@@ -29,8 +29,9 @@ async def unload(ctx, extension):
         await ctx.send(f'Extension {extension} is not loaded!')
 
 
-@client.command(aliases=['reloadall', 'reload'])
+@client.command(aliases=['reloadall', 'reload', 'rl'])
 async def reload_all(ctx):
+    os.system('cls')
     await ctx.send('Reloaded all extensions.')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
