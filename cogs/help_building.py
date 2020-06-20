@@ -32,8 +32,8 @@ class Node:
 
 
 root = Node(':one: Comment rejoindre le serveur MC?\n:two: Comment devenir builder officiel?', None)
-second = Node('Il faut déjà être builder officiel!', '1\N{COMBINING ENCLOSING KEYCAP}')
-third = Node("Il faut constuire 2 bâtiments en solo.", '2\N{COMBINING ENCLOSING KEYCAP}')
+second = Node('Il faut déjà être builder officiel!', '1\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}')
+third = Node("Il faut constuire 2 bâtiments en solo.", '2\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}')
 root.add_children(second, third)
 
 
