@@ -10,7 +10,8 @@ class RandomCommands(commands.Cog):
         await ctx.send(f'Pong! {round(self.client.latency*1000)}ms')
 
     @commands.command(aliases=['purge'], brief='Clear the last x messages sent in the channel')
-    async def clear(self, ctx, number=5):
+    @commands.check_any(commands.is_owner(), commands.has_permissions(manage_roles=True, manage_channels=True))
+    async def clear(self, ctx, number=1):
         await ctx.channel.purge(limit=number + 1)
 
 

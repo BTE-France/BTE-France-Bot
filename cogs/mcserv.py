@@ -16,7 +16,7 @@ class MCServ(commands.Cog):
         )
         self.offline_embed.set_thumbnail(url=self.thumbnail_url)
         self.online_embed = discord.Embed(
-            title="Status du serveur Minecraft BTE - France",
+            title="Statut du serveur Minecraft BTE - France",
             colour=discord.Colour(0x00FF00),
             description=":white_check_mark: Serveur en ligne!"
         )

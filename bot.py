@@ -10,6 +10,7 @@ async def on_ready():
 
 
 @client.command()
+@commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
 async def load(ctx, extension):
     try:
         client.load_extension(f'cogs.{extension}')
@@ -21,6 +22,7 @@ async def load(ctx, extension):
 
 
 @client.command()
+@commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
 async def unload(ctx, extension):
     try:
         client.unload_extension(f'cogs.{extension}')
@@ -30,6 +32,7 @@ async def unload(ctx, extension):
 
 
 @client.command(aliases=['reloadall', 'reload', 'rl'])
+@commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
 async def reload_all(ctx):
     os.system('cls')
     await ctx.send('Reloaded all extensions.')
@@ -40,6 +43,7 @@ async def reload_all(ctx):
 
 
 @client.command(aliases=['list', 'extlist'])
+@commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
 async def extension_list(ctx):
     await ctx.send('List of extensions:')
     for filename in os.listdir('./cogs'):

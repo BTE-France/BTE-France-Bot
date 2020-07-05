@@ -54,6 +54,7 @@ class HelpBuilding(commands.Cog):
         await self.add_emojis(message, root)
 
     @commands.command(brief='Find the name of an emoji')
+    @commands.check_any(commands.is_owner())
     async def emojiname(self, ctx, emoji):
         await ctx.author.send(emoji.encode('ascii', 'namereplace'))
 
