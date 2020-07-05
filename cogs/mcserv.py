@@ -53,10 +53,6 @@ class MCServCommands(commands.Cog):
             await ctx.send(embed=embed)
         except (ConnectionError, socket.timeout) as e:
             await ctx.send(embed=self.offline_embed)
-        except Exception as e:
-            print("Error when looking up server: ", e, type(e))
-            await ctx.send("Sorry, I ran into an error :(")
-
 
 def setup(client):
     host = os.environ['BTEBOT_IP']
