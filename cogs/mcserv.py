@@ -51,8 +51,11 @@ class MCServCommands(commands.Cog):
             status = ping.get_status()
             embed = self._status2embed(status)
             await ctx.send(embed=embed)
-        except:
+        except (ConnectionError, socket.timeout) as e:
             await ctx.send(embed=self.offline_embed)
+        except Exception as e:
+            print("Error when looking up server: ", e, type(e))
+            await ctx.send("Sorry, I ran into an error :(")
 
 
 def setup(client):
