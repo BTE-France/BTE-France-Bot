@@ -13,17 +13,17 @@ class Node:
             self.children.append(child)
 
     def get_node(self, question):
-        l = self.create_list()
-        for node in l:
+        list = self.create_list()
+        for node in list:
             if node.question == question:
                 return node
         raise Exception("There is no node with this question in this tree!")
 
-    def create_list(self, l=[]):
-        l.append(self)
+    def create_list(self, list=[]):
+        list.append(self)
         for child in self.children:
-            child.create_list(l)
-        return l
+            child.create_list(list)
+        return list
 
     def print_tree(self):
         print(self.question)
