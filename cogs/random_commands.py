@@ -1,9 +1,30 @@
+import discord
 from discord.ext import commands
 
 
 class RandomCommands(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.map_embed = discord.Embed(
+            title="Map du Projet BTE",
+            colour=discord.Colour(0x00FF00),
+            description="https://buildtheearth.net/map"
+        )
+        self.youtube_embed = discord.Embed(
+            title="YouTube de BTE: France",
+            colour=discord.Colour(0xFF0000),
+            description="https://www.youtube.com/channel/UCZwaYbXg_umFjI0knBV5PhA"
+        )
+        self.twitter_embed = discord.Embed(
+            title="Twitter de BTE: France",
+            colour=discord.Colour(0x0000FF),
+            description="https://twitter.com/BuildFr"
+        )
+        self.instagram_embed = discord.Embed(
+            title="Instagram de BTE: France",
+            colour=discord.Colour(0xFFFF00),
+            description="https://www.instagram.com/bte_france/"
+        )
 
     @commands.command(brief='Check the latency between the bot and the user')
     async def ping(self, ctx):
@@ -13,6 +34,22 @@ class RandomCommands(commands.Cog):
     @commands.check_any(commands.is_owner(), commands.has_permissions(manage_roles=True, manage_channels=True))
     async def clear(self, ctx, number=1):
         await ctx.channel.purge(limit=number + 1)
+
+    @commands.command(brief='Map Link')
+    async def map(self, ctx):
+        await ctx.send(embed=self.map_embed)
+
+    @commands.command(brief='YouTube Link', aliases=['ytb', 'yt'])
+    async def youtube(self, ctx):
+        await ctx.send(embed=self.youtube_embed)
+
+    @commands.command(brief='Twitter Link', aliases=['twi'])
+    async def twitter(self, ctx):
+        await ctx.send(embed=self.twitter_embed)
+
+    @commands.command(brief='Instagram Link', aliases=['insta'])
+    async def instagram(self, ctx):
+        await ctx.send(embed=self.instagram_embed)
 
 
 def setup(client):
