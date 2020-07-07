@@ -5,6 +5,7 @@ from discord.ext import commands
 class RandomCommands(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.thumbnail_url = "https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128"
         self.map_embed = discord.Embed(
             title="Map du Projet BTE",
             colour=discord.Colour(0x00FF00),
@@ -25,6 +26,10 @@ class RandomCommands(commands.Cog):
             colour=discord.Colour(0xFFFF00),
             description="https://www.instagram.com/bte_france/"
         )
+        self.map_embed.set_thumbnail(url=self.thumbnail_url)
+        self.youtube_embed.set_thumbnail(url=self.thumbnail_url)
+        self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
+        self.instagram_embed.set_thumbnail(url=self.thumbnail_url)
 
     @commands.command(brief='Check the latency between the bot and the user')
     async def ping(self, ctx):
