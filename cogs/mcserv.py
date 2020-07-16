@@ -31,7 +31,11 @@ class MCServ(commands.Cog):
         else:
             self.online_embed.clear_fields()
             online = status.players.online
-            self.online_embed.add_field(name="En ligne:", value=f"{online}/{status.players.max}", inline=False)
+            self.online_embed.add_field(
+                name="En ligne:",
+                value=f"{online}/{status.players.max}",
+                inline=False
+            )
             if status.players.sample is not None:
                 sample = sorted([p.name for p in status.players.sample])
             else:
@@ -47,7 +51,11 @@ class MCServ(commands.Cog):
                     sample_txt = sample[0]
                 else:
                     sample_txt = ", ".join(sample[:-1]) + " et " + sample[-1]
-                self.online_embed.add_field(name=sample_title, value=sample_txt, inline=False)
+                self.online_embed.add_field(
+                    name=sample_title,
+                    value=discord.utils.escape_markdown(sample_txt),
+                    inline=False
+                )
             await ctx.send(embed=self.online_embed)
 
 
