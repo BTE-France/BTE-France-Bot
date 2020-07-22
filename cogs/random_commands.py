@@ -26,16 +26,10 @@ class RandomCommands(commands.Cog):
             colour=discord.Colour(0xFFFF00),
             description="https://www.instagram.com/bte_france/"
         )
-        self.warps_embed = discord.Embed(
-            title="Warps de BTE: France",
-            colour=discord.Colour(0xFFFFFF),
-            description="https://cutt.ly/warps"
-        )
         self.map_embed.set_thumbnail(url=self.thumbnail_url)
         self.youtube_embed.set_thumbnail(url=self.thumbnail_url)
         self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
         self.instagram_embed.set_thumbnail(url=self.thumbnail_url)
-        self.warps_embed.set_thumbnail(url=self.thumbnail_url)
 
     @commands.command(brief='Check the latency between the bot and the user')
     async def ping(self, ctx):
@@ -61,10 +55,6 @@ class RandomCommands(commands.Cog):
     @commands.command(brief='Instagram Link', aliases=['insta'])
     async def instagram(self, ctx):
         await ctx.send(embed=self.instagram_embed)
-
-    @commands.command(brief='Warps Link', aliases=['warp'])
-    async def warps(self, ctx):
-        await ctx.send(embed=self.warps_embed)
 
 
 def setup(client):
