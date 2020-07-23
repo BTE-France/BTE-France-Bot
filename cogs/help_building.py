@@ -48,12 +48,14 @@ class HelpBuilding(commands.Cog):
             except discord.errors.HTTPException:
                 print(f"Emoji {child.emoji} not found!")
 
-    @commands.command(brief='Help with building in private messages')
+    @commands.command(brief='[WIP] Aide type FAQ en cours de création')
     async def build(self, ctx):
-        message = await ctx.author.send(embed=discord.Embed(type='rich', description=root.question))
+        if ctx.channel.type != discord.ChannelType.private:
+            await ctx.send(f"{ctx.author.mention}, regarde tes MPs! :mailbox:")
+        message = await ctx.author.send(embed=discord.Embed(description=root.question))
         await self.add_emojis(message, root)
 
-    @commands.command(brief='Find the name of an emoji')
+    @commands.command(brief='Trouve le nom d\'une emoji')
     @commands.check_any(commands.is_owner())
     async def emojiname(self, ctx, emoji):
         await ctx.author.send(emoji.encode('ascii', 'namereplace'))

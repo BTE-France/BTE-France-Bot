@@ -1,4 +1,5 @@
 import os
+import discord
 from discord.ext import commands
 
 client = commands.Bot(command_prefix='.')
@@ -8,6 +9,11 @@ client.remove_command('help')
 @client.event
 async def on_ready():
     print('Bot is ready!')
+    await client.change_presence(activity=discord.Activity(
+        name=f'{client.command_prefix}help',
+        type=discord.ActivityType.watching
+        )
+    )
 
 
 @client.command()

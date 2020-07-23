@@ -31,28 +31,28 @@ class RandomCommands(commands.Cog):
         self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
         self.instagram_embed.set_thumbnail(url=self.thumbnail_url)
 
-    @commands.command(brief='Check the latency between the bot and the user')
+    @commands.command(brief='Donne la latence du bot')
     async def ping(self, ctx):
         await ctx.send(f'Pong! {round(self.client.latency*1000)}ms')
 
-    @commands.command(aliases=['purge'], brief='Clear the last x messages sent in the channel')
+    @commands.command(aliases=['purge'], brief='Supprime les x derniers messages')
     @commands.check_any(commands.is_owner(), commands.has_permissions(manage_roles=True, manage_channels=True))
     async def clear(self, ctx, number=1):
         await ctx.channel.purge(limit=number + 1)
 
-    @commands.command(brief='Map Link')
+    @commands.command(brief='Lien de la Map BTE')
     async def map(self, ctx):
         await ctx.send(embed=self.map_embed)
 
-    @commands.command(brief='YouTube Link', aliases=['ytb', 'yt'])
+    @commands.command(brief='Lien YouTube', aliases=['ytb', 'yt'])
     async def youtube(self, ctx):
         await ctx.send(embed=self.youtube_embed)
 
-    @commands.command(brief='Twitter Link', aliases=['twi'])
+    @commands.command(brief='Lien Twitter', aliases=['twi'])
     async def twitter(self, ctx):
         await ctx.send(embed=self.twitter_embed)
 
-    @commands.command(brief='Instagram Link', aliases=['insta'])
+    @commands.command(brief='Lien Instagram', aliases=['insta'])
     async def instagram(self, ctx):
         await ctx.send(embed=self.instagram_embed)
 

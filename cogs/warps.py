@@ -5,7 +5,7 @@ warps = {
     "La Défense": ["/warp defense_esplanade", "Quartier d'affaires de Paris connu pour ses nombreux gratte-ciels.\nBusiness district of Paris known for its numerous skyscrapers.", "https://media.discordapp.net/attachments/694325296106569748/719921092814438460/2020-06-09_10.27.30.png?width=1194&height=671"],
     "Arc de Triomphe": ["/warp arc_de_triomphe", "Arc au coeur de Paris, situé sur l'avenue des Champs-Elysées.\nArc at the heart of Paris, situated on the Avenue des Champs-Elysées.", "https://images-ext-1.discordapp.net/external/zzWs72V7Gglq3vHYKV9r33NAhYssRQ9WhDFeL0XMqZM/https/i.imgur.com/ey0Dewp.png?width=641&height=672"],
     "Île Saint-Louis": ["/warp saint-louis", "Île en plein milieu de Paris et bordée par la Seine.\nIsland in the middle of Paris and bordered by the Seine.", "https://media.discordapp.net/attachments/694325296106569748/719704689318559795/2020-06-09_02.00.20.png?width=1268&height=671"],
-    "Nantes": ["/warp nantes", "Sixième ville de France, non loin de l'océan Atlantique.\nSixth city of France, not far from the Atlantic ocean.", "https://i.imgur.com/DW9k26J.png"],
+    "Nantes": ["/warp nantes", "Cité des Ducs de Bretagne, non loin de l'océan Atlantique.\nCity of Dukes of Brittany, not far from the Atlantic ocean.", "https://i.imgur.com/DW9k26J.png"],
     "Turenne": ["/warp turenne", "Village en Corrèze, réalisé en 48h en tant qu'évènement communautaire.\n Village in Corrèze, realized in 48h as a community event.", "https://images-ext-1.discordapp.net/external/pbkeBOTWQVA-IUa8blek5pNI-sUZhNIPu_Yw-WgLM-U/https/i.imgur.com/hvd2klJ.jpg?width=1194&height=671"],
     "Belle-Île-en-Mer": ["/warp belle_ile", "Île dans l'océan Atlantique ayant été une forteresse auparavant.\nIsland in the Atlantic ocean having been previously a fortress.", "https://media.discordapp.net/attachments/694325296106569748/708468079658795018/2020-05-09_01.34.14.png?width=1268&height=671"],
     "Quimper": ["/warp quimper", "Chef-lieu du Finistère, le centre ayant été construit en 96h en tant qu'évènement communautaire.\nCapital of Finistère, the center having been built in 48h as a community event.", "https://media.discordapp.net/attachments/692259936012468235/714577660742729738/Image_04_000.png?width=1194&height=671"],
@@ -20,7 +20,7 @@ class Warps(commands.Cog):
         self.client = client
         self.thumbnail_url = "https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128"
 
-    @commands.command(brief='Warps Link', aliases=['warp'])
+    @commands.command(brief='Liste des meilleurs Warps', aliases=['warp'])
     async def warps(self, ctx):
         if ctx.channel.type != discord.ChannelType.private:
             await ctx.send(f"{ctx.author.mention}, regarde tes MPs! :mailbox:")

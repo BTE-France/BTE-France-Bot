@@ -22,7 +22,7 @@ class MCServ(commands.Cog):
         )
         self.online_embed.set_thumbnail(url=self.thumbnail_url)
 
-    @commands.command(aliases=['mcserv', 'mcstatus', 'status'])
+    @commands.command(brief='Statut du serveur Minecraft', aliases=['mcserv', 'mcstatus', 'status'])
     async def mc(self, ctx):
         try:
             status = self.server.status()

@@ -53,7 +53,7 @@ class Poll(commands.Cog):
         self.poll_embed.add_field(name=":four: Reset the poll", value=f"{prefix}poll reset", inline=False)
         self.poll_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128")
 
-    @commands.command(brief='Create a poll')
+    @commands.command(brief=f'Création d\'un sondage. .poll help pour plus d\'infos')
     @commands.check_any(commands.is_owner(), commands.has_permissions(manage_roles=True, manage_channels=True))
     async def poll(self, ctx, *args):
         try:
