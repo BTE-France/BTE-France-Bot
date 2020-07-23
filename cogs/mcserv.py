@@ -1,5 +1,6 @@
 import os
 import discord
+import socket
 from discord.ext import commands
 from mcstatus import MinecraftServer
 
@@ -27,6 +28,8 @@ class MCServ(commands.Cog):
         try:
             status = self.server.status()
         except ConnectionRefusedError:
+            await ctx.send(embed=self.offline_embed)
+        except socket.timeout:
             await ctx.send(embed=self.offline_embed)
         else:
             self.online_embed.clear_fields()
