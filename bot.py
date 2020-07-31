@@ -59,7 +59,7 @@ async def extension_list(ctx):
 
 
 if __name__ == '__main__':
-    # Load all extensions when launching the bot.
+    os.system('cls')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             client.load_extension(f'cogs.{filename[:-3]}')
