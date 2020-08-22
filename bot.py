@@ -11,9 +11,7 @@ async def on_ready():
     print('Bot is ready!')
     await client.change_presence(activity=discord.Activity(
         name=f'{client.command_prefix}help',
-        type=discord.ActivityType.watching
-        )
-    )
+        type=discord.ActivityType.watching))
 
 
 @client.command()
