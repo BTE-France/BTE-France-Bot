@@ -49,6 +49,7 @@ class HelpBuilding(commands.Cog):
                 print(f"Emoji {child.emoji} not found!")
 
     @commands.command(brief='[WIP] Aide type FAQ en cours de création')
+    @commands.check_any(commands.is_owner())
     async def build(self, ctx):
         if ctx.channel.type != discord.ChannelType.private:
             await ctx.send(f"{ctx.author.mention}, regarde tes MPs! :mailbox:")
