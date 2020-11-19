@@ -14,7 +14,7 @@ class RandomCommands(commands.Cog):
         self.youtube_embed = discord.Embed(
             title="YouTube de BTE: France",
             colour=discord.Colour(0xFF0000),
-            description="https://www.youtube.com/channel/BTEFrance"
+            description="https://www.youtube.com/c/BTEFrance"
         )
         self.twitter_embed = discord.Embed(
             title="Twitter de BTE: France",
