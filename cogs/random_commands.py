@@ -26,10 +26,16 @@ class RandomCommands(commands.Cog):
             colour=discord.Colour(0xFFFF00),
             description="https://www.instagram.com/bte_france/"
         )
+        self.facebook_embed = discord.Embed(
+            title="Facebook de BTE: France",
+            colour=discord.Colour(0x0800FF),
+            description="https://www.facebook.com/Build-The-Earth-France-113380800556340"
+        )
         self.map_embed.set_thumbnail(url=self.thumbnail_url)
         self.youtube_embed.set_thumbnail(url=self.thumbnail_url)
         self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
         self.instagram_embed.set_thumbnail(url=self.thumbnail_url)
+        self.facebook_embed.set_thumbnail(url=self.thumbnail_url)
 
     @commands.command(brief='Donne la latence du bot')
     async def ping(self, ctx):
@@ -55,6 +61,10 @@ class RandomCommands(commands.Cog):
     @commands.command(brief='Lien Instagram', aliases=['insta'])
     async def instagram(self, ctx):
         await ctx.send(embed=self.instagram_embed)
+
+    @commands.command(brief='Lien Facebook', aliases=['fb'])
+    async def facebook(self, ctx):
+        await ctx.send(embed=self.facebook_embed)
 
 
 def setup(client):
