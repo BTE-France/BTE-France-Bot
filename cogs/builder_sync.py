@@ -1,16 +1,12 @@
 import os
 import requests
 import discord
-from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
 
 
 class Builder_Sync(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.main_url = "https://buildtheearth.net/buildteams/74/members"
-        self.main_page = requests.get(self.main_url)
-        self.main_soup = BeautifulSoup(self.main_page.content, 'html.parser')
         self.sync.start()
 
     @tasks.loop(minutes=1.0)
