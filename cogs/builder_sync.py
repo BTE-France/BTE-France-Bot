@@ -1,3 +1,4 @@
+import os
 import requests
 import discord
 from bs4 import BeautifulSoup
@@ -15,23 +16,24 @@ class Builder_Sync(commands.Cog):
     @tasks.loop(minutes=1.0)
     async def sync(self):
         await self.client.wait_until_ready()
-        l = [a.text for a in self.main_soup.find_all('a', href=True) if 'page' in a['href']]
-        num = int(max(l)) if l else 1
-        users = []
-        to_exclude = ['Builder', 'Reviewer', 'Co-leader', 'Leader']
-        for i in range(1, num + 1):
-            page = requests.get(f"{self.main_url}?page={i}")
-            soup = BeautifulSoup(page.content, 'html.parser')
-            users += [a.text for a in soup.find_all('td', text=True) if a.text not in to_exclude]
+        try:
+            api_key = os.environ['API_KEY']
+        except KeyError:
+            return
+        headers = {"Host": "buildtheearth.net", "Authorization": f"Bearer {api_key}", "Accept": "application/json"}
+        response = requests.get("https://buildtheearth.net/api/v1/members", headers=headers).json()
         guild = self.client.get_guild(694003889506091100)
         notBuilderRole = discord.utils.get(guild.roles, id=694176792675614800)
         builderRole = discord.utils.get(guild.roles, id=694176169465086003)
-        for user in users:
-            member = guild.get_member_named(user)
-            if member is not None and notBuilderRole in member.roles:
-                await member.add_roles(builderRole)
-                await member.remove_roles(notBuilderRole)
-                print(f'Added {user} as a Builder!')
+        for user in response['members']:
+            try:
+                member = await guild.fetch_member(user['discordId'])
+                if notBuilderRole in member.roles:
+                    await member.add_roles(builderRole)
+                    await member.remove_roles(notBuilderRole)
+                    print('Added ' + user['discordTag'] + ' as a Builder!')
+            except discord.errors.NotFound:  # Member not in the server
+                continue
 
 
 def setup(client):
