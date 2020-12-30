@@ -1,4 +1,5 @@
 import discord
+import variables
 from discord.ext import commands
 
 warps = {
@@ -18,7 +19,7 @@ warps = {
 class Warps(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.thumbnail_url = "https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128"
+        self.thumbnail_url = variables.bte_france_icon
 
     @commands.command(brief='Liste des meilleurs Warps', aliases=['warp'])
     async def warps(self, ctx):

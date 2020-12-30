@@ -1,5 +1,6 @@
 import discord
 import socket
+import variables
 from discord.ext import commands
 from mcstatus import MinecraftServer
 
@@ -10,7 +11,7 @@ class MCServ(commands.Cog):
         self.servers = [{"ip": "213.32.7.119:25540", "desc": "Serveur Moddé 1.12 - IP: buildtheearth.net, /bt FR"},
                         {"ip": "178.33.43.52:27120", "desc": "Serveur Vanilla 1.16 - IP: buildtheearth.net, /bt FR"}]
         self.mc_embed = discord.Embed(title="**Statut des serveurs Minecraft BTE - France**", description="_ _\n")
-        self.mc_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128")
+        self.mc_embed.set_thumbnail(url=variables.bte_france_icon)
 
     @commands.command(brief='Statut du serveur Minecraft', aliases=['mcserv', 'mcstatus', 'status'])
     async def mc(self, ctx):

@@ -1,11 +1,12 @@
 import discord
+import variables
 from discord.ext import commands
 
 
 class RandomCommands(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.thumbnail_url = "https://cdn.discordapp.com/icons/694003889506091100/a_c40ba19cfcfbb9db5f5060e85f6539cf.png?size=128"
+        self.thumbnail_url = variables.bte_france_icon
         self.map_embed = discord.Embed(
             title="Map du Projet BTE",
             colour=discord.Colour(0x00FF00),
