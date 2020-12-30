@@ -54,7 +54,7 @@ class RandomCommands(commands.Cog):
     async def youtube(self, ctx):
         await ctx.send(embed=self.youtube_embed)
 
-    @commands.command(brief='Lien Twitter', aliases=['twi'])
+    @commands.command(brief='Lien Twitter', aliases=['twi', 'tw'])
     async def twitter(self, ctx):
         await ctx.send(embed=self.twitter_embed)
 

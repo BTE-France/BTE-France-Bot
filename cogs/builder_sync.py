@@ -1,6 +1,7 @@
 import os
 import requests
 import discord
+import variables
 from discord.ext import commands, tasks
 
 
@@ -18,15 +19,15 @@ class Builder_Sync(commands.Cog):
             return
         headers = {"Host": "buildtheearth.net", "Authorization": f"Bearer {api_key}", "Accept": "application/json"}
         response = requests.get("https://buildtheearth.net/api/v1/members", headers=headers).json()
-        guild = self.client.get_guild(694003889506091100)
-        notBuilderRole = discord.utils.get(guild.roles, id=694176792675614800)
-        builderRole = discord.utils.get(guild.roles, id=694176169465086003)
+        guild = self.client.get_guild(variables.server)
+        builderNonConfirmeRole = discord.utils.get(guild.roles, id=variables.builder_non_confirme)
+        builderRole = discord.utils.get(guild.roles, id=variables.builder)
         for user in response['members']:
             try:
                 member = await guild.fetch_member(user['discordId'])
-                if notBuilderRole in member.roles:
+                if builderNonConfirmeRole in member.roles:
                     await member.add_roles(builderRole)
-                    await member.remove_roles(notBuilderRole)
+                    await member.remove_roles(builderNonConfirmeRole)
                     print('Added ' + user['discordTag'] + ' as a Builder!')
             except discord.errors.NotFound:  # Member not in the server
                 continue
