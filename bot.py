@@ -1,4 +1,5 @@
 import os
+import platform
 import discord
 from discord.ext import commands
 
@@ -39,7 +40,7 @@ async def unload(ctx, extension):
 @client.command(aliases=['reloadall', 'reload', 'rl'])
 @commands.check_any(commands.is_owner(), commands.has_permissions(administrator=True))
 async def reload_all(ctx):
-    os.system('cls')
+    os.system('cls') if platform.system() == 'Windows' else os.system('clear')
     await ctx.send('Reloaded all extensions.')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
@@ -57,7 +58,7 @@ async def extension_list(ctx):
 
 
 if __name__ == '__main__':
-    os.system('cls')
+    os.system('cls') if platform.system() == 'Windows' else os.system('clear')
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             client.load_extension(f'cogs.{filename[:-3]}')
