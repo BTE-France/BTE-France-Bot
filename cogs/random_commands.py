@@ -67,6 +67,10 @@ class RandomCommands(commands.Cog):
     async def facebook(self, ctx):
         await ctx.send(embed=self.facebook_embed)
 
+    @commands.command(brief='Ban Image')
+    async def ban(self, ctx):
+        await ctx.send('https://i.imgur.com/TnjvTKh.png')
+
 
 def setup(client):
     client.add_cog(RandomCommands(client))
