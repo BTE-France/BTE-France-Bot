@@ -43,7 +43,7 @@ class MCServ(commands.Cog):
                     else:
                         sample_txt = ", ".join(sample[:-1]) + " et " + sample[-1]
                 embed_value = f':white_check_mark: Serveur en ligne!\n\n**{online_players} {sample_title}**\n' + discord.utils.escape_markdown(sample_txt)
-                embed_value += '\n\n_ _' if server == self.servers[0] else ''
+                 # embed_value += '\n\n_ _' if server == self.servers[0] else ''
                 self.mc_embed.add_field(
                     name=server['desc'],
                     value=embed_value,
