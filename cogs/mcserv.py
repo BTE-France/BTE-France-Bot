@@ -10,11 +10,11 @@ class MCServ(commands.Cog):
         self.client = client
         self.servers = [{"ip": "213.32.7.119:25540", "desc": "Serveur Moddé 1.12 - IP: buildtheearth.net, /bt FR"},
                         {"ip": "178.33.43.52:27120", "desc": "Serveur Vanilla 1.16 - IP: buildtheearth.net, /bt FR"}]
-        self.mc_embed = discord.Embed(title="**Statut des serveurs Minecraft BTE - France**", description="_ _\n")
+        self.mc_embed = discord.Embed(title="**Statut des serveurs Minecraft BTE - France**", colour=discord.Colour(0x0000FF), description="_ _\n")
         self.mc_embed.set_thumbnail(url=variables.bte_france_icon)
 
     @commands.command(brief='Statut du serveur Minecraft', aliases=['mcserv', 'mcstatus', 'status'])
-    async def mc(self, ctx):
+    async def mcx(self, ctx):
         self.mc_embed.clear_fields()
         for server in self.servers:
             try:
