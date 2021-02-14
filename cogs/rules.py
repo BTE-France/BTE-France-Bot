@@ -18,7 +18,7 @@ rules_message_FR = {
     "Il est interdit de perturber ou de bait le chat.":
         "Cela inclut le spam textuel, le copier-coller de murs de texte et le spoil bait pour faire croire aux autres à un mot interdit. Il faut également éviter le ping excessif et inutile, la surutilisation de majuscules et le formatage du texte.",
     "Il est interdit d'avoir un nom d'utilisateur, une photo de profil, un statut ou une activité de jeu qui enfreint nos règles.":
-        "Cela inclut également l'usurpation de l'indentité de membres du Staff (avoir une photo ou un nom d'utilisateur identique).",
+        "Cela inclut également l'usurpation de l'identité de membres du Staff (avoir une photo ou un nom d'utilisateur identique).",
     "La publicité non sollicitée (par voix, texte ou DM) est interdite":
         " ⁣⁣",
     "Il est interdit d'accuser quelqu'un d'enfreindre les règles dans les chats publics":
