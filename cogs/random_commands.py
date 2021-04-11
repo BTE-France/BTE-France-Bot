@@ -32,10 +32,6 @@ class RandomCommands(commands.Cog):
             colour=discord.Colour(0x0800FF),
             description="https://www.facebook.com/Build-The-Earth-France-113380800556340"
         )
-        self.rules_embed = discord.Embed(
-            description=f"As-tu bien lu les salons {self.client.get_channel(810512822928670780).mention} et {self.client.get_channel(821291710993661992).mention}?",
-            colour=discord.Colour(0xFF0000)
-        )
         self.map_embed.set_thumbnail(url=self.thumbnail_url)
         self.youtube_embed.set_thumbnail(url=self.thumbnail_url)
         self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
@@ -77,7 +73,10 @@ class RandomCommands(commands.Cog):
 
     @commands.command(brief='Read the rules')
     async def lire(self, ctx):
-        await ctx.send(embed=self.rules_embed)
+        await ctx.send(embed=discord.Embed(
+            description=f"As-tu bien lu les salons {self.client.get_channel(variables.comment_rejoindre_channel).mention} et {self.client.get_channel(variables.ip_channel).mention}?",
+            colour=discord.Colour(0xFF0000)
+        ))
 
 
 def setup(client):

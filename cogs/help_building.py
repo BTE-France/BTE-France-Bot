@@ -31,9 +31,18 @@ class Node:
             child.print_tree()
 
 
-root = Node(':one: Comment rejoindre le serveur MC?\n:two: Comment devenir builder officiel?', None)
-second = Node('Il faut déjà être builder officiel!', '1\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}')
-third = Node("Il faut constuire 2 bâtiments en solo.", '2\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}')
+root = Node(
+    ":one: Comment rejoindre le serveur MC?\n:two: Comment devenir builder officiel?",
+    None,
+)
+second = Node(
+    "Il faut déjà être builder officiel!",
+    "1\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}",
+)
+third = Node(
+    "Il faut constuire 2 bâtiments en solo.",
+    "2\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}",
+)
 root.add_children(second, third)
 
 
@@ -48,7 +57,7 @@ class HelpBuilding(commands.Cog):
             except discord.errors.HTTPException:
                 print(f"Emoji {child.emoji} not found!")
 
-    @commands.command(brief='[WIP] Aide type FAQ en cours de création')
+    @commands.command(brief="[WIP] Aide type FAQ en cours de création")
     @commands.check_any(commands.is_owner())
     async def build(self, ctx):
         if ctx.channel.type != discord.ChannelType.private:
@@ -56,21 +65,26 @@ class HelpBuilding(commands.Cog):
         message = await ctx.author.send(embed=discord.Embed(description=root.question))
         await self.add_emojis(message, root)
 
-    @commands.command(brief='Trouve le nom d\'une emoji')
+    @commands.command(brief="Trouve le nom d'une emoji")
     @commands.check_any(commands.is_owner())
     async def emojiname(self, ctx, emoji):
-        await ctx.author.send(emoji.encode('ascii', 'namereplace'))
+        await ctx.author.send(emoji.encode("ascii", "namereplace"))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        if reaction.message.channel.type == discord.ChannelType.private and not user.bot:
+        if (
+            reaction.message.channel.type == discord.ChannelType.private
+            and not user.bot
+        ):
             try:
                 node = root.get_node(reaction.message.embeds[0].description)
             except Exception:
                 return
             for child in node.children:
                 if child.emoji == reaction.emoji:
-                    message = await reaction.message.channel.send(embed=discord.Embed(type='rich', description=child.question))
+                    message = await reaction.message.channel.send(
+                        embed=discord.Embed(type="rich", description=child.question)
+                    )
                     await self.add_emojis(message, child)
                     break
 

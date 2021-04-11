@@ -9,6 +9,8 @@ builder = 694176169465086003
 
 # Channels & Message
 rules_channel = 793846913203306526
+comment_rejoindre_channel = 810512822928670780
+ip_channel = 821291710993661992
 
 # Links
-bte_france_icon = 'https://i.imgur.com/1ZPB2Wt.png'
+bte_france_icon = "https://i.imgur.com/1ZPB2Wt.png"

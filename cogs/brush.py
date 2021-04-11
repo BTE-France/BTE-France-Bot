@@ -10,21 +10,24 @@ class Brush(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.syntax_embed = discord.Embed(
-            title="Wrong syntax! Write .br <material> [size=20]", colour=discord.Colour(0xFF0000))
-        self.syntax_embed.add_field(
-            name="Maximum size: 100", value='_ _', inline=False)
+            title="Wrong syntax! Write .br <material> [size=20]",
+            colour=discord.Colour(0xFF0000),
+        )
+        self.syntax_embed.add_field(name="Maximum size: 100", value="_ _", inline=False)
         self.syntax_embed.set_thumbnail(url=variables.bte_france_icon)
 
-    @commands.command(aliases=['br'], brief='Brush command to replicate the WorldEdit brush')
+    @commands.command(
+        aliases=["br"], brief="Brush command to replicate the WorldEdit brush"
+    )
     async def brush(self, ctx, material=None, size=20):
         if material is None or size > 100:
             await ctx.send(embed=self.syntax_embed)
             return
-        material_split = material.split(',')
+        material_split = material.split(",")
         weights, materials = [], []
         forget_weights = False
         for mat in material_split:
-            result = mat.split('%')
+            result = mat.split("%")
             if len(result) == 2:
                 materials.append(result[1])
                 try:
@@ -40,26 +43,35 @@ class Brush(commands.Cog):
                 return
         weights = None if forget_weights else weights
         weighted_list = random.choices(
-            population=materials, weights=weights, k=size**2)
+            population=materials, weights=weights, k=size ** 2
+        )
         # print('\n'.join(weighted_list))
-        final_image = Image.new('RGB', (size * 16, size * 16), (250, 250, 250))
+        final_image = Image.new("RGB", (size * 16, size * 16), (250, 250, 250))
         not_found = []
         for y in range(size):
             for x in range(size):
                 block_raw = weighted_list[y * size + x]
                 block = self.get_emoji(block_raw)
                 if block is None:
-                    final_image.paste(Image.open('blocks/question.png'), (x * 16, y * 16))
+                    final_image.paste(
+                        Image.open("blocks/question.png"), (x * 16, y * 16)
+                    )
                     if block_raw not in not_found:
                         not_found.append(block_raw)
                 else:
-                    final_image.paste(Image.open(f'blocks/{block}.png'), (x * 16, y * 16))
+                    final_image.paste(
+                        Image.open(f"blocks/{block}.png"), (x * 16, y * 16)
+                    )
         with io.BytesIO() as image_binary:
-            final_image.save(image_binary, 'PNG')
+            final_image.save(image_binary, "PNG")
             image_binary.seek(0)
-            await ctx.send(file=discord.File(fp=image_binary, filename='BTEFrance.png'))
+            await ctx.send(file=discord.File(fp=image_binary, filename="BTEFrance.png"))
         if not_found:
-            await ctx.send(':question: `Unrecognized IDs: ' + ', '.join(sorted(not_found)) + '` :question:')
+            await ctx.send(
+                ":question: `Unrecognized IDs: "
+                + ", ".join(sorted(not_found))
+                + "` :question:"
+            )
 
     @brush.error
     async def brush_handler(self, ctx, error):
@@ -187,22 +199,66 @@ blocks = {
     "grass_path_top": ["208", "grass_path"],
     "gravel": ["13"],
     "hardened_clay": ["172"],
-    "hardened_clay_stained_black": ["159:15", "black_hardened_clay", "hardened_clay_black"],
-    "hardened_clay_stained_blue": ["159:11", "blue_hardened_clay", "hardened_clay_blue"],
-    "hardened_clay_stained_brown": ["159:12", "brown_hardened_clay", "hardened_clay_brown"],
+    "hardened_clay_stained_black": [
+        "159:15",
+        "black_hardened_clay",
+        "hardened_clay_black",
+    ],
+    "hardened_clay_stained_blue": [
+        "159:11",
+        "blue_hardened_clay",
+        "hardened_clay_blue",
+    ],
+    "hardened_clay_stained_brown": [
+        "159:12",
+        "brown_hardened_clay",
+        "hardened_clay_brown",
+    ],
     "hardened_clay_stained_cyan": ["159:9", "cyan_hardened_clay", "hardened_clay_cyan"],
     "hardened_clay_stained_gray": ["159:7", "gray_hardened_clay", "hardened_clay_gray"],
-    "hardened_clay_stained_green": ["159:13", "green_hardened_clay", "hardened_clay_green"],
-    "hardened_clay_stained_light_blue": ["159:3", "light_blue_hardened_clay", "hardened_clay_light_blue"],
+    "hardened_clay_stained_green": [
+        "159:13",
+        "green_hardened_clay",
+        "hardened_clay_green",
+    ],
+    "hardened_clay_stained_light_blue": [
+        "159:3",
+        "light_blue_hardened_clay",
+        "hardened_clay_light_blue",
+    ],
     "hardened_clay_stained_lime": ["159:5", "lime_hardened_clay", "hardened_clay_lime"],
-    "hardened_clay_stained_magenta": ["159:2", "magenta_hardened_clay", "hardened_clay_magenta"],
-    "hardened_clay_stained_orange": ["159:1", "orange_hardened_clay", "hardened_clay_orange"],
+    "hardened_clay_stained_magenta": [
+        "159:2",
+        "magenta_hardened_clay",
+        "hardened_clay_magenta",
+    ],
+    "hardened_clay_stained_orange": [
+        "159:1",
+        "orange_hardened_clay",
+        "hardened_clay_orange",
+    ],
     "hardened_clay_stained_pink": ["159:6", "pink_hardened_clay", "hardened_clay_pink"],
-    "hardened_clay_stained_purple": ["159:10", "purple_hardened_clay", "hardened_clay_purple"],
+    "hardened_clay_stained_purple": [
+        "159:10",
+        "purple_hardened_clay",
+        "hardened_clay_purple",
+    ],
     "hardened_clay_stained_red": ["159:14", "red_hardened_clay", "hardened_clay_red"],
-    "hardened_clay_stained_silver": ["159:8", "silver_hardened_clay", "hardened_clay_silver"],
-    "hardened_clay_stained_white": ["159", "white_hardened_clay", "hardened_clay_white"],
-    "hardened_clay_stained_yellow": ["159:4", "yellow_hardened_clay", "hardened_clay_yellow"],
+    "hardened_clay_stained_silver": [
+        "159:8",
+        "silver_hardened_clay",
+        "hardened_clay_silver",
+    ],
+    "hardened_clay_stained_white": [
+        "159",
+        "white_hardened_clay",
+        "hardened_clay_white",
+    ],
+    "hardened_clay_stained_yellow": [
+        "159:4",
+        "yellow_hardened_clay",
+        "hardened_clay_yellow",
+    ],
     "hay_block_top": ["170", "hay_block", "170:12"],
     "ice": ["79"],
     "ice_packed": ["174", "packed_ice"],

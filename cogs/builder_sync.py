@@ -14,25 +14,33 @@ class Builder_Sync(commands.Cog):
     async def sync(self):
         await self.client.wait_until_ready()
         try:
-            api_key = os.environ['API_KEY']
+            api_key = os.environ["API_KEY"]
         except KeyError:
             return
-        headers = {"Host": "buildtheearth.net", "Authorization": f"Bearer {api_key}", "Accept": "application/json"}
+        headers = {
+            "Host": "buildtheearth.net",
+            "Authorization": f"Bearer {api_key}",
+            "Accept": "application/json",
+        }
         try:
-            response = requests.get("https://buildtheearth.net/api/v1/members", headers=headers).json()
+            response = requests.get(
+                "https://buildtheearth.net/api/v1/members", headers=headers
+            ).json()
         except Exception as e:
-            print('Error while accessing BTE API:\n ', e)
+            print("Error while accessing BTE API:\n ", e)
         else:
             guild = self.client.get_guild(variables.server)
-            builderNonConfirmeRole = discord.utils.get(guild.roles, id=variables.builder_non_confirme)
+            builderNonConfirmeRole = discord.utils.get(
+                guild.roles, id=variables.builder_non_confirme
+            )
             builderRole = discord.utils.get(guild.roles, id=variables.builder)
-            for user in response['members']:
+            for user in response["members"]:
                 try:
-                    member = await guild.fetch_member(user['discordId'])
+                    member = await guild.fetch_member(user["discordId"])
                     if builderNonConfirmeRole in member.roles:
                         await member.add_roles(builderRole)
                         await member.remove_roles(builderNonConfirmeRole)
-                        print('Added ' + user['discordTag'] + ' as a Builder!')
+                        print("Added " + user["discordTag"] + " as a Builder!")
                 except discord.errors.NotFound:  # Member not in the server
                     continue
 
