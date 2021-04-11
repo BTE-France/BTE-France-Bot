@@ -74,7 +74,7 @@ class RandomCommands(commands.Cog):
     @commands.command(brief='Read the rules')
     async def lire(self, ctx):
         await ctx.send(embed=discord.Embed(
-            description=f"As-tu bien lu les salons {self.client.get_channel(variables.comment_rejoindre_channel).mention} et {self.client.get_channel(variables.ip_channel).mention}?",
+            description=f"As-tu bien lu le salon {self.client.get_channel(variables.comment_rejoindre_channel).mention}?",
             colour=discord.Colour(0xFF0000)
         ))
 
