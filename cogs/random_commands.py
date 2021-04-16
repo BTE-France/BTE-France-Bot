@@ -71,6 +71,10 @@ class RandomCommands(commands.Cog):
     async def ban(self, ctx):
         await ctx.send('https://i.imgur.com/TnjvTKh.png')
 
+    @commands.command(brief='Stonks GIF')
+    async def stonks(self, ctx):
+        await ctx.send('https://media2.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif')
+
     @commands.command(brief='Read the rules')
     async def lire(self, ctx):
         await ctx.send(embed=discord.Embed(
