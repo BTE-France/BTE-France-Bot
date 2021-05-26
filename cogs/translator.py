@@ -1,5 +1,6 @@
 import variables
 import json
+import re
 import googletrans
 import discord
 from discord.ext import commands
@@ -19,9 +20,15 @@ class Translator(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
+        if reaction.count > 1:
+            return
         language = self.get_language(reaction.emoji)
         if language:
-            text = str(reaction.message.content)
+            text = re.sub(
+                "<@[0-9]{18}>",
+                "@@@@",
+                re.sub("<@![0-9]{18}>", "@@@@", reaction.message.content),
+            )
             if (
                 language not in googletrans.LANGUAGES
                 and language not in googletrans.LANGCODES
@@ -31,6 +38,10 @@ class Translator(commands.Cog):
                 )
             else:
                 translated_text = self.translator.translate(text, dest=language).text
+                for user_mention in reaction.message.mentions:
+                    translated_text = re.sub(
+                        "@@@@", user_mention.mention, translated_text, 1
+                    )
                 embed = discord.Embed(
                     title=f"Translation to {language}  {reaction.emoji}",
                     description=translated_text,
