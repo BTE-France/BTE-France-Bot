@@ -137,7 +137,7 @@ blocks = {
     "concrete_powder_white": ["252"],
     "concrete_powder_yellow": ["252:4"],
     "concrete_purple": ["251:10"],
-    "concrete_red": [":251:14"],
+    "concrete_red": ["251:14"],
     "concrete_silver": ["251:8"],
     "concrete_white": ["251"],
     "concrete_yellow": ["251:4"],
