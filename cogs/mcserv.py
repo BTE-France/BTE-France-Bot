@@ -10,10 +10,9 @@ class MCServ(commands.Cog):
         self.client = client
         self.servers = [
             {
-                "ip": "213.32.7.119:25540",
+                "ip": "btefr.thesmyler.fr:7000",
                 "desc": "Serveur Moddé 1.12 - IP: buildtheearth.net, /bt FR",
             },
-            # {"ip": "45.82.121.55:25565", "desc": "Serveur Event FR/CH/DE/NL - IP: bte.thesmyler.fr, /server event"}
         ]
         self.mc_embed = discord.Embed(
             title="**Statut des serveurs Minecraft BTE - France**", description="_ _\n"
