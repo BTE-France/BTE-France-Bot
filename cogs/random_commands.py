@@ -32,6 +32,16 @@ class RandomCommands(commands.Cog):
             colour=discord.Colour(0x0800FF),
             description="https://www.facebook.com/Build-The-Earth-France-113380800556340",
         )
+        self.reddit_embed = discord.Embed(
+            title="Reddit de BTE: France",
+            colour=discord.Colour(0x0800FF),
+            description="https://www.reddit.com/user/BTE_France/",
+        )
+        self.pm_embed = discord.Embed(
+            title="PlanetMinecraft de BTE: France",
+            colour=discord.Colour(0x0800FF),
+            description="https://www.planetminecraft.com/member/bte-france",
+        )
         self.ip_embed = discord.Embed(
             title="IPs de BTE: France",
             colour=discord.Colour(0x0800FF),
@@ -75,6 +85,14 @@ class RandomCommands(commands.Cog):
     @commands.command(brief="Lien Facebook", aliases=["fb"])
     async def facebook(self, ctx):
         await ctx.send(embed=self.facebook_embed)
+
+    @commands.command(brief="Lien Reddit", aliases=["ytb", "yt"])
+    async def reddit(self, ctx):
+        await ctx.send(embed=self.reddit_embed)
+
+    @commands.command(brief="Lien PlanetMinecraft", aliases=["pm"])
+    async def planetminecraft(self, ctx):
+        await ctx.send(embed=self.pm_embed)
 
     @commands.command(brief="Ban Image")
     async def ban(self, ctx):
