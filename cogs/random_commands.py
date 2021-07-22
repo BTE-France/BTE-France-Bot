@@ -52,6 +52,8 @@ class RandomCommands(commands.Cog):
         self.twitter_embed.set_thumbnail(url=self.thumbnail_url)
         self.instagram_embed.set_thumbnail(url=self.thumbnail_url)
         self.facebook_embed.set_thumbnail(url=self.thumbnail_url)
+        self.pm_embed.set_thumbnail(url=self.thumbnail_url)
+        self.reddit_embed.set_thumbnail(url=self.thumbnail_url)
         self.ip_embed.set_thumbnail(url=self.thumbnail_url)
 
     @commands.command(brief="Donne la latence du bot")
