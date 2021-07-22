@@ -86,7 +86,7 @@ class RandomCommands(commands.Cog):
     async def facebook(self, ctx):
         await ctx.send(embed=self.facebook_embed)
 
-    @commands.command(brief="Lien Reddit", aliases=["ytb", "yt"])
+    @commands.command(brief="Lien Reddit")
     async def reddit(self, ctx):
         await ctx.send(embed=self.reddit_embed)
 
