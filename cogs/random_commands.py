@@ -98,11 +98,11 @@ class RandomCommands(commands.Cog):
 
     @commands.command(brief="Ban Image")
     async def ban(self, ctx):
-        await ctx.send("https://i.imgur.com/TnjvTKh.png")
+        await ctx.send("https://i.imgur.com/RGfJXmZ.png")
 
     @commands.command(brief="Read the Rules Image", aliases=["regles"])
     async def lis(self, ctx):
-        await ctx.send("https://i.imgur.com/27aoi3F.png")
+        await ctx.send("https://i.imgur.com/AP0CD1J.png")
 
     @commands.command(brief="Stonks GIF")
     async def stonks(self, ctx):
