@@ -117,6 +117,10 @@ class RandomCommands(commands.Cog):
     async def stonks(self, ctx):
         await ctx.send("https://media2.giphy.com/media/YnkMcHgNIMW4Yfmjxr/giphy.gif")
 
+    @commands.command(brief="Triforce image")
+    async def triforce(self, ctx):
+        await ctx.send("https://i.imgur.com/DNxRVsV.png")
+
 
 def setup(client):
     client.add_cog(RandomCommands(client))
