@@ -42,7 +42,7 @@ class RandomCommands(commands.Cog):
         embed = discord.Embed(
             title="Twitter de BTE: France",
             colour=discord.Colour(0x0000FF),
-            description="https://twitter.com/BuildFr",
+            description="https://twitter.com/BTE_France",
         )
         embed.set_thumbnail(url=self.thumbnail_url)
         await ctx.send(embed=embed)
