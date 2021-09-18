@@ -87,6 +87,16 @@ class RandomCommands(commands.Cog):
         embed.set_thumbnail(url=self.thumbnail_url)
         await ctx.send(embed=embed)
 
+    @commands.command(brief="Lien TikTok", aliases=["tk"])
+    async def tiktok(self, ctx):
+        embed = discord.Embed(
+            title="TikTok de BTE: France",
+            colour=discord.Colour(0x0800FF),
+            description="https://www.tiktok.com/@btefrance",
+        )
+        embed.set_thumbnail(url=self.thumbnail_url)
+        await ctx.send(embed=embed)
+
     @commands.command(brief="Read the rules")
     async def lire(self, ctx):
         embed = discord.Embed(
