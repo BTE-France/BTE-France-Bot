@@ -97,6 +97,16 @@ class RandomCommands(commands.Cog):
         embed.set_thumbnail(url=self.thumbnail_url)
         await ctx.send(embed=embed)
 
+    @commands.command(brief="Tutoriel Bedrock")
+    async def bedrock(self, ctx):
+        embed = discord.Embed(
+            title="Comment rejoindre BTE quand on joue sur Bedrock?",
+            colour=discord.Colour(0x0800FF),
+            description="https://docs.google.com/document/d/12QG9d_O2ZX-OH9CdC44urpfWCnSmSon4nhsSXyuuGsM/edit?usp=drivesdk",
+        )
+        embed.set_thumbnail(url=self.thumbnail_url)
+        await ctx.send(embed=embed)
+
     @commands.command(brief="Read the rules")
     async def lire(self, ctx):
         embed = discord.Embed(
