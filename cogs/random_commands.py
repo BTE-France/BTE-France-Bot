@@ -141,6 +141,10 @@ class RandomCommands(commands.Cog):
     async def triforce(self, ctx):
         await ctx.send("https://i.imgur.com/DNxRVsV.png")
 
+    @commands.command(brief="Sel image")
+    async def sel(self, ctx):
+        await ctx.send("https://i.imgur.com/8RoWypa.png")
+
 
 def setup(client):
     client.add_cog(RandomCommands(client))
