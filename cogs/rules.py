@@ -77,13 +77,27 @@ class Rules(commands.Cog):
         commands.is_owner(), commands.has_permissions(administrator=True)
     )
     async def rules(self, ctx):
-        await ctx.channel.purge(limit=10)
         await self.client.get_channel(variables.rules_channel).send(
             embed=self.rules_embed_FR
         )
         await self.client.get_channel(variables.rules_channel).send(
             embed=self.rules_embed_EN
         )
+
+    @commands.command(brief="Mettre à jour les IPs du serveur")
+    @commands.check_any(
+        commands.is_owner(), commands.has_permissions(administrator=True)
+    )
+    async def ip_embed(self, ctx):
+        embed = discord.Embed(title="**Comment rejoindre le serveur BTE France**", color=16098851)
+        embed.add_field(name="__IPs JAVA__", value="(Version PC)", inline=False)
+        embed.add_field(name="<:mc:695357986427895869>", value="Principale : ```buildtheearth.net``` __Puis faites une fois en jeu :__```/bt FR```", inline=True)
+        embed.add_field(name="<:mc:695357986427895869>", value="Alternative :```bte.thesmyler.fr```", inline=True)
+        embed.add_field(name="__IP BEDROCK__", value="(Windows 10, consoles...)", inline=False)
+        embed.add_field(name="<:mc:695357986427895869>", value="```bedrock.buildtheearth.net```Port:```19132```", inline=True)
+        embed.set_thumbnail(url=variables.bte_france_icon)
+        await ctx.channel.purge(limit=1)
+        await ctx.send(embed=embed)
 
 
 def setup(client):
