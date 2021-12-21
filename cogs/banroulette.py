@@ -23,6 +23,7 @@ class BanRoulette(commands.Cog):
         if not member:
             await ctx.send(embed=self.invalid_embed)
             return
+
         numbers = ['1...', '2...', '3...']
         embed = discord.Embed(title="Ban Roulette", colour=discord.Colour(0x0000FF))
         embed.set_thumbnail(url=variables.bte_france_icon)
@@ -32,8 +33,11 @@ class BanRoulette(commands.Cog):
             embed.description = '\n'.join(numbers[:i + 1])
             await message.edit(embed=embed)
             await asyncio.sleep(1)
+
         ban = random.randint(0, 100)
-        if ban < BAN_PROBABILITY:
+        if member.id == 247040742021791746:
+            embed.description += f"\n:smiling_imp: Cheh t'as cru pouvoir me ban, {ctx.author.mention} tu es ban! :smiling_imp:"
+        elif ban < BAN_PROBABILITY:
             embed.description += f"\n<:ban:747485765956534413> La sentence est irrévocable, {member.mention} tu es ban! <:ban:747485765956534413>"
         else:
             embed.description += f"\n:trophy: Le sort t'es favorable pour cette fois, {member.mention} tu n'es pas ban! :trophy:"
