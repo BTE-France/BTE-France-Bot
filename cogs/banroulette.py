@@ -35,10 +35,13 @@ class BanRoulette(commands.Cog):
             await asyncio.sleep(1)
 
         ban = random.randint(0, 100)
+
         if member.id == 247040742021791746:
             embed.description += f"\n:smiling_imp: Cheh t'as cru pouvoir me ban, {ctx.author.mention} tu es ban! :smiling_imp:"
         elif member.id == 439733455883075584:
             embed.description += f"\n:unamused: Bah non en fait. C'est pas toi qui décide en fait. `/ban` {ctx.author.mention} <:ban:747485765956534413>"
+        elif member.id == ctx.author.id:
+            embed.description += f"\n<:ban:747485765956534413> Si t'en es à vouloir te ban c'est que c'est mérité, {member.mention} tu es ban! <:ban:747485765956534413>"
         elif ban < BAN_PROBABILITY:
             embed.description += f"\n<:ban:747485765956534413> La sentence est irrévocable, {member.mention} tu es ban! <:ban:747485765956534413>"
         else:
