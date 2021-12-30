@@ -145,6 +145,13 @@ class RandomCommands(commands.Cog):
     async def sel(self, ctx):
         await ctx.send("https://i.imgur.com/8RoWypa.png")
 
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild, member):
+        logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+        for log in logs:
+            if log.target == member and not log.user.bot:
+                await self.client.get_channel(variables.logs_channel).send(f'**{log.user} banned {log.target} for the reason:**\n{log.reason}')
+
 
 def setup(client):
     client.add_cog(RandomCommands(client))
