@@ -15,7 +15,7 @@ class MCServ(commands.Cog):
             },
         ]
         self.mc_embed = discord.Embed(
-            title="**Statut des serveurs Minecraft BTE - France**", description="_ _\n"
+            title="**Statut du serveur Minecraft BTE France**", description="_ _\n"
         )
         self.mc_embed.set_thumbnail(url=variables.bte_france_icon)
 
