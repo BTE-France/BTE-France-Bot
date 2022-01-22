@@ -17,7 +17,7 @@ class RandomCommands(commands.Cog):
     async def clear(self, ctx, number=1):
         try:
             await ctx.channel.purge(limit=number + 1)
-        except commands.errors.CommandInvokeError:  # Purging a DM/Group channel
+        except AttributeError:  # Purging a DM/Group channel
             pass
 
     @commands.command(brief="Lien de la Map BTE")
