@@ -15,7 +15,10 @@ class RandomCommands(commands.Cog):
     @commands.command(aliases=["purge"], brief="Supprime les x derniers messages")
     @commands.check_any(commands.is_owner(), commands.has_permissions(manage_roles=True, manage_channels=True))
     async def clear(self, ctx, number=1):
-        await ctx.channel.purge(limit=number + 1)
+        try:
+            await ctx.channel.purge(limit=number + 1)
+        except AttributeError:  # Purging a DM/Group channel
+            pass
 
     @commands.command(brief="Lien de la Map BTE")
     async def map(self, ctx):

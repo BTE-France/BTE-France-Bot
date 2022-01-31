@@ -6,6 +6,7 @@ from discord.ext import commands
 class Help(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.client.remove_command("help")
 
     @commands.command(
         brief="Menu avec toutes les commandes disponibles!", aliases=["h"]
@@ -21,31 +22,19 @@ class Help(commands.Cog):
         )
         for cog in [self.client.get_cog(cogs) for cogs in self.client.cogs]:
             for command in cog.get_commands():
+                # Add the command to the help list only if all checks are passed (i.e. user has access to this command)
                 if command.checks:
-                    for check in command.checks:
-                        try:
-                            await check(ctx)
-                            name = " / ".join(
-                                [self.client.command_prefix + command.name]
-                                + [
-                                    self.client.command_prefix + alias
-                                    for alias in command.aliases
-                                ]
-                            )
-                            embed.add_field(
-                                name=name, value=command.brief, inline=False
-                            )
-                        except commands.errors.CheckAnyFailure:
-                            pass
-                else:
-                    name = " / ".join(
-                        [self.client.command_prefix + command.name]
-                        + [
-                            self.client.command_prefix + alias
-                            for alias in command.aliases
-                        ]
-                    )
-                    embed.add_field(name=name, value=command.brief, inline=False)
+                    try:
+                        all([await check(ctx) for check in command.checks])
+                    except commands.errors.CheckAnyFailure:
+                        continue
+                name = " / ".join(
+                    [self.client.command_prefix + command.name] + [
+                        self.client.command_prefix + alias
+                        for alias in command.aliases
+                    ]
+                )
+                embed.add_field(name=name, value=command.brief, inline=False)
         await ctx.author.send(embed=embed)
 
 
