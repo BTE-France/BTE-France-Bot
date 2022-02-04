@@ -1,10 +1,16 @@
 from utils.embed import create_info_embed
+from argparse import ArgumentParser
 from variables import server
 import interactions
 import os
 
 
-bot = interactions.Client(token=os.environ["DISCORD_TOKEN"], disable_sync=False)
+parser = ArgumentParser()
+parser.add_argument('-s', '--sync', action='store_true')
+args = parser.parse_args()
+disable_sync = False if args.sync else True
+
+bot = interactions.Client(token=os.environ["DISCORD_TOKEN"], disable_sync=disable_sync)
 
 # Define all cogs
 cogs = []
