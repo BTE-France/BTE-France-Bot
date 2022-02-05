@@ -6,7 +6,7 @@ import os
 
 
 parser = ArgumentParser()
-parser.add_argument('-s', '--sync', action='store_true')
+parser.add_argument('-s', '--sync', action='store_true', help="synchronize slash commands on the Discord API")
 args = parser.parse_args()
 disable_sync = False if args.sync else True
 
