@@ -4,10 +4,7 @@ import interactions
 
 
 # Dictionary of polls (resets when the bot is reloaded), one poll per user
-polls = {
-    506793183108268032: {"title": "What is the best programming language?", "choices": ["Assembly", "C", "Python", "C++", "Java", "C#", "Matlab"]},
-    247040742021791746: {"title": "What is the best programming language?", "choices": ["Assembly", "C", "Python", "C++", "Java", "C#", "Matlab"]}
-}
+polls = {}
 numbers = [
     "1️⃣",
     "2️⃣",
