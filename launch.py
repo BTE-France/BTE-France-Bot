@@ -54,17 +54,17 @@ async def reload(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Reloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.autocomplete("cog", command=bot._http.cache.interactions.get("load").id)
+@bot.autocomplete("load", "cog")
 async def load_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
     await ctx.populate(get_available_cogs())
 
 
-@bot.autocomplete("cog", command=bot._http.cache.interactions.get("unload").id)
+@bot.autocomplete("unload", "cog")
 async def unload_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
     await ctx.populate(get_available_cogs())
 
 
-@bot.autocomplete("cog", command=bot._http.cache.interactions.get("reload").id)
+@bot.autocomplete("reload", "cog")
 async def reload_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
     await ctx.populate(get_available_cogs())
 
