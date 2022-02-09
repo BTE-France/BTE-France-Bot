@@ -1,5 +1,5 @@
 from utils.embed import create_embed, create_info_embed
-from variables import server, comment_rejoindre_channel
+from variables import server, comment_rejoindre_channel, logs_channel
 import interactions
 
 
@@ -50,7 +50,6 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_ban_add(self, guild_ban: interactions.GuildBan):
-        logs_channel = 347310057853026305
         channel = interactions.Channel(**await self.client._http.get_channel(logs_channel), _client=self.client._http)
         for ban in await self.client._http.get_guild_bans(guild_ban.guild_id):
             banned_user: interactions.User = interactions.User(**ban["user"])
