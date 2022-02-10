@@ -20,8 +20,8 @@ class RandomCommands(interactions.Extension):
     @interactions.extension_command(name="map", description="BTE map link", scope=server)
     async def map(self, ctx: interactions.CommandContext):
         await ctx.send(embeds=create_embed(
-            title="Map du Projet BTE",
-            description="https://buildtheearth.net/map",
+            title="Maps de BTE",
+            description="[**Map internationale**](https://buildtheearth.net/map)\n\n[**Map française**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)",
             color=0x00FF00
         ))
 
