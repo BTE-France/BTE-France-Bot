@@ -20,7 +20,7 @@ class RandomCommands(commands.Cog):
         except AttributeError:  # Purging a DM/Group channel
             pass
 
-    @commands.command(brief="Lien de la Map BTE & BTE France")
+    @commands.command(brief="Lien des maps BTE")
     async def map(self, ctx):
         embed = discord.Embed(
             title="Maps de BTE",
