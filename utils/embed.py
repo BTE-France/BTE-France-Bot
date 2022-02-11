@@ -2,13 +2,14 @@ import interactions
 import variables
 
 
-def create_embed(title: str = None, description: str = None, fields: list[interactions.EmbedField] = [], color: int = 0x0000FF, footer: str = None, include_thumbnail: bool = True) -> interactions.Embed:
+def create_embed(title: str = None, description: str = None, fields: list[interactions.EmbedField] = [], color: int = 0x0000FF, footer: str = None, include_thumbnail: bool = True, image: str = None) -> interactions.Embed:
     return interactions.Embed(
         title=title,
         description=description,
         color=color,
         footer=interactions.EmbedFooter(text=footer, icon_url=variables.bte_france_icon),
         thumbnail=interactions.EmbedImageStruct(url=variables.bte_france_icon)._json if include_thumbnail else None,
+        image=interactions.EmbedImageStruct(url=image)._json if image else None,
         fields=fields
     )
 
