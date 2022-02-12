@@ -3,3 +3,4 @@ requests
 Pillow
 googletrans==3.1.0a0
 discord-py-interactions
+pip install imgur-python
