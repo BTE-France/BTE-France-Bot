@@ -11,8 +11,6 @@ class Embeds(interactions.Extension):
         interactions.Option(type=interactions.OptionType.CHANNEL, name="channel", description="Channel to update", required=True, channel_types=[interactions.ChannelType.GUILD_TEXT])
     ])
     async def embeds(self, ctx: interactions.CommandContext, channel: interactions.Channel):
-        comment_rejoindre_channel = 730478208956366991
-
         channel_id = int(channel.id)
 
         if channel_id == rules_channel:
