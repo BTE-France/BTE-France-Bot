@@ -10,7 +10,18 @@ parser.add_argument('-s', '--sync', action='store_true', help="synchronize slash
 args = parser.parse_args()
 disable_sync = False if args.sync else True
 
-bot = interactions.Client(token=os.environ["DISCORD_TOKEN"], disable_sync=disable_sync)
+bot = interactions.Client(
+    token=os.environ["DISCORD_TOKEN"],
+    disable_sync=disable_sync,
+    presence=interactions.ClientPresence(
+        status=interactions.StatusType.ONLINE,
+        activities=[interactions.PresenceActivity(
+            type=interactions.PresenceActivityType.WATCHING,
+            name="/help"
+        )]
+    ),
+    intents=interactions.Intents.ALL
+)
 
 # Define all cogs
 cogs = []
