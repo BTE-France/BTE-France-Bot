@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Server
-server = 250363043202990081  # 694003889506091100 -> Main server!
+server = 694003889506091100
 
 # Roles
 builder_non_confirme = 694176792675614800
