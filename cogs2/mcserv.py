@@ -1,4 +1,4 @@
-from mcstatus import MinecraftServer
+from mcstatus import JavaServer
 from utils.embed import create_embed
 from variables import server
 import interactions
@@ -24,7 +24,7 @@ class MCServ(interactions.Extension):
         for server_dict in servers:
 
             try:
-                status = MinecraftServer.lookup(server_dict["ip"]).status()
+                status = JavaServer.lookup(server_dict["ip"]).status()
 
             except (ConnectionRefusedError, socket.timeout):
                 embed_value = ":x: Serveur hors ligne!"
