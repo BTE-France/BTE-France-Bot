@@ -25,7 +25,7 @@ bot = interactions.Client(
 
 # Define all cogs
 cogs = []
-for filename in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cogs2")):
+for filename in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cogs")):
     if filename.endswith(".py"):
         cogs.append(filename.replace(".py", ""))
 
@@ -41,7 +41,7 @@ async def on_ready():
 async def load(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
-        bot.load("cogs2." + cog)
+        bot.load("cogs." + cog)
     await ctx.send(embeds=create_info_embed("**Loaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
@@ -51,7 +51,7 @@ async def load(ctx: interactions.CommandContext, cog: str = None):
 async def unload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
-        bot.remove("cogs2." + cog)
+        bot.remove("cogs." + cog)
     await ctx.send(embeds=create_info_embed("**Unloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
@@ -61,7 +61,7 @@ async def unload(ctx: interactions.CommandContext, cog: str = None):
 async def reload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
-        bot.reload("cogs2." + cog)
+        bot.reload("cogs." + cog)
     await ctx.send(embeds=create_info_embed("**Reloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 

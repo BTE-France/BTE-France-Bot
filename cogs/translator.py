@@ -1,59 +1,62 @@
-import variables
-import json
-import re
-import googletrans
-import discord
-from discord.ext import commands
+from utils.embed import create_embed
+import interactions
+import deepl
+import os
+
+LANGUAGES = {
+    "🇫🇷": deepl.Language.FRENCH,
+    "🇩🇪": deepl.Language.GERMAN,
+    "🇬🇧": deepl.Language.ENGLISH_BRITISH,
+    "🇺🇸": deepl.Language.ENGLISH_AMERICAN,
+    "🇪🇸": deepl.Language.SPANISH,
+    "🇮🇹": deepl.Language.ITALIAN,
+    "🇯🇵": deepl.Language.JAPANESE,
+    "🇳🇱": deepl.Language.DUTCH,
+    "🇧🇷": deepl.Language.PORTUGUESE_BRAZILIAN,
+    "🇵🇹": deepl.Language.PORTUGUESE_EUROPEAN,
+    "🇷🇺": deepl.Language.RUSSIAN,
+    "🇨🇳": deepl.Language.CHINESE,
+}
 
 
-class Translator(commands.Cog):
-    """Thanks to @Benjy#1026 for the idea and the help!"""
+class Translator(interactions.Extension):
+    def __init__(self, client: interactions.Client):
+        self.client: interactions.Client = client
+        try:
+            self.translator = deepl.Translator(os.environ["DEEPL_TOKEN"])
+        except KeyError:
+            print("Deepl API key has not been found!")
 
-    def __init__(self, client):
-        self.client = client
-        self.translator = googletrans.Translator()
-
-    def get_language(self, flag):
-        with open("languages.json", "r") as datafile:
-            jsondata = json.loads(datafile.read())
-            return jsondata.get(flag)
-
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        if reaction.count > 1:
+    @interactions.extension_listener()
+    async def on_message_reaction_add(self, message_reaction: interactions.MessageReaction):
+        language = LANGUAGES.get(message_reaction.emoji.name)
+        if not language:
             return
-        language = self.get_language(reaction.emoji)
-        if language:
-            text = re.sub(
-                "<@[0-9]{18}>",
-                "@@@@",
-                re.sub("<@![0-9]{18}>", "@@@@", reaction.message.content),
-            )
-            if (
-                language not in googletrans.LANGUAGES
-                and language not in googletrans.LANGCODES
-            ):
-                await reaction.message.channel.send(
-                    embed=discord.Embed(title="Translation failed!", colour=0xFF0000)
-                )
-            else:
-                translated_text = self.translator.translate(text, dest=language).text
-                for user_mention in reaction.message.mentions:
-                    translated_text = re.sub(
-                        "@@@@", user_mention.mention, translated_text, 1
-                    )
-                embed = discord.Embed(
-                    title=f"Translation to {language}  {reaction.emoji}",
-                    description=translated_text,
-                    colour=discord.Colour(0xA6A67A),
-                )
-                embed.set_thumbnail(url=variables.bte_france_icon)
-                embed.set_footer(
-                    text=f"Requested by @{user.name}#{user.discriminator}",
-                    icon_url=user.avatar_url,
-                )
-                await reaction.message.channel.send(embed=embed)
+
+        count = len(await self.client._http.get_reactions_of_emoji(
+            message_reaction.channel_id,
+            message_reaction.message_id,
+            message_reaction.emoji.name
+        ))
+        if count > 1:
+            return
+
+        message = interactions.Message(** await self.client._http.get_message(message_reaction.channel_id, message_reaction.message_id), _client=self.client._http)
+        user = interactions.User(** await self.client._http.get_user(message_reaction.user_id))
+
+        if not message.content:
+            return
+        translated_text = self.translator.translate_text(message.content, target_lang=language).text
+
+        embed = create_embed(
+            title=f"Translation to {message_reaction.emoji.name}",
+            description=translated_text,
+            color=0xA6A67A,
+            footer_text=f"Requested by @{user.username}#{user.discriminator}",
+            footer_image=user.avatar_url
+        )
+        await message.reply("", embeds=embed)
 
 
-def setup(client):
-    client.add_cog(Translator(client))
+def setup(client: interactions.Client):
+    Translator(client)

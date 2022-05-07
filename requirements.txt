@@ -3,4 +3,4 @@ requests
 Pillow
 deepl
 discord-py-interactions
-pip install imgur-python
+imgur-python

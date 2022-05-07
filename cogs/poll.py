@@ -1,129 +1,172 @@
-import discord
-import variables
-from discord.ext import commands
+from utils.embed import create_embed, create_info_embed, create_error_embed
+from variables import server
+import interactions
 
-nums = [
-    ":one:",
-    ":two:",
-    ":three:",
-    ":four:",
-    ":five:",
-    ":six:",
-    ":seven:",
-    ":eight:",
-    ":nine:",
+
+# Dictionary of polls (resets when the bot is reloaded), one poll per user
+polls = {}
+numbers = [
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "4️⃣",
+    "5️⃣",
+    "6️⃣",
+    "7️⃣",
+    "8️⃣",
+    "9️⃣",
 ]
-emoji_list = [
-    [f"{i+1}\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}", nums[i]]
-    for i in range(len(nums))
-]
-emoji_list += [
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER A}", ":regional_indicator_a:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER B}", ":regional_indicator_b:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER C}", ":regional_indicator_c:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER D}", ":regional_indicator_d:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER E}", ":regional_indicator_e:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER F}", ":regional_indicator_f:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER G}", ":regional_indicator_g:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER H}", ":regional_indicator_h:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER I}", ":regional_indicator_i:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER J}", ":regional_indicator_j:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER K}", ":regional_indicator_k:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER L}", ":regional_indicator_l:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER M}", ":regional_indicator_m:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER N}", ":regional_indicator_n:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER O}", ":regional_indicator_o:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER P}", ":regional_indicator_p:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER Q}", ":regional_indicator_q:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER R}", ":regional_indicator_r:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER T}", ":regional_indicator_t:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER V}", ":regional_indicator_v:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER W}", ":regional_indicator_w:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER X}", ":regional_indicator_x:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER Y}", ":regional_indicator_y:"],
-    ["\N{REGIONAL INDICATOR SYMBOL LETTER Z}", ":regional_indicator_z:"],
-]
+end_poll = "🔴"
 
 
-class Poll(commands.Cog):
-    def __init__(self, client):
-        self.client = client
-        self.title = None
-        self.choices = []
-        prefix = self.client.command_prefix
-        self.poll_embed = discord.Embed(
-            title="Poll Help", colour=discord.Colour(0x0000FF)
+class Poll(interactions.Extension):
+    def __init__(self, client: interactions.Client):
+        self.client: interactions.Client = client
+
+    @interactions.extension_command(name="poll", description="Setup a poll", scope=server, options=[
+        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="create", description="Create the poll", options=[
+            interactions.Option(type=interactions.OptionType.STRING, name="poll_name", description="Name of the poll", required=True)
+        ]),
+        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="add", description="Add a choice to the poll", options=[
+            interactions.Option(type=interactions.OptionType.STRING, name="choice", description="Choice", required=True)
+        ]),
+        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="show", description="Show the poll")
+    ])
+    async def poll(self, ctx: interactions.CommandContext, sub_command: str, poll_name=None, choice=None):
+        user_id: int = int(ctx.author.id)
+        if sub_command == "create":
+            if polls.get(user_id) is not None:
+                await ctx.send(embeds=create_info_embed(
+                    f"Replaced the poll called `{polls[user_id]['title']}` with `{poll_name}`"
+                ), ephemeral=True)
+            else:
+                await ctx.send(embeds=create_info_embed(
+                    f"Created the poll called `{poll_name}`"
+                ), ephemeral=True)
+            polls[user_id] = {"title": poll_name, "choices": []}
+
+        elif sub_command == "add":
+            if polls.get(user_id) is None:
+                await ctx.send(embeds=create_error_embed(
+                    "You have not created any poll yet! Please create one using `/poll create <name>`"
+                ), ephemeral=True)
+            elif len(polls[user_id]["choices"]) >= len(numbers):
+                await ctx.send(embeds=create_error_embed(
+                    "You have reached the maximum number of choices!"
+                ), ephemeral=True)
+            else:
+                await ctx.send(embeds=create_info_embed(
+                    f"Added `{choice}` as a choice to the poll `{polls[user_id]['title']}`"
+                ), ephemeral=True)
+                polls[user_id]["choices"].append(choice)
+
+        elif sub_command == "show":
+            if polls.get(user_id) is None:
+                await ctx.send(embeds=create_error_embed(
+                    "You have not created any poll yet! Please create one using `/poll create <name>`"
+                ), ephemeral=True)
+            elif len(polls[user_id]["choices"]) < 2:
+                await ctx.send(embeds=create_error_embed(
+                    f"Your poll is missing at least {2 - len(polls[user_id]['choices'])} choice(s)! Please create them using `/poll add <choice>`"
+                ), ephemeral=True)
+            else:
+                polls[user_id]["votes"] = {}
+                menu = interactions.SelectMenu(
+                    custom_id=str(user_id),
+                    options=[interactions.SelectOption(
+                        label=choice, value=str(i),
+                        emoji={"name": numbers[i]}
+                    ) for i, choice in enumerate(polls[user_id]["choices"])],
+                    placeholder=polls[user_id]["title"]
+                )
+
+                channel = interactions.Channel(**await self.client._http.get_channel(ctx.channel_id), _client=self.client._http)
+                message: interactions.Message = await channel.send("*Generating poll...*", components=menu)
+                polls[user_id]["message"] = message
+                await self.send_poll(user_id)
+                await ctx.send(embeds=create_info_embed(
+                    f"Your poll named `{polls[user_id]['title']}` has successfully been created. React to it with {end_poll} to close the poll!"
+                ), ephemeral=True)
+
+                # Register menu's callbacks
+                self.client.component(menu)(self.on_poll_select)
+                self.client.event(self.on_poll_react, "on_message_reaction_add")
+
+    async def on_poll_select(self, ctx: interactions.ComponentContext, options: list):
+        option: int = int(options[0])  # This poll will only have one selectable option possible
+        voter_id: int = int(ctx.author.id)
+
+        # Find correct poll_id
+        poll_id = None
+        for _poll_id, poll in polls.items():
+            if poll.get("message") is not None and int(poll["message"].id) == int(ctx.message.id):
+                poll_id = _poll_id
+                break
+        if not poll_id:
+            await ctx.send(embeds=create_error_embed(
+                "Unable to find this poll. Is it still active?"
+            ), ephemeral=True)
+            return
+
+        polls[poll_id]["votes"][voter_id] = option
+        await ctx.send(embeds=create_info_embed(
+            f"You selected the option {numbers[option]} `{polls[poll_id]['choices'][option]}`"
+        ), ephemeral=True)
+        await self.send_poll(poll_id)
+
+    async def send_poll(self, poll_id: int) -> interactions.Message:
+        # Create list of percentages for each choice
+        votes = [0 for _ in range(len(polls[poll_id]["choices"]))]
+        for voter_id, option in polls[poll_id]["votes"].items():
+            votes[option] += 1
+
+        num_votes = len(polls[poll_id]["votes"])
+        if num_votes == 0:
+            percentages = [0 for _ in range(len(votes))]
+        else:
+            percentages = [vote / num_votes for vote in votes]
+
+        # Create a bar to represent the percentage visually
+        bars = []
+        for percentage in percentages:
+            num: int = round(percentage * 10)
+            bars.append("█" * num)
+
+        # Create message to send and return
+        fields = [interactions.EmbedField(
+            name=f"{numbers[i]} {choice}",
+            value=f"{bars[i]} **{round(percentages[i] * 100)}%** ({votes[i]})"
+        ) for i, choice in enumerate(polls[poll_id]["choices"])]
+        embed: interactions.Embed = create_embed(
+            title=f"Sondage: {polls[poll_id]['title']}",
+            fields=fields
         )
-        self.poll_embed.add_field(
-            name=":one: Create a poll",
-            value=f"{prefix}poll create <title>",
-            inline=False,
-        )
-        self.poll_embed.add_field(
-            name=":two: Add choices", value=f"{prefix}poll add <choice>", inline=False
-        )
-        self.poll_embed.add_field(
-            name=":three: Show the poll", value=f"{prefix}poll show", inline=False
-        )
-        self.poll_embed.add_field(
-            name=":four: Reset the poll", value=f"{prefix}poll reset", inline=False
-        )
-        self.poll_embed.set_thumbnail(url=variables.bte_france_icon)
 
-    @commands.command(brief="Création d'un sondage. .poll help pour plus d'infos")
-    @commands.check_any(
-        commands.is_owner(),
-        commands.has_permissions(manage_roles=True, manage_channels=True),
-    )
-    async def poll(self, ctx, *args):
-        try:
-            action = args[0]
-            args = args[1:]
-            if action == "create":
-                title = ""
-                for i in range(len(args)):
-                    title += args[i] + " "
-                self.title = title
-                return
+        message: interactions.Message = polls[poll_id]["message"]
+        await message.edit("", embeds=embed)
 
-            elif action == "reset":
-                self.title = None
-                self.choices = []
-                return
+    async def on_poll_react(self, message_reaction: interactions.MessageReaction):
+        if message_reaction.emoji.name != end_poll:
+            return
 
-            elif action == "add":
-                choice = ""
-                for i in range(len(args)):
-                    choice += args[i] + " "
-                self.choices.append(choice)
-                return
+        # Find correct poll_id
+        poll_id = None
+        for _poll_id, poll in polls.items():
+            if poll.get("message") is not None and int(poll["message"].id) == int(message_reaction.message_id):
+                poll_id = _poll_id
+                break
+        if not poll_id:
+            return
 
-            elif action == "show":
-                if self.title is not None:
-                    if len(self.choices) <= len(emoji_list):
-                        if len(self.choices) != 0:
-                            embed = discord.Embed(title=self.title, type="rich")
-                            emojis = [emoji_list[i] for i in range(len(self.choices))]
-                            embed.description = "\n".join(
-                                [
-                                    f"{emojis[i][1]} {self.choices[i]}"
-                                    for i in range(len(self.choices))
-                                ]
-                            )
-                            message = await ctx.channel.send(embed=embed)
-                            for emoji in emojis:
-                                await message.add_reaction(emoji[0])
-                        else:
-                            await ctx.channel.send("No choices exist!")
-                    else:
-                        await ctx.channel.send("Too many choices! (max: 35)")
-                else:
-                    await ctx.channel.send("No poll exists!")
-                return
-        except IndexError:
-            pass
-        await ctx.send(embed=self.poll_embed)
+        if poll_id != int(message_reaction.member.id):
+            return
+
+        message = interactions.Message(**await self.client._http.get_message(message_reaction.channel_id, message_reaction.message_id), _client=self.client._http)
+        embed: interactions.Embed = message.embeds[0]
+        embed = interactions.Embed(**embed._json, footer=interactions.EmbedFooter(text="Sondage terminé"))
+        await message.edit("", embeds=embed, components=[])
+        del polls[poll_id]
 
 
-def setup(client):
-    client.add_cog(Poll(client))
+def setup(client: interactions.Client):
+    Poll(client)
