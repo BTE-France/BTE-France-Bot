@@ -1,25 +1,20 @@
+from interactions.ext.tasks import IntervalTrigger, create_task
 from variables import server, builder_non_confirme, builder
 import interactions
 import requests
-import asyncio
 import os
 
 
 class BuilderSync(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
+        self.synchronize_builders.start(self)
 
-        asyncio.get_event_loop().create_task(self.run())
-
-    async def run(self):
-        while True:
-            # print("Synchronizing builders...")
-            await self.synchronize_builders()
-            await asyncio.sleep(5 * 60)
-
+    @create_task(IntervalTrigger(5 * 60))
     async def synchronize_builders(self):
+        # print("Synchronizing builders...")
         try:
-            api_key = os.environ["API_KEY"]
+            api_key = os.environ["BTE_API_KEY"]
         except KeyError:
             print("BTE API key not found, cannot synchronize builders!")
             return

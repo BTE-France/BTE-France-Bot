@@ -4,3 +4,4 @@ Pillow
 deepl
 discord-py-interactions
 imgur-python
+git+https://github.com/Catalyst4222/interactions-tasks.git
