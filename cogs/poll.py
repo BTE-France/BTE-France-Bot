@@ -23,15 +23,21 @@ class Poll(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="poll", description="Setup a poll", scope=server, options=[
-        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="create", description="Create the poll", options=[
-            interactions.Option(type=interactions.OptionType.STRING, name="poll_name", description="Name of the poll", required=True)
-        ]),
-        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="add", description="Add a choice to the poll", options=[
-            interactions.Option(type=interactions.OptionType.STRING, name="choice", description="Choice", required=True)
-        ]),
-        interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="show", description="Show the poll")
-    ])
+    @interactions.extension_command(
+        name="poll",
+        description="Setup a poll",
+        scope=server,
+        options=[
+            interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="create", description="Create the poll", options=[
+                interactions.Option(type=interactions.OptionType.STRING, name="poll_name", description="Name of the poll", required=True)
+            ]),
+            interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="add", description="Add a choice to the poll", options=[
+                interactions.Option(type=interactions.OptionType.STRING, name="choice", description="Choice", required=True)
+            ]),
+            interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="show", description="Show the poll")
+        ],
+        default_member_permissions=interactions.Permissions.MANAGE_CHANNELS
+    )
     async def poll(self, ctx: interactions.CommandContext, sub_command: str, poll_name=None, choice=None):
         user_id: int = int(ctx.author.id)
         if sub_command == "create":

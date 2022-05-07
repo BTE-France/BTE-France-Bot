@@ -7,9 +7,15 @@ class Embeds(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="embeds", description="Update the server's embeds", scope=server, options=[
-        interactions.Option(type=interactions.OptionType.CHANNEL, name="channel", description="Channel to update", required=True, channel_types=[interactions.ChannelType.GUILD_TEXT])
-    ])
+    @interactions.extension_command(
+        name="embeds",
+        description="Update the server's embeds",
+        scope=server,
+        options=[
+            interactions.Option(type=interactions.OptionType.CHANNEL, name="channel", description="Channel to update", required=True, channel_types=[interactions.ChannelType.GUILD_TEXT])
+        ],
+        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
+    )
     async def embeds(self, ctx: interactions.CommandContext, channel: interactions.Channel):
         channel_id = int(channel.id)
 

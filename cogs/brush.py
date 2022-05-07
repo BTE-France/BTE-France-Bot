@@ -16,10 +16,15 @@ class Brush(interactions.Extension):
             "access_token": os.environ["IMGUR_TOKEN"]
         })
 
-    @interactions.extension_command(name="brush", description="Brush command, replicating the one from WorldEdit", scope=server, options=[
-        interactions.Option(type=interactions.OptionType.STRING, name="pattern", description="WorldEdit pattern", required=True),
-        interactions.Option(type=interactions.OptionType.INTEGER, name="size", description="Size of the brush", required=False, min_value=20, max_value=100),
-    ])
+    @interactions.extension_command(
+        name="brush",
+        description="Brush command, replicating the one from WorldEdit",
+        scope=server,
+        options=[
+            interactions.Option(type=interactions.OptionType.STRING, name="pattern", description="WorldEdit pattern", required=True),
+            interactions.Option(type=interactions.OptionType.INTEGER, name="size", description="Size of the brush", required=False, min_value=20, max_value=100),
+        ]
+    )
     async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
         await ctx.defer()
 

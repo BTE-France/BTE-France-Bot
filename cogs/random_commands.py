@@ -7,9 +7,15 @@ class RandomCommands(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="clear", description="Clear x last messages", scope=server, options=[
-        interactions.Option(type=interactions.OptionType.INTEGER, name="number", description="Number of messages to clear")
-    ])
+    @interactions.extension_command(
+        name="clear",
+        description="Clear x last messages",
+        scope=server,
+        options=[
+            interactions.Option(type=interactions.OptionType.INTEGER, name="number", description="Number of messages to clear")
+        ],
+        default_member_permissions=interactions.Permissions.MANAGE_CHANNELS
+    )
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
         channel: interactions.Channel = await ctx.get_channel()
         await channel.purge(amount=number)

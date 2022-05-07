@@ -35,9 +35,15 @@ async def on_ready():
     print("Bot is ready!")
 
 
-@bot.command(name="load", description="Load all cogs or a specific one", scope=server, options=[
-    interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to load", required=False, autocomplete=True)
-])
+@bot.command(
+    name="load",
+    description="Load all cogs or a specific one",
+    scope=server,
+    options=[
+        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to load", required=False, autocomplete=True)
+    ],
+    default_member_permissions=interactions.Permissions.ADMINISTRATOR
+)
 async def load(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
@@ -45,9 +51,15 @@ async def load(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Loaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.command(name="unload", description="Unload all cogs or a specific one", scope=server, options=[
-    interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to unload", required=False, autocomplete=True)
-])
+@bot.command(
+    name="unload",
+    description="Unload all cogs or a specific one",
+    scope=server,
+    options=[
+        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to unload", required=False, autocomplete=True)
+    ],
+    default_member_permissions=interactions.Permissions.ADMINISTRATOR
+)
 async def unload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
@@ -55,9 +67,15 @@ async def unload(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Unloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.command(name="reload", description="Reload all cogs or a specific one", scope=server, options=[
-    interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to reload", required=False, autocomplete=True)
-])
+@bot.command(
+    name="reload",
+    description="Reload all cogs or a specific one",
+    scope=server,
+    options=[
+        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to reload", required=False, autocomplete=True)
+    ],
+    default_member_permissions=interactions.Permissions.ADMINISTRATOR
+)
 async def reload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
