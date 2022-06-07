@@ -35,8 +35,7 @@ class Poll(interactions.Extension):
                 interactions.Option(type=interactions.OptionType.STRING, name="choice", description="Choice", required=True)
             ]),
             interactions.Option(type=interactions.OptionType.SUB_COMMAND, name="show", description="Show the poll")
-        ],
-        default_member_permissions=interactions.Permissions.MANAGE_CHANNELS
+        ]
     )
     async def poll(self, ctx: interactions.CommandContext, sub_command: str, poll_name=None, choice=None):
         user_id: int = int(ctx.author.id)
@@ -96,7 +95,6 @@ class Poll(interactions.Extension):
 
                 # Register menu's callbacks
                 self.client.component(menu)(self.on_poll_select)
-                self.client.event(self.on_poll_react, "on_message_reaction_add")
 
     async def on_poll_select(self, ctx: interactions.ComponentContext, options: list):
         option: int = int(options[0])  # This poll will only have one selectable option possible
@@ -151,7 +149,8 @@ class Poll(interactions.Extension):
         message: interactions.Message = polls[poll_id]["message"]
         await message.edit("", embeds=embed)
 
-    async def on_poll_react(self, message_reaction: interactions.MessageReaction):
+    @interactions.extension_listener()
+    async def on_message_reaction_add(self, message_reaction: interactions.MessageReaction):
         if message_reaction.emoji.name != end_poll:
             return
 
@@ -171,6 +170,7 @@ class Poll(interactions.Extension):
         embed: interactions.Embed = message.embeds[0]
         embed = interactions.Embed(**embed._json, footer=interactions.EmbedFooter(text="Sondage terminé"))
         await message.edit("", embeds=embed, components=[])
+        await message.remove_reaction_from(end_poll, poll_id)
         del polls[poll_id]
 
 

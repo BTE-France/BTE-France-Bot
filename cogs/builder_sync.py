@@ -12,7 +12,7 @@ class BuilderSync(interactions.Extension):
 
     @create_task(IntervalTrigger(5 * 60))
     async def synchronize_builders(self):
-        # print("Synchronizing builders...")
+        print("Synchronizing builders...")
         try:
             api_key = os.environ["BTE_API_KEY"]
         except KeyError:

@@ -10,7 +10,7 @@ class Images(interactions.Extension):
     async def ban(self, ctx: interactions.CommandContext):
         await ctx.send("https://i.imgur.com/RGfJXmZ.png")
 
-    @interactions.extension_command(name="ban", description="Read the rules image", scope=server)
+    @interactions.extension_command(name="regles", description="Read the rules image", scope=server)
     async def regles(self, ctx: interactions.CommandContext):
         await ctx.send("https://i.imgur.com/AP0CD1J.png")
 
