@@ -1,20 +1,14 @@
 from utils.embed import create_error_embed, create_embed
-from imgur_python import Imgur
 from variables import server
 from PIL import Image
 import interactions
 import random
-import os
+import io
 
 
 class Brush(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
-        self.imgur_client = Imgur({
-            "client_id": os.environ["IMGUR_ID"],
-            "client_secret": os.environ["IMGUR_SECRET"],
-            "access_token": os.environ["IMGUR_TOKEN"]
-        })
 
     @interactions.extension_command(
         name="brush",
@@ -26,8 +20,6 @@ class Brush(interactions.Extension):
         ]
     )
     async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
-        await ctx.defer()
-
         pattern_split = pattern.split(",")
         weights, materials = [], []
         forget_weights = False
@@ -38,19 +30,20 @@ class Brush(interactions.Extension):
                 try:
                     weights.append(int(result[0]))
                 except ValueError:  # Weight is not a number
-                    await ctx.send(embeds=create_error_embed(f"Wrong weight detected: {result[0]}"))
+                    await ctx.send(embeds=create_error_embed(f"Wrong weight detected: {result[0]}"), ephemeral=True)
                     return
             elif len(result) == 1:  # No weight set, cancelling weights for all blocks
                 forget_weights = True
                 materials.append(result[0])
             else:
-                await ctx.send(embeds=create_error_embed("Wrong syntax in materials!"))
+                await ctx.send(embeds=create_error_embed("Wrong syntax in materials!"), ephemeral=True)
                 return
         weights = None if forget_weights else weights
         weighted_list = random.choices(
             population=materials, weights=weights, k=size ** 2
         )
 
+        await ctx.defer()
         final_image = Image.new("RGB", (size * 16, size * 16), (250, 250, 250))
         not_found = []
         for y in range(size):
@@ -68,18 +61,17 @@ class Brush(interactions.Extension):
                         Image.open(f"blocks/{block}.png"), (x * 16, y * 16)
                     )
 
-        # Upload image to imgur.com
-        name = "BTEFranceBrush.png"
-        album_id = "R22ds3m"
-        final_image.save(name)
-        response = self.imgur_client.image_upload(name, name, "", album=album_id)
-        os.remove(name)
-
-        await ctx.send(embeds=create_embed(
-            title=f"Pattern: {pattern}",
-            description=f":question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:" if not_found else "",
-            image=response["response"]["data"]["link"]
-        ))
+        with io.BytesIO() as binary_image:
+            final_image.save(binary_image, 'PNG')
+            binary_image.seek(0)
+            file = interactions.File(filename="BTEFranceBrush.png", fp=binary_image)
+            await ctx.send(
+                embeds=create_embed(
+                    title=f"Pattern: {pattern}",
+                    description=f":question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:" if not_found else "",
+                ),
+                files=file,
+            )
 
     def get_emoji(self, block_raw):
         for block_id, block_aliases in blocks.items():
