@@ -2,7 +2,10 @@ from interactions.ext.tasks import IntervalTrigger, create_task
 from variables import server, builder_non_confirme, builder
 import interactions
 import requests
+from datetime import datetime
 import os
+
+CACHED_IDS = []
 
 
 class BuilderSync(interactions.Extension):
@@ -12,7 +15,8 @@ class BuilderSync(interactions.Extension):
 
     @create_task(IntervalTrigger(5 * 60))
     async def synchronize_builders(self):
-        print("Synchronizing builders...")
+        date = datetime.now().strftime("%H:%M")
+        print(f"[{date}] Synchronizing builders...")
         try:
             api_key = os.environ["BTE_API_KEY"]
         except KeyError:
@@ -31,6 +35,9 @@ class BuilderSync(interactions.Extension):
             print("Error while accessing BTE API:\n ", e)
         else:
             for user in response["members"]:
+                if user["discordId"] in CACHED_IDS:  # User was already added, skipping to not hit ratelimit
+                    continue
+
                 member_dict: dict = await self.client._http.get_member(server, user["discordId"])
                 if member_dict.get("message", None) is not None:  # This user is not in the Discord server
                     continue
@@ -40,6 +47,8 @@ class BuilderSync(interactions.Extension):
                     await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
                     await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
                     print(f"Added {user['discordTag']} as a Builder!")
+
+                CACHED_IDS.append(user["discordId"])
 
 
 def setup(client: interactions.Client):
