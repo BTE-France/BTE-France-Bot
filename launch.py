@@ -19,9 +19,9 @@ bot = interactions.Client(
             type=interactions.PresenceActivityType.WATCHING,
             name="/help"
         )]
-    ),
-    intents=interactions.Intents.ALL
+    )
 )
+bot.load('interactions.ext.files')
 
 # Define all cogs
 cogs = []
@@ -104,7 +104,7 @@ def get_available_cogs() -> list[interactions.Choice]:
 
 try:
     for cog in cogs:
-        bot.load("cogs2." + cog)
+        bot.load("cogs." + cog)
     bot.start()
 except KeyboardInterrupt:
     print("Shutting down bot...")
