@@ -1,42 +1,33 @@
-import discord
-import variables
-from discord.ext import commands
+from utils.embed import create_embed
+from variables import server
+import interactions
 
 
-class Help(commands.Cog):
-    def __init__(self, client):
-        self.client = client
-        self.client.remove_command("help")
+class Help(interactions.Extension):
+    def __init__(self, client: interactions.Client):
+        self.client: interactions.Client = client
 
-    @commands.command(
-        brief="Menu avec toutes les commandes disponibles!", aliases=["h"]
+    @interactions.extension_command(
+        name="help",
+        description="Display all commands for the bot",
+        scope=server
     )
-    async def help(self, ctx):
-        if ctx.channel.type != discord.ChannelType.private:
-            await ctx.send(f"{ctx.author.mention}, regarde tes MPs! :mailbox:")
-        embed = discord.Embed(title="Help!", colour=discord.Colour(0xFF0000))
-        embed.set_thumbnail(url=variables.bte_france_icon)
-        embed.set_footer(
-            text="Contacte @mAxYoLo01#4491 si tu trouves des bugs / suggestions!",
-            icon_url=variables.bte_france_icon,
+    async def help(self, ctx: interactions.CommandContext):
+        commands: list[interactions.ApplicationCommand] = [
+            interactions.ApplicationCommand(**command) for command in await self.client._http.get_application_commands(application_id=self.client.me.id, guild_id=server)
+        ]
+
+        embed = create_embed(
+            title="Help!",
+            color=0xFF0000,
+            footer_text="Contacte @mAxYoLo01#4491 si tu trouves des bugs / suggestions!"
         )
-        for cog in [self.client.get_cog(cogs) for cogs in self.client.cogs]:
-            for command in cog.get_commands():
-                # Add the command to the help list only if all checks are passed (i.e. user has access to this command)
-                if command.checks:
-                    try:
-                        all([await check(ctx) for check in command.checks])
-                    except commands.errors.CheckAnyFailure:
-                        continue
-                name = " / ".join(
-                    [self.client.command_prefix + command.name] + [
-                        self.client.command_prefix + alias
-                        for alias in command.aliases
-                    ]
-                )
-                embed.add_field(name=name, value=command.brief, inline=False)
-        await ctx.author.send(embed=embed)
+        for command in commands:
+            embed.add_field(name=f"/{command.name}", value=command.description)
+
+        await ctx.author.send(embeds=embed)
+        await ctx.send("Regarde tes MPs! :mailbox:")
 
 
-def setup(client):
-    client.add_cog(Help(client))
+def setup(client: interactions.Client):
+    Help(client)
