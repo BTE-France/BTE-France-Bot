@@ -29,7 +29,7 @@ class MCServ(interactions.Extension):
             except (ConnectionRefusedError, socket.timeout):
                 embed_value = ":x: Serveur hors ligne!"
                 embed_value += "\n\n_ _" if server_dict == servers[0] else ""
-                fields.append(interactions.EmbedField(name=server_dict["desc"], value=embed_value, inline=False))
+                fields.append((server_dict["desc"], embed_value, False))
 
             else:
                 online_players = status.players.online
@@ -50,7 +50,7 @@ class MCServ(interactions.Extension):
                 sample_txt = sample_txt.replace("_", r"\_").replace("*", r"\*")  # Escape markdown symbols that could be present in players' names
 
                 embed_value = f":white_check_mark: Serveur en ligne!\n\n**{online_players} {sample_title}**\n" + sample_txt
-                fields.append(interactions.EmbedField(name=server_dict["desc"], value=embed_value, inline=False))
+                fields.append((server_dict["desc"], embed_value, False))
 
         await ctx.send(embeds=create_embed(
             title="**Statut du serveur Minecraft BTE France**",

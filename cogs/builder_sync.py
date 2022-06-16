@@ -5,8 +5,6 @@ import requests
 from datetime import datetime
 import os
 
-CACHED_IDS = []
-
 
 class BuilderSync(interactions.Extension):
     def __init__(self, client: interactions.Client):
@@ -33,22 +31,21 @@ class BuilderSync(interactions.Extension):
             ).json()
         except Exception as e:
             print("Error while accessing BTE API:\n ", e)
-        else:
-            for user in response["members"]:
-                if user["discordId"] in CACHED_IDS:  # User was already added, skipping to not hit ratelimit
-                    continue
+            return
 
-                member_dict: dict = await self.client._http.get_member(server, user["discordId"])
-                if member_dict.get("message", None) is not None:  # This user is not in the Discord server
-                    continue
-                member = interactions.Member(**member_dict, _client=self.client._http)
+        guild = interactions.Guild(**await self.client._http.get_guild(server), _client=self.client._http)
+        guild_members = await guild.get_all_members()
+        guild_member_IDs = [str(member.id) for member in guild_members]
+        for user in response["members"]:
+            try:
+                member = guild_members[guild_member_IDs.index(user["discordId"])]
+            except ValueError:  # Skip user if not in the Discord server
+                continue
 
-                if str(builder) not in member._json["roles"]:
-                    await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
-                    await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
-                    print(f"Added {user['discordTag']} as a Builder!")
-
-                CACHED_IDS.append(user["discordId"])
+            if str(builder) not in member.roles:
+                await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
+                await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
+                print(f"Added {user['discordTag']} as a Builder!")
 
 
 def setup(client: interactions.Client):

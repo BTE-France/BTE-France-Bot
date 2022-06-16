@@ -29,7 +29,6 @@ class Embeds(interactions.Extension):
             await ctx.send(embeds=create_error_embed(f"{channel.mention} does not have a corresponding embed!"), ephemeral=True)
             return
 
-        channel = interactions.Channel(**channel._json, _client=self.client._http)
         # await channel.purge(amount=10, bulk=False)
         await channel.send(embeds=embeds)
         await ctx.send(embeds=create_info_embed(f"The embed has successfully been updated in {channel.mention}"), ephemeral=True)
@@ -88,14 +87,14 @@ class Embeds(interactions.Extension):
                 title=":flag_fr: **Règles** :flag_fr:",
                 color=0xFF0000,
                 fields=[
-                    interactions.EmbedField(name=f":{RULES_EMOTES[i]}: {i+1}. {key}", value=value, inline=False) for i, (key, value) in enumerate(RULES_FR.items())
+                    (f":{RULES_EMOTES[i]}: {i+1}. {key}", value, False) for i, (key, value) in enumerate(RULES_FR.items())
                 ]
             ),
             create_embed(
                 title=":flag_us: **Rules** :flag_us:",
                 color=0xFF0000,
                 fields=[
-                    interactions.EmbedField(name=f":{RULES_EMOTES[i]}: {i+1}. {key}", value=value, inline=False) for i, (key, value) in enumerate(RULES_EN.items())
+                    (f":{RULES_EMOTES[i]}: {i+1}. {key}", value, False) for i, (key, value) in enumerate(RULES_EN.items())
                 ]
             )
         ]
@@ -107,11 +106,11 @@ class Embeds(interactions.Extension):
                 title="**Comment rejoindre le serveur BTE France ?**",
                 color=0x0000FF,
                 fields=[
-                    interactions.EmbedField(name="__IPs JAVA__", value="(Version PC)", inline=False),
-                    interactions.EmbedField(name="<:minecraft_heart:922583879469117491>", value="BTE Hub : ```buildtheearth.net``` __Puis faites une fois en jeu :__```/bt FR```", inline=True),
-                    interactions.EmbedField(name="<:minecraft_heart:922583879469117491>", value="BTE France :```bte.thesmyler.fr```", inline=True),
-                    interactions.EmbedField(name="__IP BEDROCK__", value="(Windows 10, mobile, consoles)", inline=False),
-                    interactions.EmbedField(name="<:bedrock:922583660761333850>", value="```bedrock.buildtheearth.net, port: 19132```", inline=True)
+                    ("__IPs JAVA__", "(Version PC)", False),
+                    ("<:minecraft_heart:922583879469117491>", "BTE Hub : ```buildtheearth.net``` __Puis faites une fois en jeu :__```/bt FR```", True),
+                    ("<:minecraft_heart:922583879469117491>", "BTE France :```bte.thesmyler.fr```", True),
+                    ("__IP BEDROCK__", "(Windows 10, mobile, consoles)", False),
+                    ("<:bedrock:922583660761333850>", "```bedrock.buildtheearth.net, port: 19132```", True)
                 ]
             )
         ]
@@ -125,7 +124,7 @@ class Embeds(interactions.Extension):
                 title=":bank: Comment rejoindre le projet? :bank:",
                 description=":arrow_right: Il vous faut premièrement le modpack, à télécharger ci-dessous **(INUTILE POUR BEDROCK)**\nTout est automatique, dézippez le fichier, ouvrez-le et cliquez sur **Install**, vous le retrouverez dans votre launcher Minecraft **(:warning: fermez votre launcher pendant l'installation)**",
                 fields=[
-                    interactions.EmbedField(name="Liens d'installation:", value="[Windows](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-windows.zip)\n[Linux](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-linux.AppImage)\n[Mac](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-mac.dmg)\n[Universal](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-universal.jar)")
+                    ("Liens d'installation:", "[Windows](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-windows.zip)\n[Linux](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-linux.AppImage)\n[Mac](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-mac.dmg)\n[Universal](https://s3.buildtheearth.net/public/installer/v1.20/BTEInstaller-1.20.0-universal.jar)", False)
                 ]
             ),
             create_embed(
@@ -136,7 +135,7 @@ class Embeds(interactions.Extension):
                 title=":pick: Comment fonctionne le serveur? :pick:",
                 description=":arrow_right: Accessible à la visite.\n:arrow_right: Pour construire, demandez le grade __Débutant__ **SUR le serveur Minecraft à un membre du staff.**",
                 fields=[
-                    interactions.EmbedField(name="Devenir builder officiel (pas obligatoire) :arrow_heading_down:", value="[**Document**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)")
+                    ("Devenir builder officiel (pas obligatoire) :arrow_heading_down:", "[**Document**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)", False)
                 ]
             ),
             create_embed(

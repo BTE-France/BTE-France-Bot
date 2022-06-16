@@ -82,8 +82,6 @@ class Warps(interactions.Extension):
 
     @interactions.extension_command(name="warps", description="List of the best BTE France warps", scope=server)
     async def warps(self, ctx: interactions.CommandContext):
-        await ctx.send("Regarde tes MPs! :mailbox:")
-
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)
         chunked_warps_list = [WARPS[i:i + 10] for i in range(0, len(WARPS), 10)]
@@ -95,13 +93,7 @@ class Warps(interactions.Extension):
                 create_embed(
                     title=warp.name,
                     color=0xFFFFFF,
-                    fields=[
-                        interactions.EmbedField(
-                            name=f"/warp {warp.warp}",
-                            value=warp.description,
-                            inline=False
-                        )
-                    ],
+                    fields=[(f"/warp {warp.warp}", warp.description, False)],
                     image=warp.image
                 )
                 for warp in warp_list
@@ -113,6 +105,7 @@ class Warps(interactions.Extension):
                 ":flag_fr: **Liste des meilleurs warps sur le serveur BTE France** :flag_fr:" if i == 0 else "",
                 embeds=embed_list
             )
+        await ctx.send("Regarde tes MPs! :mailbox:")
 
 
 def setup(client: interactions.Client):

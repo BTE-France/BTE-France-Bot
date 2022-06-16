@@ -137,9 +137,10 @@ class Poll(interactions.Extension):
             bars.append("█" * num)
 
         # Create message to send and return
-        fields = [interactions.EmbedField(
-            name=f"{numbers[i]} {choice}",
-            value=f"{bars[i]} **{round(percentages[i] * 100)}%** ({votes[i]})"
+        fields = [(
+            f"{numbers[i]} {choice}",
+            f"{bars[i]} **{round(percentages[i] * 100)}%** ({votes[i]})",
+            False
         ) for i, choice in enumerate(polls[poll_id]["choices"])]
         embed: interactions.Embed = create_embed(
             title=f"Sondage: {polls[poll_id]['title']}",
@@ -168,7 +169,7 @@ class Poll(interactions.Extension):
 
         message = interactions.Message(**await self.client._http.get_message(message_reaction.channel_id, message_reaction.message_id), _client=self.client._http)
         embed: interactions.Embed = message.embeds[0]
-        embed = interactions.Embed(**embed._json, footer=interactions.EmbedFooter(text="Sondage terminé"))
+        embed.set_footer(text="Sondage terminé")
         await message.edit("", embeds=embed, components=[])
         await message.remove_reaction_from(end_poll, poll_id)
         del polls[poll_id]
