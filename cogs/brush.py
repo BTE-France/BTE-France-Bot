@@ -69,6 +69,7 @@ class Brush(interactions.Extension):
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",
                     description=f":question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:" if not_found else "",
+                    image="attachment://BTEFranceBrush.png"
                 ),
                 files=file,
             )
