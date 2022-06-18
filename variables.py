@@ -12,6 +12,7 @@ rules_channel = 793846913203306526
 comment_rejoindre_channel = 810512822928670780
 ip_channel = 821291710993661992
 logs_channel = 697374867867041842
+verify_channel = 735212860598124595
 
 # Links
 bte_france_icon = "https://i.imgur.com/1ZPB2Wt.png"

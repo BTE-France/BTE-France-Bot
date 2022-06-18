@@ -1,21 +1,24 @@
-import os
+from interactions.ext.tasks import IntervalTrigger, create_task
+from variables import server, builder_non_confirme, builder
+import interactions
 import requests
-import discord
-import variables
-from discord.ext import commands, tasks
+from datetime import datetime
+import os
 
 
-class Builder_Sync(commands.Cog):
-    def __init__(self, client):
-        self.client = client
-        self.sync.start()
+class BuilderSync(interactions.Extension):
+    def __init__(self, client: interactions.Client):
+        self.client: interactions.Client = client
+        self.synchronize_builders.start(self)
 
-    @tasks.loop(minutes=1.0)
-    async def sync(self):
-        await self.client.wait_until_ready()
+    @create_task(IntervalTrigger(5 * 60))
+    async def synchronize_builders(self):
+        date = datetime.now().strftime("%H:%M")
+        print(f"[{date}] Synchronizing builders...")
         try:
-            api_key = os.environ["API_KEY"]
+            api_key = os.environ["BTE_API_KEY"]
         except KeyError:
+            print("BTE API key not found, cannot synchronize builders!")
             return
         headers = {
             "Host": "buildtheearth.net",
@@ -28,22 +31,22 @@ class Builder_Sync(commands.Cog):
             ).json()
         except Exception as e:
             print("Error while accessing BTE API:\n ", e)
-        else:
-            guild = self.client.get_guild(variables.server)
-            builderNonConfirmeRole = discord.utils.get(
-                guild.roles, id=variables.builder_non_confirme
-            )
-            builderRole = discord.utils.get(guild.roles, id=variables.builder)
-            for user in response["members"]:
-                try:
-                    member = await guild.fetch_member(user["discordId"])
-                    if builderNonConfirmeRole in member.roles:
-                        await member.add_roles(builderRole)
-                        await member.remove_roles(builderNonConfirmeRole)
-                        print("Added " + user["discordTag"] + " as a Builder!")
-                except discord.errors.NotFound:  # Member not in the server
-                    continue
+            return
+
+        guild = interactions.Guild(**await self.client._http.get_guild(server), _client=self.client._http)
+        guild_members = await guild.get_all_members()
+        guild_member_IDs = [str(member.id) for member in guild_members]
+        for user in response["members"]:
+            try:
+                member = guild_members[guild_member_IDs.index(user["discordId"])]
+            except ValueError:  # Skip user if not in the Discord server
+                continue
+
+            if str(builder) not in member.roles:
+                await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
+                await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
+                print(f"Added {user['discordTag']} as a Builder!")
 
 
-def setup(client):
-    client.add_cog(Builder_Sync(client))
+def setup(client: interactions.Client):
+    BuilderSync(client)

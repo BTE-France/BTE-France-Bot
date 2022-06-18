@@ -1,51 +1,49 @@
-import variables
-import discord
-import random
-from discord.ext import commands
+from utils.embed import create_error_embed, create_embed
+from variables import server
 from PIL import Image
+import interactions
+import random
 import io
 
 
-class Brush(commands.Cog):
-    def __init__(self, client):
-        self.client = client
-        self.syntax_embed = discord.Embed(
-            title="Wrong syntax! Write .br <material> [size=20]",
-            colour=discord.Colour(0xFF0000),
-        )
-        self.syntax_embed.add_field(name="Maximum size: 100", value="_ _", inline=False)
-        self.syntax_embed.set_thumbnail(url=variables.bte_france_icon)
+class Brush(interactions.Extension):
+    def __init__(self, client: interactions.Client):
+        self.client: interactions.Client = client
 
-    @commands.command(
-        aliases=["br"], brief="Brush command to replicate the WorldEdit brush"
+    @interactions.extension_command(
+        name="brush",
+        description="Brush command, replicating the one from WorldEdit",
+        scope=server,
+        options=[
+            interactions.Option(type=interactions.OptionType.STRING, name="pattern", description="WorldEdit pattern", required=True),
+            interactions.Option(type=interactions.OptionType.INTEGER, name="size", description="Size of the brush", required=False, min_value=20, max_value=100),
+        ]
     )
-    async def brush(self, ctx, material=None, size=20):
-        if material is None or size > 100:
-            await ctx.send(embed=self.syntax_embed)
-            return
-        material_split = material.split(",")
+    async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
+        pattern_split = pattern.split(",")
         weights, materials = [], []
         forget_weights = False
-        for mat in material_split:
-            result = mat.split("%")
+        for pat in pattern_split:
+            result = pat.split("%")
             if len(result) == 2:
                 materials.append(result[1])
                 try:
                     weights.append(int(result[0]))
                 except ValueError:  # Weight is not a number
-                    await ctx.send("Wrong weight detected: " + result[0])
+                    await ctx.send(embeds=create_error_embed(f"Wrong weight detected: {result[0]}"), ephemeral=True)
                     return
             elif len(result) == 1:  # No weight set, cancelling weights for all blocks
                 forget_weights = True
                 materials.append(result[0])
             else:
-                await ctx.send("Wrong syntax in materials!")
+                await ctx.send(embeds=create_error_embed("Wrong syntax in materials!"), ephemeral=True)
                 return
         weights = None if forget_weights else weights
         weighted_list = random.choices(
             population=materials, weights=weights, k=size ** 2
         )
-        # print('\n'.join(weighted_list))
+
+        await ctx.defer()
         final_image = Image.new("RGB", (size * 16, size * 16), (250, 250, 250))
         not_found = []
         for y in range(size):
@@ -62,22 +60,19 @@ class Brush(commands.Cog):
                     final_image.paste(
                         Image.open(f"blocks/{block}.png"), (x * 16, y * 16)
                     )
-        with io.BytesIO() as image_binary:
-            final_image.save(image_binary, "PNG")
-            image_binary.seek(0)
-            await ctx.send(file=discord.File(fp=image_binary, filename="BTEFrance.png"))
-        if not_found:
-            await ctx.send(
-                ":question: `Unrecognized IDs: "
-                + ", ".join(sorted(not_found))
-                + "` :question:"
-            )
 
-    @brush.error
-    async def brush_handler(self, ctx, error):
-        if isinstance(error, commands.errors.BadArgument):
-            await ctx.send(embed=self.syntax_embed)
-            return
+        with io.BytesIO() as binary_image:
+            final_image.save(binary_image, 'PNG')
+            binary_image.seek(0)
+            file = interactions.File(filename="BTEFranceBrush.png", fp=binary_image)
+            await ctx.send(
+                embeds=create_embed(
+                    title=f"Pattern: {pattern}",
+                    description=f":question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:" if not_found else "",
+                    image="attachment://BTEFranceBrush.png"
+                ),
+                files=file,
+            )
 
     def get_emoji(self, block_raw):
         for block_id, block_aliases in blocks.items():
@@ -86,8 +81,8 @@ class Brush(commands.Cog):
         return None
 
 
-def setup(client):
-    client.add_cog(Brush(client))
+def setup(client: interactions.Client):
+    Brush(client)
 
 
 blocks = {
