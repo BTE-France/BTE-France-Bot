@@ -102,9 +102,6 @@ def get_available_cogs() -> list[interactions.Choice]:
     return [interactions.Choice(name=cog, value=cog) for cog in cogs]
 
 
-try:
-    for cog in cogs:
-        bot.load("cogs." + cog)
-    bot.start()
-except KeyboardInterrupt:
-    print("Shutting down bot...")
+for cog in cogs:
+    bot.load("cogs." + cog)
+bot.start()
