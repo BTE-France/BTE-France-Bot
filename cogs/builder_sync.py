@@ -1,51 +1,84 @@
 from interactions.ext.tasks import IntervalTrigger, create_task
 from variables import server, builder_non_confirme, builder
+from datetime import datetime
 import interactions
 import requests
-from datetime import datetime
 import os
 
 
 class BuilderSync(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
-        self.synchronize_builders.start(self)
+        self.guild_member_IDs, self.builder_IDs = [], []
+        self.client._loop.create_task(self.synchronize_guild_members())
 
-    @create_task(IntervalTrigger(5 * 60))
-    async def synchronize_builders(self):
-        date = datetime.now().strftime("%H:%M")
-        print(f"[{date}] Synchronizing builders...")
+    async def synchronize_guild_members(self):
         try:
             api_key = os.environ["BTE_API_KEY"]
         except KeyError:
             print("BTE API key not found, cannot synchronize builders!")
             return
-        headers = {
+        self.headers = {
             "Host": "buildtheearth.net",
             "Authorization": f"Bearer {api_key}",
             "Accept": "application/json",
         }
+
+        self.guild = interactions.Guild(**await self.client._http.get_guild(server), _client=self.client._http)
+        guild_members = await self.guild.get_all_members()
+        self.guild_member_IDs.extend([int(member.id) for member in guild_members])
+        self.builder_IDs.extend([int(member.id) for member in guild_members if str(builder) in member.roles])
+
+        self.get_builders.start(self)
+
+    @create_task(IntervalTrigger(60))
+    async def get_builders(self):
         try:
             response = requests.get(
-                "https://buildtheearth.net/api/v1/members", headers=headers
+                "https://buildtheearth.net/api/v1/members", headers=self.headers
             ).json()
         except Exception as e:
             print("Error while accessing BTE API:\n ", e)
             return
 
-        guild = interactions.Guild(**await self.client._http.get_guild(server), _client=self.client._http)
-        guild_members = await guild.get_all_members()
-        guild_member_IDs = [str(member.id) for member in guild_members]
         for user in response["members"]:
-            try:
-                member = guild_members[guild_member_IDs.index(user["discordId"])]
-            except ValueError:  # Skip user if not in the Discord server
+            if int(user["discordId"]) in self.builder_IDs:
                 continue
 
-            if str(builder) not in member.roles:
-                await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
-                await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
-                print(f"Added {user['discordTag']} as a Builder!")
+            if int(user["discordId"]) in self.guild_member_IDs:
+                member = await self.guild.get_member(int(user["discordId"]))
+                await self.add_builder_role(member)
+
+    @interactions.extension_listener()
+    async def on_guild_member_add(self, member: interactions.GuildMember):
+        if int(member.guild_id) != server:
+            return
+        self.guild_member_IDs.append(int(member.id))
+
+    @interactions.extension_listener()
+    async def on_guild_member_remove(self, member: interactions.GuildMember):
+        try:
+            self.guild_member_IDs.remove(int(member.id))
+        except ValueError:  # Member was not registered in cache
+            pass
+
+    @interactions.extension_listener()
+    async def on_guild_member_update(self, member: interactions.GuildMember):
+        if int(member.guild_id) != server:
+            return
+
+        if str(builder) in member.roles:
+            if int(member.id) not in self.builder_IDs:
+                self.builder_IDs.append(int(member.id))
+        else:
+            if int(member.id) in self.builder_IDs:
+                self.builder_IDs.remove(int(member.id))
+
+    async def add_builder_role(self, member: interactions.GuildMember):
+        await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
+        await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
+        date = datetime.now().strftime("%d/%m - %H:%M")
+        print(f"[{date}] Added {member.user.username}#{member.user.discriminator} as a Builder!")
 
 
 def setup(client: interactions.Client):

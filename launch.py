@@ -2,8 +2,10 @@ from utils.embed import create_info_embed
 from argparse import ArgumentParser
 from variables import server
 import interactions
+import logging
 import os
 
+logging.basicConfig(format='[%(levelname)s] %(message)s')
 
 parser = ArgumentParser()
 parser.add_argument('-s', '--sync', action='store_true', help="synchronize slash commands on the Discord API")
@@ -19,7 +21,8 @@ bot = interactions.Client(
             type=interactions.PresenceActivityType.WATCHING,
             name="/help"
         )]
-    )
+    ),
+    intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS
 )
 bot.load('interactions.ext.files')
 
