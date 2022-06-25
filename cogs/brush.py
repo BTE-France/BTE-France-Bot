@@ -38,14 +38,18 @@ class Brush(interactions.Extension):
             else:
                 await ctx.send(embeds=create_error_embed("Wrong syntax in materials!"), ephemeral=True)
                 return
-        weights = None if forget_weights else weights
+
+        if forget_weights:
+            weights = [100 / len(materials) for _ in materials]
+        else:
+            weights = [100 * weight / sum(weights) for weight in weights]
         weighted_list = random.choices(
             population=materials, weights=weights, k=size ** 2
         )
 
         await ctx.defer()
         final_image = Image.new("RGB", (size * 16, size * 16), (250, 250, 250))
-        not_found = []
+        not_found, percentage = set(), set()
         for y in range(size):
             for x in range(size):
                 block_raw = weighted_list[y * size + x]
@@ -54,21 +58,26 @@ class Brush(interactions.Extension):
                     final_image.paste(
                         Image.open("blocks/question.png"), (x * 16, y * 16)
                     )
-                    if block_raw not in not_found:
-                        not_found.append(block_raw)
+                    not_found.add(block_raw)
+                    percentage.add(block_raw)
                 else:
                     final_image.paste(
                         Image.open(f"blocks/{block}.png"), (x * 16, y * 16)
                     )
+                    percentage.add(block)
 
         with io.BytesIO() as binary_image:
             final_image.save(binary_image, 'PNG')
             binary_image.seek(0)
             file = interactions.File(filename="BTEFranceBrush.png", fp=binary_image)
+            percentage = list(percentage)
+            description = "\n".join([f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))])
+            if not_found:
+                description += f"\n:question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:"
             await ctx.send(
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",
-                    description=f":question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:" if not_found else "",
+                    description=description,
                     image="attachment://BTEFranceBrush.png"
                 ),
                 files=file,
