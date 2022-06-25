@@ -56,11 +56,13 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_ban_add(self, guild_ban: interactions.GuildBan):
-        channel = interactions.Channel(**await self.client._http.get_channel(logs_channel), _client=self.client._http)
-        for ban in await self.client._http.get_guild_bans(guild_ban.guild_id):
-            banned_user: interactions.User = interactions.User(**ban["user"])
-            if int(banned_user.id) == int(guild_ban.user.id) and not banned_user.bot:
-                await channel.send(f"**{banned_user.username}#{banned_user.discriminator} banned for the following reason:**\n{ban['reason']}")
+        audit_log = await self.client._http.get_guild_auditlog(server, action_type=22, limit=5)
+        for entry in audit_log["audit_log_entries"]:
+            if int(entry["target_id"]) == int(guild_ban.user.id):
+                mod_user: interactions.User = interactions.User(**await self.client._http.get_user(entry["user_id"]))
+                if not mod_user.bot:
+                    channel = interactions.Channel(**await self.client._http.get_channel(logs_channel), _client=self.client._http)
+                    await channel.send(f"**{guild_ban.user.username}#{guild_ban.user.discriminator} was banned by {mod_user.username}#{mod_user.discriminator} for the following reason:**\n{entry['reason']}")
                 return
 
 
