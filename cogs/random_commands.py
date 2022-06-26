@@ -1,3 +1,4 @@
+import asyncio
 from utils.embed import create_embed, create_info_embed
 from variables import server, comment_rejoindre_channel, logs_channel
 import interactions
@@ -56,6 +57,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_ban_add(self, guild_ban: interactions.GuildBan):
+        await asyncio.sleep(3)  # Leave some time for the audit log to be updated
         audit_log = await self.client._http.get_guild_auditlog(server, action_type=22, limit=5)
         for entry in audit_log["audit_log_entries"]:
             if int(entry["target_id"]) == int(guild_ban.user.id):
