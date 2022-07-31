@@ -7,15 +7,8 @@ class Embeds(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(
-        name="embeds",
-        description="Update the server's embeds",
-        scope=server,
-        options=[
-            interactions.Option(type=interactions.OptionType.CHANNEL, name="channel", description="Channel to update", required=True, channel_types=[interactions.ChannelType.GUILD_TEXT])
-        ],
-        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
-    )
+    @interactions.extension_command(name="embeds", description="Update the server's embeds", scope=server, default_member_permissions=interactions.Permissions.ADMINISTRATOR)
+    @interactions.option("Channel to update", channel_types=[interactions.ChannelType.GUILD_TEXT])
     async def embeds(self, ctx: interactions.CommandContext, channel: interactions.Channel):
         channel_id = int(channel.id)
 
@@ -29,7 +22,6 @@ class Embeds(interactions.Extension):
             await ctx.send(embeds=create_error_embed(f"{channel.mention} does not have a corresponding embed!"), ephemeral=True)
             return
 
-        # await channel.purge(amount=10, bulk=False)
         await channel.send(embeds=embeds)
         await ctx.send(embeds=create_info_embed(f"The embed has successfully been updated in {channel.mention}"), ephemeral=True)
 

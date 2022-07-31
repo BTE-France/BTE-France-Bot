@@ -34,19 +34,12 @@ for filename in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file_
 
 
 @bot.event
-async def on_ready():
+async def on_start():
     print("Bot is ready!")
 
 
-@bot.command(
-    name="load",
-    description="Load all cogs or a specific one",
-    scope=server,
-    options=[
-        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to load", required=False, autocomplete=True)
-    ],
-    default_member_permissions=interactions.Permissions.ADMINISTRATOR
-)
+@bot.command(name="load", description="Load all cogs or a specific one", scope=server, default_member_permissions=interactions.Permissions.ADMINISTRATOR)
+@interactions.option("Cog to load", autocomplete=True)
 async def load(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
@@ -54,15 +47,13 @@ async def load(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Loaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.command(
-    name="unload",
-    description="Unload all cogs or a specific one",
-    scope=server,
-    options=[
-        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to unload", required=False, autocomplete=True)
-    ],
-    default_member_permissions=interactions.Permissions.ADMINISTRATOR
-)
+@load.autocomplete("cog")
+async def load_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
+    await ctx.populate(get_available_cogs())
+
+
+@bot.command(name="unload", description="Unload all cogs or a specific one", scope=server, default_member_permissions=interactions.Permissions.ADMINISTRATOR)
+@interactions.option("Cog to unload", autocomplete=True)
 async def unload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
@@ -70,15 +61,13 @@ async def unload(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Unloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.command(
-    name="reload",
-    description="Reload all cogs or a specific one",
-    scope=server,
-    options=[
-        interactions.Option(type=interactions.OptionType.STRING, name="cog", description="Cog to reload", required=False, autocomplete=True)
-    ],
-    default_member_permissions=interactions.Permissions.ADMINISTRATOR
-)
+@unload.autocomplete("cog")
+async def unload_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
+    await ctx.populate(get_available_cogs())
+
+
+@bot.command(name="reload", description="Reload all cogs or a specific one", scope=server, default_member_permissions=interactions.Permissions.ADMINISTRATOR)
+@interactions.option("Cog to reload", autocomplete=True)
 async def reload(ctx: interactions.CommandContext, cog: str = None):
     cog_list = [cog] if cog else cogs
     for cog in cog_list:
@@ -86,17 +75,7 @@ async def reload(ctx: interactions.CommandContext, cog: str = None):
     await ctx.send(embeds=create_info_embed("**Reloaded:**\n" + "\n".join([f"- {cog_name}" for cog_name in cog_list])), ephemeral=True)
 
 
-@bot.autocomplete("load", "cog")
-async def load_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
-    await ctx.populate(get_available_cogs())
-
-
-@bot.autocomplete("unload", "cog")
-async def unload_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
-    await ctx.populate(get_available_cogs())
-
-
-@bot.autocomplete("reload", "cog")
+@reload.autocomplete("cog")
 async def reload_autocomplete(ctx: interactions.CommandContext, user_input: str = ""):
     await ctx.populate(get_available_cogs())
 

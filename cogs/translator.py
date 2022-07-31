@@ -41,8 +41,8 @@ class Translator(interactions.Extension):
         if count > 1:
             return
 
-        message = interactions.Message(** await self.client._http.get_message(message_reaction.channel_id, message_reaction.message_id), _client=self.client._http)
-        user = interactions.User(** await self.client._http.get_user(message_reaction.user_id))
+        message = await interactions.get(self.client, interactions.Message, object_id=message_reaction.message_id, parent_id=message_reaction.channel_id)
+        user = await interactions.get(self.client, interactions.User, object_id=message_reaction.user_id)
 
         if not message.content:
             return
@@ -55,7 +55,7 @@ class Translator(interactions.Extension):
             footer_text=f"Requested by @{user.username}#{user.discriminator}",
             footer_image=user.avatar_url
         )
-        await message.reply("", embeds=embed)
+        await message.reply(embeds=embed)
 
 
 def setup(client: interactions.Client):

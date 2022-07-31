@@ -10,15 +10,9 @@ class Brush(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(
-        name="brush",
-        description="Brush command, replicating the one from WorldEdit",
-        scope=server,
-        options=[
-            interactions.Option(type=interactions.OptionType.STRING, name="pattern", description="WorldEdit pattern", required=True),
-            interactions.Option(type=interactions.OptionType.INTEGER, name="size", description="Size of the brush", required=False, min_value=20, max_value=100),
-        ]
-    )
+    @interactions.extension_command(name="brush", description="Brush command, replicating the one from WorldEdit", scope=server)
+    @interactions.option("WorldEdit pattern")
+    @interactions.option("Size of the brush", min_value=20, max_value=100)
     async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
         pattern_split = pattern.split(",")
         weights, materials = [], []
@@ -26,6 +20,8 @@ class Brush(interactions.Extension):
         for pat in pattern_split:
             result = pat.split("%")
             if len(result) == 2:
+                if result[1] in materials:  # Material already added, skipping
+                    continue
                 materials.append(result[1])
                 try:
                     weights.append(int(result[0]))
@@ -34,9 +30,10 @@ class Brush(interactions.Extension):
                     return
             elif len(result) == 1:  # No weight set, cancelling weights for all blocks
                 forget_weights = True
-                materials.append(result[0])
+                if result[0] not in materials:  # Material already added, skipping
+                    materials.append(result[0])
             else:
-                await ctx.send(embeds=create_error_embed("Wrong syntax in materials!"), ephemeral=True)
+                await ctx.send(embeds=create_error_embed(f"Wrong syntax in materials detected: {result}"), ephemeral=True)
                 return
 
         if forget_weights:

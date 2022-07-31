@@ -24,12 +24,15 @@ class BuilderSync(interactions.Extension):
             "Accept": "application/json",
         }
 
-        self.guild = interactions.Guild(**await self.client._http.get_guild(server), _client=self.client._http)
+        self.guild = await interactions.get(self.client, interactions.Guild, object_id=server)
         guild_members = await self.guild.get_all_members()
-        self.guild_member_IDs.extend([int(member.id) for member in guild_members])
-        self.builder_IDs.extend([int(member.id) for member in guild_members if str(builder) in member.roles])
+        for member in guild_members:
+            self.guild_member_IDs.append(int(member.id))
+            if builder in member.roles:
+                self.builder_IDs.append(int(member.id))
 
         self.get_builders.start(self)
+        print("Synchronizing guild members finished!")
 
     @create_task(IntervalTrigger(60))
     async def get_builders(self):
@@ -63,11 +66,11 @@ class BuilderSync(interactions.Extension):
             pass
 
     @interactions.extension_listener()
-    async def on_guild_member_update(self, member: interactions.GuildMember):
+    async def on_raw_guild_member_update(self, member: interactions.GuildMember):
         if int(member.guild_id) != server:
             return
 
-        if str(builder) in member.roles:
+        if builder in member.roles:
             if int(member.id) not in self.builder_IDs:
                 self.builder_IDs.append(int(member.id))
         else:

@@ -8,15 +8,8 @@ class RandomCommands(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(
-        name="clear",
-        description="Clear x last messages",
-        scope=server,
-        options=[
-            interactions.Option(type=interactions.OptionType.INTEGER, name="number", description="Number of messages to clear")
-        ],
-        default_member_permissions=interactions.Permissions.MANAGE_CHANNELS
-    )
+    @interactions.extension_command(name="clear", description="Clear x last messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_CHANNELS)
+    @interactions.option("Number of messages to clear")
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
         channel: interactions.Channel = await ctx.get_channel()
         await channel.purge(amount=number)
@@ -42,7 +35,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_command(name="lire", description="Read the rules", scope=server)
     async def lire(self, ctx: interactions.CommandContext):
-        channel = interactions.Channel(**await self.client._http.get_channel(comment_rejoindre_channel))
+        channel = await interactions.get(self.client, interactions.Channel, object_id=comment_rejoindre_channel)
         await ctx.send(embeds=create_info_embed(
             f"As-tu bien lu le salon {channel.mention}?"
         ))
@@ -61,9 +54,9 @@ class RandomCommands(interactions.Extension):
         audit_log = await self.client._http.get_guild_auditlog(server, action_type=22, limit=5)
         for entry in audit_log["audit_log_entries"]:
             if int(entry["target_id"]) == int(guild_ban.user.id):
-                mod_user: interactions.User = interactions.User(**await self.client._http.get_user(entry["user_id"]))
+                mod_user: interactions.User = await interactions.get(self.client, interactions.User, object_id=entry["user_id"])
                 if not mod_user.bot:
-                    channel = interactions.Channel(**await self.client._http.get_channel(logs_channel), _client=self.client._http)
+                    channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
                     await channel.send(f"**{guild_ban.user.username}#{guild_ban.user.discriminator} was banned by {mod_user.username}#{mod_user.discriminator} for the following reason:**\n{entry['reason']}")
                 return
 

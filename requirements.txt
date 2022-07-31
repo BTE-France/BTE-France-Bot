@@ -2,6 +2,6 @@ mcstatus
 requests
 Pillow
 deepl
-git+https://github.com/interactions-py/library.git@4.3.0-beta.1
+discord-py-interactions==4.3.0
 git+https://github.com/Catalyst4222/interactions-tasks.git
-interactions-files
+interactions-files==1.1.1

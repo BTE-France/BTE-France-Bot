@@ -7,11 +7,7 @@ class Help(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(
-        name="help",
-        description="Display all commands for the bot",
-        scope=server
-    )
+    @interactions.extension_command(name="help", description="Display all commands for the bot", scope=server)
     async def help(self, ctx: interactions.CommandContext):
         commands: list[interactions.ApplicationCommand] = [
             interactions.ApplicationCommand(**command) for command in await self.client._http.get_application_commands(application_id=self.client.me.id, guild_id=server)
