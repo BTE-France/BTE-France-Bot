@@ -8,13 +8,22 @@ class RandomCommands(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="clear", description="Clear x last messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_CHANNELS)
+    @interactions.extension_command(name="clear", description="Clear x last messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     @interactions.option("Number of messages to clear")
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
-        channel: interactions.Channel = await ctx.get_channel()
+        channel = await ctx.get_channel()
         await channel.purge(amount=number)
         await ctx.send(embeds=create_info_embed(
             f"You have purged the last {number} messages!"
+        ), ephemeral=True)
+
+    @interactions.extension_message_command(name="Clear all messages after", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    async def clear_after(self, ctx: interactions.CommandContext):
+        channel = await ctx.get_channel()
+        messages = [interactions.Message(**res) for res in await self.client._http.get_channel_messages(channel_id=int(ctx.channel_id), limit=100, after=int(ctx.target.id))]
+        await channel.purge(amount=len(messages) + 1)
+        await ctx.send(embeds=create_info_embed(
+            f"You have purged the last {len(messages) + 1} messages!"
         ), ephemeral=True)
 
     @interactions.extension_command(name="map", description="BTE map link", scope=server)
