@@ -9,7 +9,7 @@ import os
 class BuilderSync(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
-        self.guild_member_IDs, self.builder_IDs = [], []
+        self.guild_member_IDs, self.builder_IDs = set(), set()
         self.client._loop.create_task(self.synchronize_guild_members())
 
     async def synchronize_guild_members(self):
@@ -27,9 +27,9 @@ class BuilderSync(interactions.Extension):
         self.guild = await interactions.get(self.client, interactions.Guild, object_id=server)
         guild_members = await self.guild.get_all_members()
         for member in guild_members:
-            self.guild_member_IDs.append(int(member.id))
+            self.guild_member_IDs.add(int(member.id))
             if builder in member.roles:
-                self.builder_IDs.append(int(member.id))
+                self.builder_IDs.add(int(member.id))
 
         self.get_builders.start(self)
         print("Synchronizing guild members finished!")
@@ -56,13 +56,13 @@ class BuilderSync(interactions.Extension):
     async def on_guild_member_add(self, member: interactions.GuildMember):
         if int(member.guild_id) != server:
             return
-        self.guild_member_IDs.append(int(member.id))
+        self.guild_member_IDs.add(int(member.id))
 
     @interactions.extension_listener()
     async def on_guild_member_remove(self, member: interactions.GuildMember):
         try:
             self.guild_member_IDs.remove(int(member.id))
-        except ValueError:  # Member was not registered in cache
+        except KeyError:  # Member was not registered in cache
             pass
 
     @interactions.extension_listener()
@@ -71,13 +71,15 @@ class BuilderSync(interactions.Extension):
             return
 
         if builder in member.roles:
-            if int(member.id) not in self.builder_IDs:
-                self.builder_IDs.append(int(member.id))
+            self.builder_IDs.add(int(member.id))
         else:
-            if int(member.id) in self.builder_IDs:
+            try:
                 self.builder_IDs.remove(int(member.id))
+            except KeyError:  # Member was not registered in cache
+                pass
 
     async def add_builder_role(self, member: interactions.GuildMember):
+        self.builder_IDs.add(int(member.id))
         await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
         await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
         date = datetime.now().strftime("%d/%m - %H:%M")
