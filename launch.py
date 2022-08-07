@@ -22,7 +22,7 @@ bot = interactions.Client(
             name="/help"
         )]
     ),
-    intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS
+    intents=interactions.Intents.ALL
 )
 bot.load('interactions.ext.files')
 

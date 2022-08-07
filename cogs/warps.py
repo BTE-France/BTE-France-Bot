@@ -1,7 +1,8 @@
 from utils.embed import create_embed
-from variables import server
+from variables import server, console_channel, logs_channel
 import interactions
 import random
+import re
 
 
 class Warp:
@@ -106,6 +107,24 @@ class Warps(interactions.Extension):
                 embeds=embed_list
             )
         await ctx.send("Regarde tes MPs! :mailbox:")
+
+    @interactions.extension_listener()
+    async def on_message_create(self, message: interactions.Message):
+        if message.channel_id != console_channel:
+            return
+
+        for msg in message.content.splitlines():
+            match = re.search(r"^\[[^]]+\] (\w+) issued server command: /(\w+) (\w+)$", msg)
+            if match:
+                player, command, warp = match.group(1, 2, 3)
+
+                if command not in ("setwarp", "delwarp"):
+                    continue
+
+                title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
+                embed = create_embed(title=title, footer_text=player, include_thumbnail=False)
+                channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
+                await channel.send(embeds=embed)
 
 
 def setup(client: interactions.Client):
