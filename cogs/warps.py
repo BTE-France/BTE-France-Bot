@@ -1,5 +1,5 @@
 from utils.embed import create_embed
-from variables import server, console_channel, logs_channel
+from variables import server, console_channel, schematic_warps_channel
 import interactions
 import random
 import re
@@ -123,7 +123,7 @@ class Warps(interactions.Extension):
 
                 title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
                 embed = create_embed(title=title, footer_text=player, include_thumbnail=False)
-                channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
+                channel = await interactions.get(self.client, interactions.Channel, object_id=schematic_warps_channel)
                 await channel.send(embeds=embed)
 
 
