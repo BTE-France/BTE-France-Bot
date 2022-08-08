@@ -80,6 +80,7 @@ WARPS = [
 class Warps(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
+        self.pattern = re.compile(r"^\[[^]]+\] (\w+) issued server command: /(\w+) (\w+)$")
 
     @interactions.extension_command(name="warps", description="List of the best BTE France warps", scope=server)
     async def warps(self, ctx: interactions.CommandContext):
@@ -114,7 +115,7 @@ class Warps(interactions.Extension):
             return
 
         for msg in message.content.splitlines():
-            match = re.search(r"^\[[^]]+\] (\w+) issued server command: /(\w+) (\w+)$", msg)
+            match = self.pattern.search(msg)
             if match:
                 player, command, warp = match.group(1, 2, 3)
 
