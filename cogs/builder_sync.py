@@ -60,6 +60,8 @@ class BuilderSync(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_member_remove(self, member: interactions.GuildMember):
+        if not member:
+            return
         try:
             self.guild_member_IDs.remove(int(member.id))
         except KeyError:  # Member was not registered in cache
