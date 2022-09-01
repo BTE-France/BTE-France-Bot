@@ -36,7 +36,7 @@ STAFF_USERNAMES = [
 
 # List of servers to get the status from.
 SERVERS = [
-    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: buildtheearth.net, /bt FR")
+    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: bte.thesmyler.fr")
 ]
 
 
