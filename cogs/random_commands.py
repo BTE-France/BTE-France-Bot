@@ -35,14 +35,6 @@ class RandomCommands(interactions.Extension):
             color=0x00FF00
         ))
 
-    @interactions.extension_command(name="bedrock", description="Bedrock tutorial", scope=server)
-    async def bedrock(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_embed(
-            title="Comment rejoindre BTE quand on joue sur Bedrock?",
-            description="https://docs.google.com/document/d/12QG9d_O2ZX-OH9CdC44urpfWCnSmSon4nhsSXyuuGsM/edit?usp=drivesdk",
-            color=0x0800FF
-        ))
-
     @interactions.extension_command(name="lire", description="Read the rules", scope=server)
     async def lire(self, ctx: interactions.CommandContext):
         channel = await interactions.get(self.client, interactions.Channel, object_id=comment_rejoindre_channel)
