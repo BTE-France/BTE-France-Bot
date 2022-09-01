@@ -69,8 +69,8 @@ class MCServ(interactions.Extension):
                     else:
                         players.append(escape_markdown(player))
 
-                staff.sort()
-                players.sort()
+                staff.sort(key=str.lower)
+                players.sort(key=str.lower)
 
                 len_players = len(staff) + len(players)
                 title = f"{len_players} {'Joueurs Connectés' if len_players != 1 else 'Joueur Connecté'}"
