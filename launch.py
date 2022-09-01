@@ -20,7 +20,7 @@ bot = interactions.Client(
             name="/help"
         )]
     ),
-    intents=interactions.Intents.ALL
+    intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.GUILD_MESSAGE_CONTENT
 )
 bot.load('interactions.ext.files')
 
