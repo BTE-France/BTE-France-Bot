@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from utils.embed import create_embed
 from variables import server, console_channel, schematic_warps_channel
 import interactions
@@ -5,12 +6,12 @@ import random
 import re
 
 
+@dataclass
 class Warp:
-    def __init__(self, name, warp, description, image):
-        self.name = name
-        self.warp = warp
-        self.description = description
-        self.image = image
+    name: str
+    warp: str
+    description: str
+    image: str
 
 
 WARPS = [
@@ -19,56 +20,47 @@ WARPS = [
         "defense_esplanade",
         "Quartier d'affaires de Paris connu pour ses nombreux gratte-ciels.\nBusiness district of Paris known for its numerous skyscrapers.",
         "https://imgur.com/ZOTj9dn.png"
-    ),
-    Warp(
+    ), Warp(
         "Arc de Triomphe",
         "paris:etoile",
         "Arc au coeur de Paris, situé sur l'avenue des Champs-Elysées.\nArc at the heart of Paris, situated on the Avenue des Champs-Elysées.",
         "https://imgur.com/OBemDc5.png"
-    ),
-    Warp(
+    ), Warp(
         "Ile de la Cité",
         "Ile_de_la_Cite",
         "Le berceau de la ville de Paris, construit par la team ETB.\nThe cradle of Paris, built by the ETB team.",
         "https://imgur.com/FcLGAae.png"
-    ),
-    Warp(
+    ), Warp(
         "Nantes",
         "Nantes:cathedrale",
         "Cité des Ducs de Bretagne, non loin de l'océan Atlantique.\nCity of Dukes of Brittany, not far from the Atlantic ocean.",
         "https://imgur.com/WM4frCq.png"
-    ),
-    Warp(
+    ), Warp(
         "Turenne",
         "turenne",
         "Village en Corrèze, réalisé en 48h en tant qu'évènement communautaire.\n Village in Corrèze, realized in 48h as a community event.",
         "https://imgur.com/j5qThvh.png"
-    ),
-    Warp(
+    ), Warp(
         "Le Puy-Notre-Dame",
         "lepuynotredame",
         "Petite commune dans le Maine-et-Loire.\nSmall town in the Maine-et-Loire.",
         "https://imgur.com/VFyfKzR.png"
-    ),
-    Warp(
+    ), Warp(
         "Le Mont-Saint-Michel",
         "mont-saint-michel",
         "Îlot roché situé en Normandie, une des icones de la France.\nTidal island located in Normandy, one of the icons of France.",
         "https://imgur.com/M9nsIbr.png"
-    ),
-    Warp(
+    ), Warp(
         "Turckheim",
         "Turckheim",
         "Petite commune en Alsace avec notamment beaucoup de maisons à colombages.\nSmall town in Alsace with many half-timbered houses.",
         "https://imgur.com/qsjFdo6.png"
-    ),
-    Warp(
+    ), Warp(
         "Monaco",
         "monaco",
         "Principauté située sur la côte méditéranéenne, construite par la team Build It 1:1.\nPrincipality located on the Mediterranean coast, built by the Build It 1:1 team.",
         "https://imgur.com/gA9DGCf.png"
-    ),
-    Warp(
+    ), Warp(
         "Viaduc de Millau",
         "viaduc_de_millau",
         "Le viaduc avec les pylônes les plus hauts du monde (343m).\nThe viaduct with the highest pylons in the world (343m).",
