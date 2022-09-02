@@ -49,6 +49,7 @@ class MCServ(interactions.Extension):
         self.client: interactions.Client = client
 
     @interactions.extension_command(name="mc", description="Statut du serveur Minecraft", scope=server)
+    @interactions.autodefer()
     async def mc(self, ctx: interactions.CommandContext):
         fields = []
         for _server in SERVERS:
