@@ -127,7 +127,7 @@ class Warps(interactions.Extension):
                     continue
 
                 title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
-                embed = create_embed(title=title, footer_text=player, include_thumbnail=False)
+                embed = create_embed(title=title, footer_text=player, include_thumbnail=False, color=0x00FF00 if command == "setwarp" else 0xFF0000)
                 channel = await interactions.get(self.client, interactions.Channel, object_id=schematic_warps_channel)
                 await channel.send(embeds=embed)
                 date = datetime.now().strftime("%d/%m - %H:%M")
