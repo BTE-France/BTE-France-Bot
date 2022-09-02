@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from utils.embed import create_embed
 from variables import server, console_channel, schematic_warps_channel
+from datetime import datetime
 import interactions
 import random
 import re
@@ -69,10 +70,14 @@ WARPS = [
 ]
 
 
+def remove_codeblock_markdown(string: str) -> str:
+    return string.replace("```diff", "").replace("```", "").strip()
+
+
 class Warps(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
-        self.pattern = re.compile(r"^\[[^]]+\] (\w+) issued server command: /([\w-]+) ([\w:-]+)$")
+        self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:-]+).*$")
 
     @interactions.extension_command(name="warps", description="List of the best BTE France warps", scope=server)
     async def warps(self, ctx: interactions.CommandContext):
@@ -106,11 +111,18 @@ class Warps(interactions.Extension):
         if message.channel_id != console_channel:
             return
 
-        for msg in message.content.splitlines():
+        await self.search_for_warp(remove_codeblock_markdown(message.content))
+
+    async def search_for_warp(self, message: str):
+        for msg in message.splitlines():
+            # String formatting
+            msg = msg.strip()
+            if not msg:
+                continue
+
             match = self.pattern.search(msg)
             if match:
                 player, command, warp = match.group(1, 2, 3)
-
                 if command not in ("setwarp", "delwarp"):
                     continue
 
@@ -118,6 +130,26 @@ class Warps(interactions.Extension):
                 embed = create_embed(title=title, footer_text=player, include_thumbnail=False)
                 channel = await interactions.get(self.client, interactions.Channel, object_id=schematic_warps_channel)
                 await channel.send(embeds=embed)
+                date = datetime.now().strftime("%d/%m - %H:%M")
+                print(f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
+
+    @interactions.extension_listener()
+    async def on_message_update(self, before: interactions.Message, after: interactions.Message):
+        if after.channel_id != console_channel:
+            return
+
+        if not before:
+            return
+
+        # Get difference between before & after messages
+        before_msg, after_msg = remove_codeblock_markdown(before.content), remove_codeblock_markdown(after.content)
+
+        if len(before_msg) > len(after_msg):
+            diff = before_msg.replace(after_msg, "")
+        else:
+            diff = after_msg.replace(before_msg, "")
+
+        await self.search_for_warp(diff)
 
 
 def setup(client: interactions.Client):
