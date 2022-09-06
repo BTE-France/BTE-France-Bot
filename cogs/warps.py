@@ -15,6 +15,14 @@ class Warp:
     image: str
 
 
+EDIT_BUTTON = interactions.Button(label="Editer", custom_id="warp_edit", emoji=interactions.Emoji(name="⚙️"), style=interactions.ButtonStyle.SUCCESS)
+EDIT_MODAL = interactions.Modal(
+    custom_id="warp_modal",
+    title="Edition du Warp",
+    components=[
+        interactions.TextInput(style=interactions.TextStyleType.SHORT, label="Informations complémentaires", custom_id="information", required=False),
+    ]
+)
 WARPS = [
     Warp(
         "La Défense",
@@ -129,7 +137,7 @@ class Warps(interactions.Extension):
                 title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
                 embed = create_embed(title=title, footer_text=player, include_thumbnail=False, color=0x00FF00 if command == "setwarp" else 0xFF0000)
                 channel = await interactions.get(self.client, interactions.Channel, object_id=schematic_warps_channel)
-                await channel.send(embeds=embed)
+                await channel.send(embeds=embed, components=EDIT_BUTTON)
                 date = datetime.now().strftime("%d/%m - %H:%M")
                 print(f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
 
@@ -150,6 +158,17 @@ class Warps(interactions.Extension):
             diff = after_msg.replace(before_msg, "")
 
         await self.search_for_warp(diff)
+
+    @interactions.extension_component("warp_edit")
+    async def on_edit_button(self, ctx: interactions.ComponentContext):
+        await ctx.popup(EDIT_MODAL)
+
+    @interactions.extension_modal("warp_modal")
+    async def on_modal_answer(self, ctx: interactions.CommandContext, information: str):
+        embed: interactions.Embed = ctx.message.embeds[0]
+        embed.description = f"Information: {information}" if information else ""
+        await ctx.message.edit(embeds=embed, components=ctx.message.components)
+        await ctx.send(f"Information ajoutée: `{information}`" if information else "Information supprimée.", ephemeral=True)
 
 
 def setup(client: interactions.Client):
