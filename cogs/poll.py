@@ -73,7 +73,7 @@ class Polls(interactions.Extension):
             await self.close_poll(ctx.message)
         else:
             poll.votes[voter_id] = option
-            await ctx.edit(embeds=self.create_embed(poll), components=ctx.message.components)
+            await ctx.message.edit(embeds=self.create_embed(poll), components=ctx.message.components)
             await ctx.send(embeds=create_info_embed(
                 f"Vous avez sélectionné l'option {NUMBERS[option]} `{poll.options[option]}`"
             ), ephemeral=True)
