@@ -18,8 +18,8 @@ class BanRoulette(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="banroulette", description="Ban Roulette", scope=server)
-    @interactions.option("User to summon ban roulette upon")
+    @interactions.extension_command(name="banroulette", description="Lance la Ban Roulette", scope=server)
+    @interactions.option("Utilisateur à passer à la Ban Roulette")
     async def banroulette(self, ctx: interactions.CommandContext, user: interactions.Member):
         await ctx.defer()
         numbers = ['1...', '2...', '3...']

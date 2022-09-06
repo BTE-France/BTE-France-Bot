@@ -26,8 +26,8 @@ class SocialMedia(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="social", description="Social media link", scope=server)
-    @interactions.option("Social media name", choices=[
+    @interactions.extension_command(name="social", description="Liens réseaux sociaux", scope=server)
+    @interactions.option("Nom du réseau", choices=[
         interactions.Choice(name=social.id, value=social.id)
         for social in SOCIALS
     ])

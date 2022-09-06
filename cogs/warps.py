@@ -79,7 +79,7 @@ class Warps(interactions.Extension):
         self.client: interactions.Client = client
         self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:-]+).*$")
 
-    @interactions.extension_command(name="warps", description="List of the best BTE France warps", scope=server)
+    @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France", scope=server)
     async def warps(self, ctx: interactions.CommandContext):
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)

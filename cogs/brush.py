@@ -10,9 +10,9 @@ class Brush(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="brush", description="Brush command, replicating the one from WorldEdit", scope=server)
-    @interactions.option("WorldEdit pattern")
-    @interactions.option("Size of the brush", min_value=20, max_value=100)
+    @interactions.extension_command(name="brush", description="Réplique de la commande /brush de WorldEdit", scope=server)
+    @interactions.option("Pattern WorldEdit")
+    @interactions.option("Taille du brush", min_value=20, max_value=100)
     async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
         pattern_split = pattern.split(",")
         weights, materials = [], []
@@ -26,14 +26,14 @@ class Brush(interactions.Extension):
                 try:
                     weights.append(int(result[0]))
                 except ValueError:  # Weight is not a number
-                    await ctx.send(embeds=create_error_embed(f"Wrong weight detected: {result[0]}"), ephemeral=True)
+                    await ctx.send(embeds=create_error_embed(f"Pourcentage incorrect détecté: {result[0]}"), ephemeral=True)
                     return
             elif len(result) == 1:  # No weight set, cancelling weights for all blocks
                 forget_weights = True
                 if result[0] not in materials:  # Material already added, skipping
                     materials.append(result[0])
             else:
-                await ctx.send(embeds=create_error_embed(f"Wrong syntax in materials detected: {result}"), ephemeral=True)
+                await ctx.send(embeds=create_error_embed(f"Syntaxe incorrecte dans les matériaux détectée: {result}"), ephemeral=True)
                 return
 
         if forget_weights:
@@ -70,7 +70,7 @@ class Brush(interactions.Extension):
             percentage = list(percentage)
             description = "\n".join([f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))])
             if not_found:
-                description += f"\n:question: `Unrecognized IDs: {', '.join(sorted(not_found))} ` :question:"
+                description += f"\n:question: `IDs inconnus: {', '.join(sorted(not_found))} ` :question:"
             await ctx.send(
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",

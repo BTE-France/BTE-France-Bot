@@ -8,8 +8,8 @@ class RandomCommands(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="clear", description="Clear x last messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
-    @interactions.option("Number of messages to clear")
+    @interactions.extension_command(name="clear", description="Supprimer les x derniers messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.option("Nombre de messages à supprimer")
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
         channel = await ctx.get_channel()
         await channel.purge(amount=number)
@@ -17,7 +17,7 @@ class RandomCommands(interactions.Extension):
             f"You have purged the last {number} messages!"
         ), ephemeral=True)
 
-    @interactions.extension_message_command(name="Clear all messages after", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.extension_message_command(name="Supprimer tout les messages après", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     async def clear_after(self, ctx: interactions.CommandContext):
         channel = await ctx.get_channel()
         messages = await self.client._http.get_channel_messages(channel_id=int(ctx.channel_id), limit=100, after=int(ctx.target.id))
@@ -27,7 +27,7 @@ class RandomCommands(interactions.Extension):
             f"You have purged the last {number} messages!"
         ), ephemeral=True)
 
-    @interactions.extension_command(name="map", description="BTE map link", scope=server)
+    @interactions.extension_command(name="map", description="Lien Maps BTE", scope=server)
     async def map(self, ctx: interactions.CommandContext):
         await ctx.send(embeds=create_embed(
             title="Maps de BTE",
@@ -35,7 +35,7 @@ class RandomCommands(interactions.Extension):
             color=0x00FF00
         ))
 
-    @interactions.extension_command(name="lire", description="Read the rules", scope=server)
+    @interactions.extension_command(name="lire", description="Lis les règles", scope=server)
     async def lire(self, ctx: interactions.CommandContext):
         channel = await interactions.get(self.client, interactions.Channel, object_id=comment_rejoindre_channel)
         await ctx.send(embeds=create_info_embed(
@@ -51,7 +51,7 @@ class RandomCommands(interactions.Extension):
                 mod_user: interactions.User = await interactions.get(self.client, interactions.User, object_id=entry["user_id"])
                 if not mod_user.bot:
                     channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
-                    await channel.send(f"**{guild_ban.user.username}#{guild_ban.user.discriminator} was banned by {mod_user.username}#{mod_user.discriminator} for the following reason:**\n{entry['reason']}")
+                    await channel.send(f"**{guild_ban.user.username}#{guild_ban.user.discriminator} a été banni par {mod_user.username}#{mod_user.discriminator} pour la raison suivante:**\n{entry['reason']}")
                 return
 
 
