@@ -42,14 +42,6 @@ class RandomCommands(interactions.Extension):
             f"As-tu bien lu le salon {channel.mention}?"
         ))
 
-    @interactions.extension_command(name="ip", description="IPs list", scope=server)
-    async def ip(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_embed(
-            title="IPs de BTE: France",
-            description=":arrow_right: Version Java: `buildtheearth.net`, puis `/bt FR` quand vous êtes dans le lobby\n:arrow_right: Version Bedrock: `bedrock.buildtheearth.net`, port `19132`.",
-            color=0x0800FF
-        ))
-
     @interactions.extension_listener()
     async def on_guild_ban_add(self, guild_ban: interactions.GuildBan):
         await asyncio.sleep(3)  # Leave some time for the audit log to be updated
