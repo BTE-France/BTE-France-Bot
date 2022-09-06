@@ -17,7 +17,7 @@ class RandomCommands(interactions.Extension):
             f"You have purged the last {number} messages!"
         ), ephemeral=True)
 
-    @interactions.extension_message_command(name="Supprimer tout les messages après", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.extension_message_command(name="Supprimer messages après", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     async def clear_after(self, ctx: interactions.CommandContext):
         channel = await ctx.get_channel()
         messages = await self.client._http.get_channel_messages(channel_id=int(ctx.channel_id), limit=100, after=int(ctx.target.id))
