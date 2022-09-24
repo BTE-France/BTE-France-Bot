@@ -1,21 +1,25 @@
-from utils.embed import create_embed
+from utils.embed import create_embed, create_error_embed
+from variables import server
 import interactions
 import deepl
 import os
 
-LANGUAGES = {
-    "🇫🇷": deepl.Language.FRENCH,
-    "🇩🇪": deepl.Language.GERMAN,
-    "🇬🇧": deepl.Language.ENGLISH_BRITISH,
-    "🇺🇸": deepl.Language.ENGLISH_AMERICAN,
-    "🇪🇸": deepl.Language.SPANISH,
-    "🇮🇹": deepl.Language.ITALIAN,
-    "🇯🇵": deepl.Language.JAPANESE,
-    "🇳🇱": deepl.Language.DUTCH,
-    "🇧🇷": deepl.Language.PORTUGUESE_BRAZILIAN,
-    "🇵🇹": deepl.Language.PORTUGUESE_EUROPEAN,
-    "🇷🇺": deepl.Language.RUSSIAN,
-    "🇨🇳": deepl.Language.CHINESE,
+# List of messages (to avoid same message been translated multiple times)
+MESSAGES = {deepl.Language.FRENCH: [], deepl.Language.ENGLISH_BRITISH: []}
+TEXT = {
+    deepl.Language.FRENCH: [
+        "🇫🇷 Traduction en français 🇫🇷",
+        "Demandée par",
+        "Le message a déjà été traduit!",
+        "Le message n'a pas pu être traduit!",
+        "Message original"
+    ], deepl.Language.ENGLISH_BRITISH: [
+        "🇬🇧 Translation to english 🇬🇧",
+        "Requested by",
+        "The message has already been translated!",
+        "The message could not be translated!",
+        "Original message"
+    ]
 }
 
 
@@ -27,35 +31,35 @@ class Translator(interactions.Extension):
         except KeyError:
             print("Deepl API key has not been found!")
 
-    @interactions.extension_listener()
-    async def on_message_reaction_add(self, message_reaction: interactions.MessageReaction):
-        language = LANGUAGES.get(message_reaction.emoji.name)
-        if not language:
-            return
+    @interactions.extension_message_command(name="Traduire en français", scope=server)
+    async def translate_french(self, ctx: interactions.CommandContext):
+        await self.translate(ctx, deepl.Language.FRENCH)
 
-        count = len(await self.client._http.get_reactions_of_emoji(
-            message_reaction.channel_id,
-            message_reaction.message_id,
-            message_reaction.emoji.name
-        ))
-        if count > 1:
-            return
+    @interactions.extension_message_command(name="Translate to english", scope=server)
+    async def translate_english(self, ctx: interactions.CommandContext):
+        await self.translate(ctx, deepl.Language.ENGLISH_BRITISH)
 
-        message = await interactions.get(self.client, interactions.Message, object_id=message_reaction.message_id, parent_id=message_reaction.channel_id)
-        user = await interactions.get(self.client, interactions.User, object_id=message_reaction.user_id)
+    async def translate(self, ctx: interactions.CommandContext, language: str):
+        message: interactions.Message = ctx.target
+        user: interactions.User = ctx.member.user
 
+        if int(message.id) in MESSAGES[language]:
+            return await ctx.send(embeds=create_error_embed(TEXT[language][2]), ephemeral=True)
         if not message.content:
-            return
+            return await ctx.send(embeds=create_error_embed(TEXT[language][3]), ephemeral=True)
+
+        MESSAGES[language].append(int(message.id))
         translated_text = self.translator.translate_text(message.content, target_lang=language).text
 
         embed = create_embed(
-            title=f"Translation to {message_reaction.emoji.name}",
+            title=TEXT[language][0],
             description=translated_text,
             color=0xA6A67A,
-            footer_text=f"Requested by @{user.username}#{user.discriminator}",
+            footer_text=f"{TEXT[language][1]} @{user.username}#{user.discriminator}",
             footer_image=user.avatar_url
         )
-        await message.reply(embeds=embed)
+        button = interactions.Button(style=interactions.ButtonStyle.LINK, label=TEXT[language][4], url=message.url)
+        await ctx.send(embeds=embed, components=button)
 
 
 def setup(client: interactions.Client):
