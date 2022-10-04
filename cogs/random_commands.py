@@ -57,7 +57,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_message_create(self, message: interactions.Message):
-        if not message.content:
+        if not message.content or message.author.bot:
             return
 
         words = ("quoi", "koi")
