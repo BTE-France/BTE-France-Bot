@@ -2,6 +2,7 @@ import asyncio
 from utils.embed import create_embed, create_info_embed
 from variables import server, comment_rejoindre_channel, logs_channel
 import interactions
+import string
 
 
 class RandomCommands(interactions.Extension):
@@ -53,6 +54,22 @@ class RandomCommands(interactions.Extension):
                     channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
                     await channel.send(f"**{guild_ban.user.username}#{guild_ban.user.discriminator} a été banni par {mod_user.username}#{mod_user.discriminator} pour la raison suivante:**\n{entry['reason']}")
                 return
+
+    @interactions.extension_listener()
+    async def on_message_create(self, message: interactions.Message):
+        if not message.content:
+            return
+
+        words = ("quoi", "koi")
+        text = message.content.lower()
+
+        if not any([word in text for word in words]):
+            return
+        text = text.translate(str.maketrans('', '', string.punctuation))  # Remove punctuation
+        last_word = text.split()[-1]
+
+        if last_word in words:
+            await message.reply(stickers=[interactions.Sticker(id=1026620857767956551)])
 
 
 def setup(client: interactions.Client):
