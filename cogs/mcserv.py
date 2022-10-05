@@ -1,6 +1,5 @@
 from mcstatus import JavaServer
 from utils.embed import create_embed
-from variables import server
 import interactions
 import socket
 
@@ -48,7 +47,7 @@ class MCServ(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="mc", description="Statut du serveur Minecraft", scope=server)
+    @interactions.extension_command(name="mc", description="Statut du serveur Minecraft")
     async def mc(self, ctx: interactions.CommandContext):
         await ctx.defer()
 

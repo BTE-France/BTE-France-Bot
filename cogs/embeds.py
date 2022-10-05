@@ -1,5 +1,5 @@
 from utils.embed import create_embed, create_error_embed, create_info_embed
-from variables import server, rules_channel, ip_channel, comment_rejoindre_channel, verify_channel
+from variables import rules_channel, ip_channel, comment_rejoindre_channel, verify_channel
 import interactions
 
 
@@ -7,25 +7,25 @@ class Embeds(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="embeds", description="Update the server's embeds", scope=server, default_member_permissions=interactions.Permissions.ADMINISTRATOR)
-    @interactions.option("Channel to update", channel_types=[interactions.ChannelType.GUILD_TEXT])
-    async def embeds(self, ctx: interactions.CommandContext, channel: interactions.Channel):
-        channel_id = int(channel.id)
+        self.embeds = {
+            rules_channel: self.rules_embed(),
+            ip_channel: self.ip_embed(),
+            comment_rejoindre_channel: self.comment_rejoindre_embed()
+        }
 
-        if channel_id == rules_channel:
-            embeds = self.rules_embed()
-        elif channel_id == ip_channel:
-            embeds = self.ip_embed()
-        elif channel_id == comment_rejoindre_channel:
-            embeds = self.comment_rejoindre_embed()
-        else:
-            await ctx.send(embeds=create_error_embed(f"{channel.mention} does not have a corresponding embed!"), ephemeral=True)
+    @interactions.extension_command(name="embeds", description="Mets à jour les embeds du serveur", default_member_permissions=interactions.Permissions.ADMINISTRATOR)
+    @interactions.option("Channel à mettre à jour", channel_types=[interactions.ChannelType.GUILD_TEXT])
+    async def _embeds(self, ctx: interactions.CommandContext, channel: interactions.Channel):
+        embeds = self.embeds.get(int(channel.id))
+
+        if not embeds:
+            await ctx.send(embeds=create_error_embed(f"{channel.mention} n'a pas d'embed correspondant!"), ephemeral=True)
             return
 
-        await channel.send(embeds=embeds)
-        await ctx.send(embeds=create_info_embed(f"The embed has successfully been updated in {channel.mention}"), ephemeral=True)
+        await channel.send(**embeds)
+        await ctx.send(embeds=create_info_embed(f"L'embed a bien été mis à jour dans {channel.mention}"), ephemeral=True)
 
-    def rules_embed(self) -> list[interactions.Embed]:
+    def rules_embed(self) -> dict:
         RULES_FR = {
             "Toute forme de racisme, de sexisme, d'homophobie et d'autres formes de préjugés est interdite.": "Comprend les canaux vocaux, les canaux textuels, les DMs sans exceptions.",
             "Envoyer toute pièce jointe (vidéo/image/lien) contenant du contenu érotique/sexuel ou gore est interdit": "Du NSFW mineur dans un texte, vocal, emoji ou réaction est également interdit, mais pris plus à la légère.",
@@ -90,9 +90,9 @@ class Embeds(interactions.Extension):
                 ]
             )
         ]
-        return RULES
+        return {"embeds": RULES}
 
-    def ip_embed(self) -> list[interactions.Embed]:
+    def ip_embed(self) -> dict:
         IP = [
             create_embed(
                 title="**Comment rejoindre le serveur BTE France ?**",
@@ -106,11 +106,11 @@ class Embeds(interactions.Extension):
                 ]
             )
         ]
-        return IP
+        return {"embeds": IP}
 
-    def comment_rejoindre_embed(self) -> list[interactions.Embed]:
-        ip = interactions.Channel(id=ip_channel, type=0).mention
-        verify = interactions.Channel(id=verify_channel, type=0).mention
+    def comment_rejoindre_embed(self) -> dict:
+        ip = interactions.Channel(id=ip_channel).mention
+        verify = interactions.Channel(id=verify_channel).mention
         COMMENT_REJOINDRE = [
             create_embed(
                 title=":bank: Comment rejoindre le projet? :bank:",
@@ -144,7 +144,7 @@ class Embeds(interactions.Extension):
                 description=f"Pour accéder à l'entièreté du Discord, n'oubliez pas de cliquez sur le :white_check_mark: dans {verify}.\n\n:red_square: **VERSIONS JAVA ET BEDROCK OFFICIELLES SEULEMENT** :red_square:",
             )
         ]
-        return COMMENT_REJOINDRE
+        return {"embeds": COMMENT_REJOINDRE}
 
 
 def setup(client: interactions.Client):

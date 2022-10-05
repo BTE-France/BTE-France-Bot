@@ -1,5 +1,4 @@
 from utils.embed import create_embed, create_error_embed
-from variables import server
 import interactions
 import deepl
 import os
@@ -31,11 +30,11 @@ class Translator(interactions.Extension):
         except KeyError:
             print("Deepl API key has not been found!")
 
-    @interactions.extension_message_command(name="Traduire en français", scope=server)
+    @interactions.extension_message_command(name="Traduire en français")
     async def translate_french(self, ctx: interactions.CommandContext):
         await self.translate(ctx, deepl.Language.FRENCH)
 
-    @interactions.extension_message_command(name="Translate to english", scope=server)
+    @interactions.extension_message_command(name="Translate to english")
     async def translate_english(self, ctx: interactions.CommandContext):
         await self.translate(ctx, deepl.Language.ENGLISH_BRITISH)
 

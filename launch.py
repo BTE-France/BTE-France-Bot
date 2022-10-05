@@ -1,3 +1,4 @@
+from variables import server
 import interactions
 import logging
 import os
@@ -13,6 +14,7 @@ bot = interactions.Client(
             name="/help"
         )]
     ),
+    default_scope=server,
     intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.GUILD_MESSAGE_CONTENT
 )
 

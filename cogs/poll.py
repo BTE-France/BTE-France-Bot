@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from utils.embed import create_embed, create_info_embed, create_error_embed
-from variables import server
 import interactions
 
 
@@ -29,7 +28,7 @@ class Polls(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="poll", description="Créer un sondage", scope=server)
+    @interactions.extension_command(name="poll", description="Créer un sondage")
     async def poll(self, ctx: interactions.CommandContext):
         await ctx.popup(POLL_MODAL)
 

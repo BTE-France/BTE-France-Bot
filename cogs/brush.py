@@ -1,6 +1,5 @@
 from utils.embed import create_error_embed, create_embed
 from interactions.ext.files import command_send
-from variables import server
 from PIL import Image
 import interactions
 import random
@@ -11,7 +10,7 @@ class Brush(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="brush", description="Réplique de la commande /brush de WorldEdit", scope=server)
+    @interactions.extension_command(name="brush", description="Réplique de la commande /brush de WorldEdit")
     @interactions.option("Pattern WorldEdit")
     @interactions.option("Taille du brush", min_value=20, max_value=100)
     async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):

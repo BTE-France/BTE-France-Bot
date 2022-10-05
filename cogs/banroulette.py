@@ -1,5 +1,4 @@
 from utils.embed import create_embed
-from variables import server
 import interactions
 import asyncio
 import random
@@ -18,7 +17,7 @@ class BanRoulette(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="banroulette", description="Lance la Ban Roulette", scope=server)
+    @interactions.extension_command(name="banroulette", description="Lance la Ban Roulette")
     @interactions.option("Utilisateur à passer à la Ban Roulette")
     async def banroulette(self, ctx: interactions.CommandContext, user: interactions.Member):
         await ctx.defer()

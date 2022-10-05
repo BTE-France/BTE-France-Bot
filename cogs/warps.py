@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from utils.embed import create_embed
-from variables import server, console_channel, schematic_warps_channel
+from variables import console_channel, schematic_warps_channel
 from datetime import datetime
 import interactions
 import random
@@ -87,7 +87,7 @@ class Warps(interactions.Extension):
         self.client: interactions.Client = client
         self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:-]+).*$")
 
-    @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France", scope=server)
+    @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France")
     async def warps(self, ctx: interactions.CommandContext):
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)

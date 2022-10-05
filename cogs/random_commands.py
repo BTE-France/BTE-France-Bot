@@ -9,26 +9,26 @@ class RandomCommands(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
 
-    @interactions.extension_command(name="clear", description="Supprimer les x derniers messages", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.extension_command(name="clear", description="Supprimer les x derniers messages", default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     @interactions.option("Nombre de messages à supprimer")
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
         channel = await ctx.get_channel()
         await channel.purge(amount=number)
         await ctx.send(embeds=create_info_embed(
-            f"You have purged the last {number} messages!"
+            f"Tu as supprimé les {number} dernier(s) message(s)!"
         ), ephemeral=True)
 
-    @interactions.extension_message_command(name="Supprimer messages après", scope=server, default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.extension_message_command(name="Supprimer messages après", default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     async def clear_after(self, ctx: interactions.CommandContext):
         channel = await ctx.get_channel()
         messages = await self.client._http.get_channel_messages(channel_id=int(ctx.channel_id), limit=100, after=int(ctx.target.id))
         number = len(messages) + 1
         await channel.purge(amount=number)
         await ctx.send(embeds=create_info_embed(
-            f"You have purged the last {number} messages!"
+            f"Tu as supprimé les {number} dernier(s) message(s)!"
         ), ephemeral=True)
 
-    @interactions.extension_command(name="map", description="Lien Maps BTE", scope=server)
+    @interactions.extension_command(name="map", description="Lien Maps BTE")
     async def map(self, ctx: interactions.CommandContext):
         await ctx.send(embeds=create_embed(
             title="Maps de BTE",
@@ -36,7 +36,7 @@ class RandomCommands(interactions.Extension):
             color=0x00FF00
         ))
 
-    @interactions.extension_command(name="lire", description="Lis les règles", scope=server)
+    @interactions.extension_command(name="lire", description="Lis les règles")
     async def lire(self, ctx: interactions.CommandContext):
         channel = await interactions.get(self.client, interactions.Channel, object_id=comment_rejoindre_channel)
         await ctx.send(embeds=create_info_embed(
