@@ -49,9 +49,14 @@ class MCServ(interactions.Extension):
         self.client: interactions.Client = client
 
     @interactions.extension_command(name="mc", description="Statut du serveur Minecraft", scope=server)
-    @interactions.autodefer()
     async def mc(self, ctx: interactions.CommandContext):
-        fields = []
+        await ctx.defer()
+
+        embed = create_embed(
+            title="**Statut du serveur Minecraft BTE France**",
+            description="_ _\n",
+        )
+
         for _server in SERVERS:
             ip, desc = _server
             try:
@@ -60,7 +65,7 @@ class MCServ(interactions.Extension):
             except (ConnectionRefusedError, socket.timeout):
                 embed_value = ":x: Serveur hors ligne!"
                 embed_value += "\n\n_ _" if _server == SERVERS[0] else ""
-                fields.append((desc, embed_value, False))
+                embed.add_field(name=desc, value=embed_value, inline=False)
 
             else:
                 staff, players = [], []
@@ -78,13 +83,9 @@ class MCServ(interactions.Extension):
 
                 txt = ", ".join(staff + players)
                 value = f":white_check_mark: Serveur en ligne!\n\n**{title}**\n" + txt
-                fields.append((desc, value, False))
+                embed.add_field(name=desc, value=value, inline=False)
 
-        await ctx.send(embeds=create_embed(
-            title="**Statut du serveur Minecraft BTE France**",
-            description="_ _\n",
-            fields=fields
-        ))
+        await ctx.send(embeds=embed)
 
 
 def setup(client: interactions.Client):

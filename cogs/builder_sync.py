@@ -13,6 +13,7 @@ class BuilderSync(interactions.Extension):
         self.client._loop.create_task(self.synchronize_guild_members())
 
     async def synchronize_guild_members(self):
+        await self.client.wait_until_ready()
         try:
             api_key = os.environ["BTE_API_KEY"]
         except KeyError:

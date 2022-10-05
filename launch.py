@@ -15,7 +15,6 @@ bot = interactions.Client(
     ),
     intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.GUILD_MESSAGE_CONTENT
 )
-bot.load('interactions.ext.files')
 
 # Define all cogs
 cogs = []
@@ -29,6 +28,5 @@ async def on_start():
     print("Bot is ready!")
 
 
-for cog in cogs:
-    bot.load("cogs." + cog)
+[bot.load("cogs." + cog) for cog in cogs]
 bot.start()

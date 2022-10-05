@@ -1,4 +1,5 @@
 from utils.embed import create_error_embed, create_embed
+from interactions.ext.files import command_send
 from variables import server
 from PIL import Image
 import interactions
@@ -71,7 +72,8 @@ class Brush(interactions.Extension):
             description = "\n".join([f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))])
             if not_found:
                 description += f"\n:question: `IDs inconnus: {', '.join(sorted(not_found))} ` :question:"
-            await ctx.send(
+            await command_send(
+                ctx,
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",
                     description=description,
