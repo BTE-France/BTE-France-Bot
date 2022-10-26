@@ -85,7 +85,7 @@ def remove_codeblock_markdown(string: str) -> str:
 class Warps(interactions.Extension):
     def __init__(self, client: interactions.Client):
         self.client: interactions.Client = client
-        self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:-]+).*$")
+        self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
 
     @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France")
     async def warps(self, ctx: interactions.CommandContext):
