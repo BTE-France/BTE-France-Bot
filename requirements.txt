@@ -1,5 +1,5 @@
 mcstatus
-requests
+aiohttp
 Pillow
 deepl
 discord-py-interactions==4.3.2

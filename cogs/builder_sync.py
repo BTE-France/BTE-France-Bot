@@ -2,7 +2,7 @@ from interactions.ext.tasks import IntervalTrigger, create_task
 from variables import server, builder_non_confirme, builder
 from datetime import datetime
 import interactions
-import requests
+import aiohttp
 import os
 
 
@@ -38,14 +38,14 @@ class BuilderSync(interactions.Extension):
     @create_task(IntervalTrigger(60))
     async def get_builders(self):
         try:
-            response = requests.get(
-                "https://buildtheearth.net/api/v1/members", headers=self.headers
-            ).json()
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://buildtheearth.net/api/v1/members", headers=self.headers) as response:
+                    json_response = await response.json()
         except Exception as e:
             print("Error while accessing BTE API:\n ", e)
             return
 
-        for user in response["members"]:
+        for user in json_response["members"]:
             if int(user["discordId"]) in self.builder_IDs:
                 continue
 
