@@ -2,6 +2,6 @@ mcstatus
 aiohttp
 Pillow
 deepl
-discord-py-interactions==4.3.2
+discord-py-interactions==4.3.4
 git+https://github.com/Catalyst4222/interactions-tasks.git
 git+https://github.com/interactions-py/files.git@3d3200739dfb0791884819ba0a61f65802b60ab4
