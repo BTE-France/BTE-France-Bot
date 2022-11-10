@@ -13,6 +13,10 @@ class RandomCommands(interactions.Extension):
         self.guild: interactions.Guild = await interactions.get(self.client, interactions.Guild, object_id=server)
         self.logs_channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
 
+    @interactions.extension_command(name="ping", description="Ping", default_scope=False)
+    async def ping(self, ctx: interactions.CommandContext):
+        await ctx.send(embeds=create_info_embed(f"Pong! {int(self.client.latency)}ms."), ephemeral=True)
+
     @interactions.extension_command(name="clear", description="Supprimer les x derniers messages", default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
     @interactions.option("Nombre de messages à supprimer")
     async def clear(self, ctx: interactions.CommandContext, number: int = 1):
