@@ -63,22 +63,6 @@ class RandomCommands(interactions.Extension):
                 f"**{banned_user.username}#{banned_user.discriminator} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
             ))
 
-    @interactions.extension_listener()
-    async def on_message_create(self, message: interactions.Message):
-        if not message.content or message.author.bot:
-            return
-
-        words = ("quoi", "koi")
-        text = message.content.lower()
-
-        if not any([word in text for word in words]):
-            return
-        text = text.translate(str.maketrans('', '', string.punctuation))  # Remove punctuation
-        last_word = text.split()[-1]
-
-        if last_word in words:
-            await message.reply(stickers=[interactions.Sticker(id=1026620857767956551)])
-
 
 def setup(client: interactions.Client):
     RandomCommands(client)
