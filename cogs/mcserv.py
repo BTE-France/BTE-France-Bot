@@ -9,7 +9,7 @@ STAFF_USERNAMES = [
     "*maxdrey49",
     "bahlkog",
     "l0pal",
-    "lucas_build",
+    "LuckyLukass",
     "madin0",
     "maxyolo01",
     "raphinoj",
