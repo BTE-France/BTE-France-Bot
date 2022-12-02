@@ -1,7 +1,7 @@
 from utils.embed import create_embed, create_info_embed
 from variables import server, comment_rejoindre_channel, logs_channel
 import interactions
-import string
+import asyncio
 
 
 class RandomCommands(interactions.Extension):
@@ -53,6 +53,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_ban_add(self, _):
+        await asyncio.sleep(3)  # Leave some time for the audit log to be updated
         audit_logs = await self.guild.get_latest_audit_log_action(interactions.AuditLogEvents.MEMBER_BAN_ADD)
         audit_log_entry = audit_logs.audit_log_entries[0]
         mod_user = interactions.search_iterable(audit_logs.users, lambda user: int(user.id) == int(audit_log_entry.user_id))[0]
