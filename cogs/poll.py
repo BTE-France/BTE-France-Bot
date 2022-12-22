@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
-from utils.embed import create_embed, create_info_embed, create_error_embed
+
 import interactions
+
+from utils.embed import create_embed, create_error_embed, create_info_embed
 
 
 @dataclass

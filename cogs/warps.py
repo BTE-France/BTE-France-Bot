@@ -1,10 +1,12 @@
-from dataclasses import dataclass
-from utils.embed import create_embed
-from variables import console_channel, schematic_warps_channel
-from datetime import datetime
-import interactions
 import random
 import re
+from dataclasses import dataclass
+from datetime import datetime
+
+import interactions
+
+from utils.embed import create_embed
+from variables import console_channel, schematic_warps_channel
 
 
 @dataclass

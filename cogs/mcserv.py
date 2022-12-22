@@ -1,8 +1,9 @@
-from mcstatus import JavaServer
-from utils.embed import create_embed
-import interactions
 import socket
 
+import interactions
+from mcstatus import JavaServer
+
+from utils.embed import create_embed
 
 STAFF_USERNAMES = [
     "lennah_",

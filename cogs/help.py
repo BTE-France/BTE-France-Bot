@@ -1,5 +1,6 @@
-from utils.embed import create_embed
 import interactions
+
+from utils.embed import create_embed
 
 
 class Help(interactions.Extension):

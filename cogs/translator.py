@@ -1,7 +1,9 @@
-from utils.embed import create_embed, create_error_embed
-import interactions
-import deepl
 import os
+
+import deepl
+import interactions
+
+from utils.embed import create_embed, create_error_embed
 
 # List of messages (to avoid same message been translated multiple times)
 MESSAGES = {deepl.Language.FRENCH: [], deepl.Language.ENGLISH_BRITISH: []}

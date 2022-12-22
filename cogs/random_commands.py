@@ -1,7 +1,9 @@
-from utils.embed import create_embed, create_info_embed
-from variables import server, comment_rejoindre_channel, logs_channel
-import interactions
 import asyncio
+
+import interactions
+
+from utils.embed import create_embed, create_info_embed
+from variables import comment_rejoindre_channel, logs_channel, server
 
 
 class RandomCommands(interactions.Extension):

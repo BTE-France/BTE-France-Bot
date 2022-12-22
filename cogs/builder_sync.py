@@ -1,9 +1,11 @@
-from interactions.ext.tasks import IntervalTrigger, create_task
-from variables import server, builder_non_confirme, builder
-from datetime import datetime
-import interactions
-import aiohttp
 import os
+from datetime import datetime
+
+import aiohttp
+import interactions
+from interactions.ext.tasks import IntervalTrigger, create_task
+
+from variables import builder, builder_non_confirme, server
 
 
 class BuilderSync(interactions.Extension):

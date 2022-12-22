@@ -1,6 +1,8 @@
-from utils.embed import create_embed, create_error_embed, create_info_embed
-from variables import rules_channel, ip_channel, comment_rejoindre_channel, verify_channel
 import interactions
+
+from utils.embed import create_embed, create_error_embed, create_info_embed
+from variables import (comment_rejoindre_channel, ip_channel, rules_channel,
+                       verify_channel)
 
 
 class Embeds(interactions.Extension):

@@ -1,7 +1,9 @@
-from variables import server
-import interactions
 import logging
 import os
+
+import interactions
+
+from variables import server
 
 logging.basicConfig(format='[%(levelname)s] %(message)s')
 

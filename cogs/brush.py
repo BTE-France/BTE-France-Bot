@@ -1,9 +1,11 @@
-from utils.embed import create_error_embed, create_embed
+import io
+import random
+
+import interactions
 from interactions.ext.files import command_send
 from PIL import Image
-import interactions
-import random
-import io
+
+from utils.embed import create_embed, create_error_embed
 
 
 class Brush(interactions.Extension):
