@@ -3,7 +3,7 @@ import os
 
 import interactions
 
-from variables import server
+import variables
 
 logging.basicConfig(format='[%(levelname)s] %(message)s')
 
@@ -16,7 +16,7 @@ bot = interactions.Client(
             name="/help"
         )]
     ),
-    default_scope=server,
+    default_scope=variables.SERVER,
     intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.GUILD_MESSAGE_CONTENT
 )
 

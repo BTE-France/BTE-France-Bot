@@ -5,12 +5,11 @@ import aiohttp
 import interactions
 from interactions.ext.tasks import IntervalTrigger, create_task
 
-from variables import builder, builder_non_confirme, server
+import variables
 
 
 class BuilderSync(interactions.Extension):
     def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
         self.guild_member_IDs, self.builder_IDs = set(), set()
 
     @interactions.extension_listener()
@@ -26,11 +25,11 @@ class BuilderSync(interactions.Extension):
             "Accept": "application/json",
         }
 
-        self.guild = await interactions.get(self.client, interactions.Guild, object_id=server)
+        self.guild = await interactions.get(self.client, interactions.Guild, object_id=variables.SERVER)
         guild_members = await self.guild.get_all_members()
         for member in guild_members:
             self.guild_member_IDs.add(int(member.id))
-            if builder in member.roles:
+            if variables.Roles.BUILDER in member.roles:
                 self.builder_IDs.add(int(member.id))
 
         self.get_builders.start(self)
@@ -56,7 +55,7 @@ class BuilderSync(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_guild_member_add(self, member: interactions.GuildMember):
-        if int(member.guild_id) != server:
+        if int(member.guild_id) != variables.SERVER:
             return
         self.guild_member_IDs.add(int(member.id))
 
@@ -71,10 +70,10 @@ class BuilderSync(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_raw_guild_member_update(self, member: interactions.GuildMember):
-        if int(member.guild_id) != server:
+        if int(member.guild_id) != variables.SERVER:
             return
 
-        if builder in member.roles:
+        if variables.Roles.BUILDER in member.roles:
             self.builder_IDs.add(int(member.id))
         else:
             try:
@@ -84,8 +83,8 @@ class BuilderSync(interactions.Extension):
 
     async def add_builder_role(self, member: interactions.GuildMember):
         self.builder_IDs.add(int(member.id))
-        await member.add_role(role=builder, guild_id=server, reason="Automatically added as a Builder!")
-        await member.remove_role(role=builder_non_confirme, guild_id=server, reason="Automatically added as a Builder!")
+        await member.add_role(role=variables.Roles.BUILDER, guild_id=variables.SERVER, reason="Automatically added as a Builder!")
+        await member.remove_role(role=variables.Roles.BUILDER_NON_CONFIRME, guild_id=variables.SERVER)
         date = datetime.now().strftime("%d/%m - %H:%M")
         print(f"[{date}] Added {member.user.username}#{member.user.discriminator} as a Builder!")
 

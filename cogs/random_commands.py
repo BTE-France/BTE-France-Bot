@@ -2,18 +2,15 @@ import asyncio
 
 import interactions
 
+import variables
 from utils.embed import create_embed, create_info_embed
-from variables import comment_rejoindre_channel, logs_channel, server
 
 
 class RandomCommands(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_listener()
     async def on_start(self):
-        self.guild: interactions.Guild = await interactions.get(self.client, interactions.Guild, object_id=server)
-        self.logs_channel = await interactions.get(self.client, interactions.Channel, object_id=logs_channel)
+        self.guild: interactions.Guild = await interactions.get(self.client, interactions.Guild, object_id=variables.SERVER)
+        self.logs_channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.LOGS)
 
     @interactions.extension_command(name="ping", description="Ping", default_scope=False)
     async def ping(self, ctx: interactions.CommandContext):
@@ -48,7 +45,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.extension_command(name="lire", description="Lis les règles")
     async def lire(self, ctx: interactions.CommandContext):
-        channel = await interactions.get(self.client, interactions.Channel, object_id=comment_rejoindre_channel)
+        channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.COMMENT_REJOINDRE)
         await ctx.send(embeds=create_info_embed(
             f"As-tu bien lu le salon {channel.mention}?"
         ))

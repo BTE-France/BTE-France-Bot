@@ -2,9 +2,6 @@ import interactions
 
 
 class Images(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_command(name="ban", description="Image Ban")
     async def ban(self, ctx: interactions.CommandContext):
         await ctx.send("https://i.imgur.com/RGfJXmZ.png")

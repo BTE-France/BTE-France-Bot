@@ -4,9 +4,6 @@ from utils.embed import create_embed
 
 
 class Help(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_command(name="help", description="Montre toutes les commandes du bot")
     async def help(self, ctx: interactions.CommandContext):
         embed = create_embed(

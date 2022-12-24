@@ -9,9 +9,6 @@ from utils.embed import create_embed, create_error_embed
 
 
 class Brush(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_command(name="brush", description="Réplique de la commande /brush de WorldEdit")
     @interactions.option("Pattern WorldEdit")
     @interactions.option("Taille du brush", min_value=20, max_value=100)

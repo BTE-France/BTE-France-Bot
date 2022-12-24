@@ -25,12 +25,12 @@ TEXT = {
 
 
 class Translator(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
+    @interactions.extension_listener()
+    async def on_start(self):
         try:
             self.translator = deepl.Translator(os.environ["DEEPL_TOKEN"])
         except KeyError:
-            print("Deepl API key has not been found!")
+            print("Deepl API key has not been found, cannot translate messages!")
 
     @interactions.extension_message_command(name="Traduire en français")
     async def translate_french(self, ctx: interactions.CommandContext):
@@ -41,6 +41,9 @@ class Translator(interactions.Extension):
         await self.translate(ctx, deepl.Language.ENGLISH_BRITISH)
 
     async def translate(self, ctx: interactions.CommandContext, language: str):
+        if not hasattr(self, "translator"):
+            return
+
         message: interactions.Message = ctx.target
         user: interactions.User = ctx.member.user
 

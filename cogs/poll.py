@@ -27,9 +27,6 @@ POLL_MODAL = interactions.Modal(
 
 
 class Polls(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_command(name="poll", description="Créer un sondage")
     async def poll(self, ctx: interactions.CommandContext):
         await ctx.popup(POLL_MODAL)

@@ -5,8 +5,8 @@ from datetime import datetime
 
 import interactions
 
+import variables
 from utils.embed import create_embed
-from variables import console_channel, schematic_warps_channel
 
 
 @dataclass
@@ -17,6 +17,7 @@ class Warp:
     image: str
 
 
+PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
 EDIT_BUTTON = interactions.Button(label="Editer", custom_id="warp_edit", emoji=interactions.Emoji(name="⚙️"), style=interactions.ButtonStyle.SUCCESS)
 EDIT_MODAL = interactions.Modal(
     custom_id="warp_modal",
@@ -85,10 +86,6 @@ def remove_codeblock_markdown(string: str) -> str:
 
 
 class Warps(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-        self.pattern = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
-
     @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France")
     async def warps(self, ctx: interactions.CommandContext):
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
@@ -118,7 +115,7 @@ class Warps(interactions.Extension):
 
     @interactions.extension_listener()
     async def on_message_create(self, message: interactions.Message):
-        if message.channel_id != console_channel:
+        if message.channel_id != variables.Channels.CONSOLE:
             return
 
         await self.search_for_warp(remove_codeblock_markdown(message.content))
@@ -130,7 +127,7 @@ class Warps(interactions.Extension):
             if not msg:
                 continue
 
-            match = self.pattern.search(msg)
+            match = PATTERN.search(msg)
             if match:
                 player, command, warp = match.group(1, 2, 3)
                 if command not in ("setwarp", "delwarp"):
@@ -138,14 +135,14 @@ class Warps(interactions.Extension):
 
                 title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
                 embed = create_embed(title=title, footer_text=player, include_thumbnail=False, color=0x00FF00 if command == "setwarp" else 0xFF0000)
-                channel = await interactions.get(self.client, interactions.Channel, object_id=schematic_warps_channel)
+                channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.SCHEMATIC_WARPS)
                 await channel.send(embeds=embed, components=EDIT_BUTTON)
                 date = datetime.now().strftime("%d/%m - %H:%M")
                 print(f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
 
     @interactions.extension_listener()
     async def on_message_update(self, before: interactions.Message, after: interactions.Message):
-        if after.channel_id != console_channel:
+        if after.channel_id != variables.Channels.CONSOLE:
             return
 
         if not before:

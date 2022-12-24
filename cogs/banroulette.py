@@ -15,9 +15,6 @@ BAHLKOG = 530124389359026206
 
 
 class BanRoulette(interactions.Extension):
-    def __init__(self, client: interactions.Client):
-        self.client: interactions.Client = client
-
     @interactions.extension_command(name="banroulette", description="Lance la Ban Roulette")
     @interactions.option("Utilisateur à passer à la Ban Roulette")
     async def banroulette(self, ctx: interactions.CommandContext, user: interactions.Member):

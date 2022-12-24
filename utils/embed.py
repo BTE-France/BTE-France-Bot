@@ -24,9 +24,9 @@ def create_embed(
     if video:
         embed.set_video(url=video)
     if include_thumbnail:
-        embed.set_thumbnail(url=variables.bte_france_icon)
+        embed.set_thumbnail(url=variables.BTE_FRANCE_ICON)
     if footer_text:
-        embed.set_footer(text=footer_text, icon_url=footer_image if footer_image else variables.bte_france_icon)
+        embed.set_footer(text=footer_text, icon_url=footer_image if footer_image else variables.BTE_FRANCE_ICON)
     for field in fields:
         embed.add_field(name=field[0], value=field[1], inline=field[2])
     return embed
