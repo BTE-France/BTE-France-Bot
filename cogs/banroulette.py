@@ -21,7 +21,8 @@ class BanRoulette(interactions.Extension):
         await ctx.defer()
         numbers = ['1...', '2...', '3...']
         embed: interactions.Embed = create_embed(
-            title="Ban Roulette"
+            title="Ban Roulette",
+            include_thumbnail=True
         )
         message: interactions.Message = await ctx.send(embeds=embed)
         await asyncio.sleep(0.5)

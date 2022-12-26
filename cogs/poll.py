@@ -102,8 +102,7 @@ class Polls(interactions.Extension):
         ) for i, choice in enumerate(poll.options)]
         embed: interactions.Embed = create_embed(
             title=poll.title,
-            fields=fields,
-            include_thumbnail=False
+            fields=fields
         )
 
         return embed

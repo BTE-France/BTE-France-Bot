@@ -36,7 +36,7 @@ STAFF_USERNAMES = [
 
 # List of servers to get the status from.
 SERVERS = [
-    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: bte.thesmyler.fr")
+    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")
 ]
 
 
@@ -52,6 +52,7 @@ class MCServ(interactions.Extension):
         embed = create_embed(
             title="**Statut du serveur Minecraft BTE France**",
             description="_ _\n",
+            include_thumbnail=True
         )
 
         for _server in SERVERS:

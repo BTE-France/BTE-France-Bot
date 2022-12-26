@@ -75,7 +75,8 @@ class Brush(interactions.Extension):
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",
                     description=description,
-                    image="attachment://BTEFranceBrush.png"
+                    image="attachment://BTEFranceBrush.png",
+                    include_thumbnail=True
                 ),
                 files=file,
             )

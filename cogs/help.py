@@ -9,7 +9,8 @@ class Help(interactions.Extension):
         embed = create_embed(
             title="Help!",
             color=0xFF0000,
-            footer_text="Contacte @mAxYoLo01#4491 si tu trouves des bugs / suggestions!"
+            footer_text="Contacte @mAxYoLo01#4491 si tu trouves des bugs / suggestions!",
+            include_thumbnail=True
         )
         for command in self.client._commands:
             if command.type == interactions.ApplicationCommandType.CHAT_INPUT:

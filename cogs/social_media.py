@@ -35,6 +35,7 @@ class SocialMedia(interactions.Extension):
                 await ctx.send(embeds=create_embed(
                     title=f"{social.name} de BTE: France",
                     description=social.link,
+                    include_thumbnail=True
                 ))
                 return
 

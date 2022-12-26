@@ -10,7 +10,7 @@ def create_embed(
     color: int = 0x0000FF,
     footer_text: str = None,
     footer_image: str = None,
-    include_thumbnail: bool = True,
+    include_thumbnail: bool = False,
     image: str = None,
     video: str = None
 ) -> interactions.Embed:
@@ -35,14 +35,12 @@ def create_embed(
 def create_error_embed(text: str) -> interactions.Embed:
     return create_embed(
         description=text,
-        color=0xFF0000,
-        include_thumbnail=False
+        color=0xFF0000
     )
 
 
 def create_info_embed(text: str) -> interactions.Embed:
     return create_embed(
         description=text,
-        color=0x787774,
-        include_thumbnail=False
+        color=0x787774
     )

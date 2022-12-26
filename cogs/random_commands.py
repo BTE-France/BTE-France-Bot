@@ -44,7 +44,8 @@ class RandomCommands(interactions.Extension):
 
             [**Carte des projets**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)
             _Carte de progression qui permet de recenser toutes les constructions sur le serveur._""",
-            color=0x00FF00
+            color=0x00FF00,
+            include_thumbnail=True
         ))
 
     @interactions.extension_command(name="lire", description="Lis les règles")
