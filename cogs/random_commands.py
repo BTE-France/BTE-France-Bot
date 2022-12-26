@@ -39,15 +39,18 @@ class RandomCommands(interactions.Extension):
     async def map(self, ctx: interactions.CommandContext):
         await ctx.send(embeds=create_embed(
             title="Maps de BTE",
-            description="[**Map internationale**](https://buildtheearth.net/map)\n\n[**Map française**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)",
+            description="""[**Carte Dynmap**](https://map.btefrance.fr/)
+            _Carte qui permet de voir les constructions les plus notables du serveur, avec une vue satellite._
+
+            [**Carte des projets**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)
+            _Carte de progression qui permet de recenser toutes les constructions sur le serveur._""",
             color=0x00FF00
         ))
 
     @interactions.extension_command(name="lire", description="Lis les règles")
     async def lire(self, ctx: interactions.CommandContext):
-        channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.COMMENT_REJOINDRE)
         await ctx.send(embeds=create_info_embed(
-            f"As-tu bien lu le salon {channel.mention}?"
+            f"As-tu bien lu le salon <#{variables.Channels.COMMENT_REJOINDRE}>?"
         ))
 
     @interactions.extension_listener()
