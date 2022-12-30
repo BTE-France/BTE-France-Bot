@@ -158,9 +158,17 @@ class Webhooks(interactions.Extension):
         if not webhook_list:
             return await ctx.send(embeds=create_error_embed(f"Le Webhook appelé {title} n'existe pas!"), ephemeral=True)
 
-        webhook = await interactions.Webhook.create(self.client._http, ctx.channel_id, ctx.guild.name, self.icon_image)
+        channel = await ctx.get_channel()
+        if channel.thread_metadata:
+            channel_id = int(channel.parent_id)
+            thread_id = int(ctx.channel_id)
+        else:
+            channel_id = int(ctx.channel_id)
+            thread_id = None
+
+        webhook = await interactions.Webhook.create(self.client._http, channel_id, ctx.guild.name, self.icon_image)
         for webhook_dict in webhook_list:
-            await webhook.execute(**webhook_dict)
+            await webhook.execute(**webhook_dict, thread_id=thread_id)
         await webhook.delete()
 
         await ctx.send(embeds=create_info_embed(f"Le Webhook appelé {title} a bien été envoyé"), ephemeral=True)
