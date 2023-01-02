@@ -95,7 +95,7 @@ WEBHOOKS = {
         {"embeds": [
             create_embed(
                 title="🏦 Comment rejoindre le projet? 🏦",
-                description="""➡️ Il faut que vous ayez lancé au moins une fois la version 1.12 de Minecraft.
+                description="""➡️ Il faut que vous ayez lancé au moins une fois la version 1.12.2 de Minecraft.
 
                 ➡️ Puis, il vous faudra télécharger le modpack avec les liens ci-dessous:
                 - [Windows](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-windows.zip)
