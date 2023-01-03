@@ -223,19 +223,19 @@ class Webhooks(interactions.Extension):
     async def on_verify_french(self, ctx: interactions.ComponentContext):
         if variables.Roles.FRANCAIS in ctx.author.roles:
             await self.guild.remove_member_role(variables.Roles.FRANCAIS, ctx.author)
-            await ctx.send("Vous n'avez plus le rôle Français.", ephemeral=True)
+            await ctx.send(create_info_embed("Vous n'avez plus le rôle Français."), ephemeral=True)
         else:
             await self.guild.add_member_role(variables.Roles.FRANCAIS, ctx.author)
-            await ctx.send("Vous avez reçu le rôle Français. Bienvenue sur le serveur!", ephemeral=True)
+            await ctx.send(create_info_embed("Vous avez reçu le rôle Français. Bienvenue sur le serveur!"), ephemeral=True)
 
     @interactions.extension_component("verify_english")
     async def on_verify_english(self, ctx: interactions.ComponentContext):
         if variables.Roles.ENGLISH in ctx.author.roles:
             await self.guild.remove_member_role(variables.Roles.ENGLISH, ctx.author)
-            await ctx.send("You lost the English role.", ephemeral=True)
+            await ctx.send(create_info_embed("You lost the English role."), ephemeral=True)
         else:
             await self.guild.add_member_role(variables.Roles.ENGLISH, ctx.author)
-            await ctx.send("You received the English role. Welcome on the server!", ephemeral=True)
+            await ctx.send(create_info_embed("You received the English role. Welcome on the server!"), ephemeral=True)
 
 
 def setup(client: interactions.Client):
