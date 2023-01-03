@@ -103,7 +103,7 @@ WEBHOOKS = {
                 - [MacOS](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-mac.dmg)
                 - [Universal](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-universal.jar)
 
-                Tout est automatique, dézippez le fichier, ouvrez-le et cliquez sur **Install**, vous trouverez dans votre launcher Minecraft un nouveau profil BTE **(⚠️ fermez votre Launcher pendant l'installation)**""",
+                Tout est automatique, dézippez le fichier, ouvrez-le et cliquez sur **Install**, vous trouverez dans votre launcher Minecraft un nouveau profil BTE **(⚠️ fermez votre launcher pendant l'installation)**""",
             ),
             create_embed(
                 title="⚙️ Quelle est l'IP? ⚙️",
@@ -128,11 +128,57 @@ WEBHOOKS = {
                 ➡️ `/visite` pour nos plus belles constructions
                 ➡️ `/warps` pour tout voir
                 Utiliser `/tpll` ⤵️""",
-                image="https://s10.gifyu.com/images/TPLL_Help.gif"
+                image="https://cdn.discordapp.com/attachments/347310057853026305/1059752300542967828/TPLL_Help.gif"
             ),
             create_embed(
                 title="‼️ Il est impératif de lire ce salon avant de poser une question, merci ‼️",
                 description=f"Pour accéder à l'entièreté du Discord, n'oubliez pas de sélectionner votre langue dans <#{variables.Channels.ACCUEIL}>.",
+                color=0xFF0000
+            )
+        ]}
+    ],
+    "How to join?": [
+        {"embeds": [
+            create_embed(
+                title="🏦 How to join the project? 🏦",
+                description="""➡️ You need to have launched at least once the 1.12.2 version of Minecraft.
+
+                ➡️ Then, you will need to download the modpack using the links below:
+                - [Windows](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-windows.zip)
+                - [Linux](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-linux.AppImage)
+                - [MacOS](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-mac.dmg)
+                - [Universal](https://s3.buildtheearth.net/public/installer/latest/BTEInstaller-universal.jar)
+
+                Everything is automated, just unzip the file, open it and click on **Install**, you will then find a new BTE profile in your Minecraft launcher **(⚠️ close your launcher during the installation)**""",
+            ),
+            create_embed(
+                title="⚙️ What is the IP? ⚙️",
+                description=f"➡️ You will find the IP in <#{variables.Channels.IP}> once you have certified you read all the channels.",
+            ),
+            create_embed(
+                title="⛏️ How does the server work? ⛏️",
+                description="""➡️ Accessible to visitors.
+                ➡️ To start building, ask for the `Beginner` role **on the Minecraft server to a member of the staff team.**
+                ➡️ To become an official builder (not mandatory), follow [**this document**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)"""
+            ),
+            create_embed(
+                title="👍 How to get started? 👍",
+                description="""➡️ Get the modpack (the links are just above)
+                ➡️ Find your way using Terramap, press the M key in-game
+                ➡️ Use Google Earth Pro to measure 3D buildings
+                ➡️ Visit the server to see how each builder built their buildings. (`/visite` or `/warps` in-game)""",
+            ),
+            create_embed(
+                title="📍 How to teleport? 📍",
+                description="""➡️ `/tpll [coordinates]` (builders only)
+                ➡️ `/visite` for our best builds
+                ➡️ `/warps` to see everything
+                Using `/tpll` ⤵️""",
+                image="https://cdn.discordapp.com/attachments/347310057853026305/1059752300542967828/TPLL_Help.gif"
+            ),
+            create_embed(
+                title="‼️ It is imperative to read this channel before asking a question, thank you ‼️",
+                description=f"To access the entire Discord, don't forget to select your language in <#{variables.Channels.ACCUEIL}>.",
                 color=0xFF0000
             )
         ]}
