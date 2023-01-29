@@ -123,6 +123,11 @@ WEBHOOKS = {
                 ➡️ Visiter le serveur pour voir comment chaque builder a construit son bâtiment. (`/visite` ou `/warps` sur le serveur)""",
             ),
             create_embed(
+                title="🆙 Quels sont les grades disponibles sur le serveur? 🆙",
+                description="""➡️ Il y a plusieurs grades disponibles sur le serveur à obtenir en montrant les avancées de vos constructions.
+                ➡️ Pour plus d'infos sur tous les grades, [**cliquez-ici**](https://www.btefrance.fr/fr/rules/).""",
+            ),
+            create_embed(
                 title="📍 Comment se téléporter? 📍",
                 description="""➡️ `/tpll [coordonnées]` (réservé aux builders)
                 ➡️ `/visite` pour nos plus belles constructions
@@ -167,6 +172,11 @@ WEBHOOKS = {
                 ➡️ Find your way using Terramap, press the M key in-game
                 ➡️ Use Google Earth Pro to measure 3D buildings
                 ➡️ Visit the server to see how each builder built their buildings. (`/visite` or `/warps` in-game)""",
+            ),
+            create_embed(
+                title="🆙 What are the available ranks on the server? 🆙",
+                description="""➡️ There are many available grades on the server that can be obtained by showing the progress of your constructions.
+                ➡️ For more information on all the grades, [**click here**](https://www.btefrance.fr/en/rules/).""",
             ),
             create_embed(
                 title="📍 How to teleport? 📍",
