@@ -54,6 +54,12 @@ class RandomCommands(interactions.Extension):
             f"As-tu bien lu le salon <#{variables.Channels.COMMENT_REJOINDRE}>?"
         ))
 
+    @interactions.extension_command(name="builder", description="Instructions pour devenir Builder")
+    async def builder(self, ctx: interactions.CommandContext):
+        await ctx.send(embeds=create_info_embed(
+            "Tu veux savoir comment devenir builder officiel? [**C'est par ici!**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)"
+        ))
+
     @interactions.extension_listener()
     async def on_guild_ban_add(self, _):
         await asyncio.sleep(3)  # Leave some time for the audit log to be updated
