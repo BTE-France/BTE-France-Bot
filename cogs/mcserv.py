@@ -42,8 +42,9 @@ def escape_markdown(string: str) -> str:
 
 
 class MCServ(interactions.Extension):
-    @interactions.extension_command(name="mc", description="Statut du serveur Minecraft")
-    async def mc(self, ctx: interactions.CommandContext):
+    @interactions.slash_command(name="mc")
+    async def mc(self, ctx: interactions.SlashContext):
+        "Statut du serveur Minecraft"
         await ctx.defer()
 
         embed = create_embed(
@@ -81,7 +82,3 @@ class MCServ(interactions.Extension):
                 embed.add_field(name=desc, value=value, inline=False)
 
         await ctx.send(embeds=embed)
-
-
-def setup(client: interactions.Client):
-    MCServ(client)

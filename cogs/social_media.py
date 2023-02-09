@@ -24,12 +24,12 @@ SOCIALS = [
 
 
 class SocialMedia(interactions.Extension):
-    @interactions.extension_command(name="social", description="Liens réseaux sociaux")
-    @interactions.option("Nom du réseau", choices=[
-        interactions.Choice(name=social.id, value=social.id)
-        for social in SOCIALS
-    ])
-    async def social(self, ctx: interactions.CommandContext, media: str):
+    @interactions.slash_command(name="social")
+    @interactions.slash_option("media", "Nom du réseau", choices=[
+        interactions.SlashCommandChoice(name=social.id, value=social.id) for social in SOCIALS
+    ], opt_type=interactions.OptionType.STRING, required=True)
+    async def social(self, ctx: interactions.SlashContext, media: str):
+        "Liens réseaux sociaux"
         for social in SOCIALS:
             if social.id == media:
                 await ctx.send(embeds=create_embed(
@@ -38,7 +38,3 @@ class SocialMedia(interactions.Extension):
                     include_thumbnail=True
                 ))
                 return
-
-
-def setup(client: interactions.Client):
-    SocialMedia(client)
