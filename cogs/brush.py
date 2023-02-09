@@ -2,17 +2,17 @@ import io
 import random
 
 import interactions
-from interactions.ext.files import command_send
 from PIL import Image
 
 from utils.embed import create_embed, create_error_embed
 
 
 class Brush(interactions.Extension):
-    @interactions.extension_command(name="brush", description="Réplique de la commande /brush de WorldEdit")
-    @interactions.option("Pattern WorldEdit")
-    @interactions.option("Taille du brush", min_value=20, max_value=100)
-    async def brush(self, ctx: interactions.CommandContext, pattern: str, size: int = 20):
+    @interactions.slash_command(name="brush")
+    @interactions.slash_option(name="pattern", description="Pattern WorldEdit", opt_type=interactions.OptionType.STRING, required=True)
+    @interactions.slash_option(name="size", description="Taille du brush", opt_type=interactions.OptionType.INTEGER, min_value=20, max_value=100)
+    async def brush(self, ctx: interactions.SlashContext, pattern: str, size: int = 20):
+        "Réplique de la commande /brush de WorldEdit"
         pattern_split = pattern.split(",")
         weights, materials = [], []
         forget_weights = False
@@ -65,34 +65,29 @@ class Brush(interactions.Extension):
         with io.BytesIO() as binary_image:
             final_image.save(binary_image, 'PNG')
             binary_image.seek(0)
-            file = interactions.File(filename="BTEFranceBrush.png", fp=binary_image)
+            file = interactions.File(file=binary_image, file_name="BTEFranceBrush.png")
             percentage = list(percentage)
             description = "\n".join([f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))])
             if not_found:
                 description += f"\n:question: `IDs inconnus: {', '.join(sorted(not_found))} ` :question:"
-            await command_send(
-                ctx,
+            await ctx.send(
                 embeds=create_embed(
                     title=f"Pattern: {pattern}",
                     description=description,
                     image="attachment://BTEFranceBrush.png",
                     include_thumbnail=True
                 ),
-                files=file,
+                file=file,
             )
 
     def get_emoji(self, block_raw):
-        for block_id, block_aliases in blocks.items():
+        for block_id, block_aliases in BLOCKS.items():
             if block_id == block_raw or block_raw in block_aliases:
                 return block_id
         return None
 
 
-def setup(client: interactions.Client):
-    Brush(client)
-
-
-blocks = {
+BLOCKS = {
     "beacon": ["138"],
     "bedrock": ["7"],
     "bone_block": ["216"],
