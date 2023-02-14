@@ -17,53 +17,49 @@ POLLS: dict[int, Poll] = {}
 NUMBERS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
 END_POLL_EMOJI = "🔴"
 POLL_MODAL = interactions.Modal(
-    custom_id="modal_poll",
+    interactions.InputText(style=interactions.TextStyles.SHORT, label="Titre du sondage", custom_id="title"),
+    interactions.InputText(style=interactions.TextStyles.PARAGRAPH, label="Options du sondage (min: 2, max: 10)", custom_id="options", placeholder="Une option par ligne"),
     title="Création d'un sondage",
-    components=[
-        interactions.TextInput(style=interactions.TextStyleType.SHORT, label="Titre du sondage", custom_id="title"),
-        interactions.TextInput(style=interactions.TextStyleType.PARAGRAPH, label="Options du sondage (min: 2, max: 10)", custom_id="options", placeholder="Une option par ligne")
-    ]
+    custom_id="modal_poll"
 )
 
 
 class Polls(interactions.Extension):
-    @interactions.extension_command(name="poll", description="Créer un sondage")
-    async def poll(self, ctx: interactions.CommandContext):
-        await ctx.popup(POLL_MODAL)
+    @interactions.slash_command(name="poll")
+    async def poll(self, ctx: interactions.SlashContext):
+        "Créer un sondage"
+        await ctx.send_modal(POLL_MODAL)
 
-    @interactions.extension_modal("modal_poll")
-    async def on_modal_answer(self, ctx: interactions.CommandContext, title: str, options: str):
-        _options = [option.strip() for option in options.split('\n') if option.strip()]  # Remove empty options
-        num = len(_options)
+        modal_ctx = await self.bot.wait_for_modal(POLL_MODAL)
+        title = modal_ctx.responses["title"]
+        options = [option.strip() for option in modal_ctx.responses["options"].split('\n') if option.strip()]  # Remove empty options
+        num = len(options)
 
         if num > len(NUMBERS):
-            await ctx.send(embeds=create_error_embed(
+            await modal_ctx.send(embeds=create_error_embed(
                 f"Le sondage a trop d'options ({num}, maximum: {len(NUMBERS)})."
             ), ephemeral=True)
         elif num < 2:
-            await ctx.send(embeds=create_error_embed(
+            await modal_ctx.send(embeds=create_error_embed(
                 f"Le sondage n'a pas assez d'options ({num}, minimum: 2)."
             ), ephemeral=True)
         else:
-            poll = Poll(title=title, options=_options, owner_id=int(ctx.author.id))
-            message = await ctx.send("_Chargement..._")
+            poll = Poll(title=title, options=options, owner_id=int(modal_ctx.author.id))
+            message = await modal_ctx.send("_Chargement..._")
             POLLS[int(message.id)] = poll
-            menu = interactions.SelectMenu(
+            menu = interactions.StringSelectMenu(
+                    *[interactions.StringSelectOption(label=choice, value=str(i), emoji=NUMBERS[i]) for i, choice in enumerate(poll.options)],
                     custom_id="select_poll",
-                    options=[interactions.SelectOption(
-                        label=choice, value=str(i),
-                        emoji=interactions.Emoji(name=NUMBERS[i])
-                    ) for i, choice in enumerate(poll.options)],
                     placeholder=poll.title
                 )
-            await message.edit("", embeds=self.create_embed(poll), components=menu)
-            await ctx.send(embeds=create_info_embed(
+            await message.edit(content="", embeds=self.create_embed(poll), components=menu)
+            await modal_ctx.send(embeds=create_info_embed(
                 f"Le sondage nommé `{poll.title}` a été créé. Réagis avec {END_POLL_EMOJI} pour le fermer!"
             ), ephemeral=True)
 
-    @interactions.extension_component("select_poll")
-    async def on_poll_select(self, ctx: interactions.ComponentContext, options: list):
-        option = int(options[0])  # This poll will only have one selectable option possible
+    @interactions.component_callback("select_poll")
+    async def on_poll_select(self, ctx: interactions.ComponentContext):
+        option = int(ctx.values[0])  # This poll will only have one selectable option possible
         voter_id = int(ctx.author.id)
 
         poll = POLLS.get(int(ctx.message.id))
@@ -79,7 +75,7 @@ class Polls(interactions.Extension):
     def create_embed(self, poll: Poll) -> interactions.Embed:
         # Create list of percentages for each choice
         votes = [0 for _ in range(len(poll.options))]
-        for voter_id, option in poll.votes.items():
+        for option in poll.votes.values():
             votes[option] += 1
 
         num_votes = len(poll.votes)
@@ -112,24 +108,19 @@ class Polls(interactions.Extension):
         embed.set_footer(text="Sondage terminé")
         await message.edit(embeds=embed, components=[])
 
-    @interactions.extension_listener()
-    async def on_message_reaction_add(self, message_reaction: interactions.MessageReaction):
+    @interactions.listen(interactions.events.MessageReactionAdd)
+    async def on_message_reaction_add(self, message_reaction: interactions.events.MessageReactionAdd):
         if message_reaction.emoji.name != END_POLL_EMOJI:
             return
 
-        poll_id = int(message_reaction.message_id)
+        poll_id = int(message_reaction.message.id)
         poll = POLLS.get(poll_id)
         if not poll:
             return
 
-        if poll.owner_id != int(message_reaction.member.id):
+        if poll.owner_id != int(message_reaction.author.id):
             return
 
-        message = await interactions.get(self.client, interactions.Message, object_id=message_reaction.message_id, parent_id=message_reaction.channel_id)
-        await self.close_poll(message)
-        await message.remove_reaction_from(END_POLL_EMOJI, message_reaction.member)
+        await self.close_poll(message_reaction.message)
+        await message_reaction.message.remove_reaction(END_POLL_EMOJI, message_reaction.author)
         del POLLS[poll_id]
-
-
-def setup(client: interactions.Client):
-    Polls(client)
