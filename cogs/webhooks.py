@@ -69,8 +69,8 @@ WEBHOOKS = {
 
                 ⚠️ **You must choose your language to get access to the entirety of the server!**""",
             ), "components": [
-                interactions.Button(custom_id="verify_french", style=interactions.ButtonStyle.PRIMARY, label="Français", emoji=interactions.Emoji(name="🇫🇷")),
-                interactions.Button(custom_id="verify_english", style=interactions.ButtonStyle.PRIMARY, label="English", emoji=interactions.Emoji(name="🇬🇧"))
+                interactions.Button(custom_id="verify_french", style=interactions.ButtonStyle.PRIMARY, label="Français", emoji="🇫🇷"),
+                interactions.Button(custom_id="verify_english", style=interactions.ButtonStyle.PRIMARY, label="English", emoji="🇬🇧")
             ]
         }
     ],
@@ -197,56 +197,52 @@ WEBHOOKS = {
 
 
 class Webhooks(interactions.Extension):
-    @interactions.extension_listener()
+    @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        self.guild: interactions.Guild = await interactions.get(self.client, interactions.Guild, object_id=variables.SERVER)
+        guild = await self.bot.fetch_guild(variables.SERVER)
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.guild.icon_url) as response:
-                self.icon_image = interactions.Image("BTEFrance.gif", fp=await response.read())
+            async with session.get(guild.icon.url) as response:
+                self.icon_image = await response.read()
 
-    @interactions.extension_command(name="webhooks", description="Envoyer un webhook", default_member_permissions=interactions.Permissions.ADMINISTRATOR)
-    @interactions.option("Webhook à envoyer", choices=[
-        interactions.Choice(name=webhook, value=webhook)
-        for webhook in list(WEBHOOKS.keys())
-    ])
-    async def webhooks(self, ctx: interactions.CommandContext, title: str):
+    @interactions.slash_command(name="webhooks")
+    @interactions.slash_default_member_permission(interactions.Permissions.ADMINISTRATOR)
+    @interactions.slash_option("title", "Webhook à envoyer", choices=[
+        interactions.SlashCommandChoice(name=webhook, value=webhook) for webhook in list(WEBHOOKS.keys())
+    ], opt_type=interactions.OptionType.STRING, required=True)
+    async def webhooks(self, ctx: interactions.SlashContext, title: str):
+        "Envoyer un webhook"
         webhook_list = WEBHOOKS.get(title)
         if not webhook_list:
             return await ctx.send(embeds=create_error_embed(f"Le Webhook appelé {title} n'existe pas!"), ephemeral=True)
 
-        channel = await ctx.get_channel()
-        if channel.thread_metadata:
-            channel_id = int(channel.parent_id)
+        if isinstance(ctx.channel, interactions.TYPE_THREAD_CHANNEL):
+            channel_id = int(ctx.channel.parent_id)
             thread_id = int(ctx.channel_id)
         else:
             channel_id = int(ctx.channel_id)
             thread_id = None
 
-        webhook = await interactions.Webhook.create(self.client._http, channel_id, ctx.guild.name, self.icon_image)
+        webhook = await interactions.Webhook.create(self.bot, channel_id, ctx.guild.name, self.icon_image)
         for webhook_dict in webhook_list:
-            await webhook.execute(**webhook_dict, thread_id=thread_id)
+            await webhook.send(**webhook_dict, thread=thread_id)
         await webhook.delete()
 
-        await ctx.send(embeds=create_info_embed(f"Le Webhook appelé {title} a bien été envoyé"), ephemeral=True)
+        await ctx.send(embeds=create_info_embed(f"Le Webhook appelé `{title}` a bien été envoyé"), ephemeral=True)
 
-    @interactions.extension_component("verify_french")
+    @interactions.component_callback("verify_french")
     async def on_verify_french(self, ctx: interactions.ComponentContext):
         if variables.Roles.FRANCAIS in ctx.author.roles:
-            await self.guild.remove_member_role(variables.Roles.FRANCAIS, ctx.author)
+            await ctx.author.remove_role(variables.Roles.FRANCAIS)
             await ctx.send(embeds=create_info_embed("Vous n'avez plus le rôle Français."), ephemeral=True)
         else:
-            await self.guild.add_member_role(variables.Roles.FRANCAIS, ctx.author)
+            await ctx.author.add_role(variables.Roles.FRANCAIS)
             await ctx.send(embeds=create_info_embed("Vous avez reçu le rôle Français. Bienvenue sur le serveur!"), ephemeral=True)
 
-    @interactions.extension_component("verify_english")
+    @interactions.component_callback("verify_english")
     async def on_verify_english(self, ctx: interactions.ComponentContext):
         if variables.Roles.ENGLISH in ctx.author.roles:
-            await self.guild.remove_member_role(variables.Roles.ENGLISH, ctx.author)
+            await ctx.author.remove_role(variables.Roles.ENGLISH)
             await ctx.send(embeds=create_info_embed("You lost the English role."), ephemeral=True)
         else:
-            await self.guild.add_member_role(variables.Roles.ENGLISH, ctx.author)
+            await ctx.author.add_role(variables.Roles.ENGLISH)
             await ctx.send(embeds=create_info_embed("You received the English role. Welcome on the server!"), ephemeral=True)
-
-
-def setup(client: interactions.Client):
-    Webhooks(client)

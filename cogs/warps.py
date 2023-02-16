@@ -18,13 +18,11 @@ class Warp:
 
 
 PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
-EDIT_BUTTON = interactions.Button(label="Editer", custom_id="warp_edit", emoji=interactions.Emoji(name="⚙️"), style=interactions.ButtonStyle.SUCCESS)
+EDIT_BUTTON = interactions.Button(label="Editer", custom_id="warp_edit", emoji="⚙️", style=interactions.ButtonStyle.SUCCESS)
 EDIT_MODAL = interactions.Modal(
-    custom_id="warp_modal",
+    interactions.InputText(style=interactions.TextStyles.SHORT, label="Informations complémentaires", custom_id="information", required=False),
     title="Edition du Warp",
-    components=[
-        interactions.TextInput(style=interactions.TextStyleType.SHORT, label="Informations complémentaires", custom_id="information", required=False),
-    ]
+    custom_id="warp_modal"
 )
 WARPS = [
     Warp(
@@ -86,8 +84,13 @@ def remove_codeblock_markdown(string: str) -> str:
 
 
 class Warps(interactions.Extension):
-    @interactions.extension_command(name="warps", description="Liste des meilleurs Warps BTE France")
-    async def warps(self, ctx: interactions.CommandContext):
+    @interactions.listen(interactions.events.Startup)
+    async def on_start(self):
+        self.warps_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
+
+    @interactions.slash_command(name="warps")
+    async def warps(self, ctx: interactions.SlashContext):
+        "Liste des meilleurs Warps BTE France"
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)
         chunked_warps_list = [WARPS[i:i + 10] for i in range(0, len(WARPS), 10)]
@@ -113,12 +116,30 @@ class Warps(interactions.Extension):
             )
         await ctx.send("Regarde tes MPs! :mailbox:")
 
-    @interactions.extension_listener()
-    async def on_message_create(self, message: interactions.Message):
-        if message.channel_id != variables.Channels.CONSOLE:
+    @interactions.listen(interactions.events.MessageCreate)
+    async def on_message_create(self, message_create: interactions.events.MessageCreate):
+        if message_create.message._channel_id != variables.Channels.CONSOLE:
             return
 
-        await self.search_for_warp(remove_codeblock_markdown(message.content))
+        await self.search_for_warp(remove_codeblock_markdown(message_create.message.content))
+
+    @interactions.listen(interactions.events.MessageUpdate)
+    async def on_message_update(self, message_update: interactions.events.MessageUpdate):
+        if message_update.after._channel_id != variables.Channels.CONSOLE:
+            return
+
+        if not message_update.before:
+            return
+
+        # Get difference between before & after messages
+        before_msg, after_msg = remove_codeblock_markdown(message_update.before.content), remove_codeblock_markdown(message_update.after.content)
+
+        if len(before_msg) > len(after_msg):
+            diff = before_msg.replace(after_msg, "")
+        else:
+            diff = after_msg.replace(before_msg, "")
+
+        await self.search_for_warp(diff)
 
     async def search_for_warp(self, message: str):
         for msg in message.splitlines():
@@ -135,40 +156,19 @@ class Warps(interactions.Extension):
 
                 title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
                 embed = create_embed(title=title, footer_text=player, color=0x00FF00 if command == "setwarp" else 0xFF0000)
-                channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.SCHEMATIC_WARPS)
-                await channel.send(embeds=embed, components=EDIT_BUTTON)
+                await self.warps_channel.send(embeds=embed, components=EDIT_BUTTON)
                 date = datetime.now().strftime("%d/%m - %H:%M")
                 print(f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
 
-    @interactions.extension_listener()
-    async def on_message_update(self, before: interactions.Message, after: interactions.Message):
-        if after.channel_id != variables.Channels.CONSOLE:
-            return
-
-        if not before:
-            return
-
-        # Get difference between before & after messages
-        before_msg, after_msg = remove_codeblock_markdown(before.content), remove_codeblock_markdown(after.content)
-
-        if len(before_msg) > len(after_msg):
-            diff = before_msg.replace(after_msg, "")
-        else:
-            diff = after_msg.replace(before_msg, "")
-
-        await self.search_for_warp(diff)
-
-    @interactions.extension_component("warp_edit")
+    @interactions.component_callback("warp_edit")
     async def on_edit_button(self, ctx: interactions.ComponentContext):
-        await ctx.popup(EDIT_MODAL)
+        modal = EDIT_MODAL
+        modal.components[0].value = ctx.message.embeds[0].description.replace("Information: ", "")
+        await ctx.send_modal(modal)
 
-    @interactions.extension_modal("warp_modal")
-    async def on_modal_answer(self, ctx: interactions.CommandContext, information: str):
+    @interactions.modal_callback("warp_modal")
+    async def on_modal_answer(self, ctx: interactions.ModalContext, information: str):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
         await ctx.send(f"Information ajoutée: `{information}`" if information else "Information supprimée.", ephemeral=True)
-
-
-def setup(client: interactions.Client):
-    Warps(client)
