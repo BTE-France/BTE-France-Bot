@@ -13,14 +13,15 @@ TEXT = {
         "Demandée par",
         "Le message a déjà été traduit!",
         "Le message n'a pas pu être traduit!",
-        "Message original"
-    ], deepl.Language.ENGLISH_BRITISH: [
+        "Message original",
+    ],
+    deepl.Language.ENGLISH_BRITISH: [
         "🇬🇧 Translation to english 🇬🇧",
         "Requested by",
         "The message has already been translated!",
         "The message could not be translated!",
-        "Original message"
-    ]
+        "Original message",
+    ],
 }
 
 
@@ -32,11 +33,15 @@ class Translator(interactions.Extension):
         except KeyError:
             print("Deepl API key has not been found, cannot translate messages!")
 
-    @interactions.context_menu(name="Traduire en français", context_type=interactions.CommandType.MESSAGE)
+    @interactions.context_menu(
+        name="Traduire en français", context_type=interactions.CommandType.MESSAGE
+    )
     async def translate_french(self, ctx: interactions.ContextMenuContext):
         await self.translate(ctx, deepl.Language.FRENCH)
 
-    @interactions.context_menu(name="Translate to english", context_type=interactions.CommandType.MESSAGE)
+    @interactions.context_menu(
+        name="Translate to english", context_type=interactions.CommandType.MESSAGE
+    )
     async def translate_english(self, ctx: interactions.ContextMenuContext):
         await self.translate(ctx, deepl.Language.ENGLISH_BRITISH)
 
@@ -47,19 +52,29 @@ class Translator(interactions.Extension):
         message: interactions.Message = ctx.target
 
         if int(message.id) in MESSAGES[language]:
-            return await ctx.send(embeds=create_error_embed(TEXT[language][2]), ephemeral=True)
+            return await ctx.send(
+                embeds=create_error_embed(TEXT[language][2]), ephemeral=True
+            )
         if not message.content:
-            return await ctx.send(embeds=create_error_embed(TEXT[language][3]), ephemeral=True)
+            return await ctx.send(
+                embeds=create_error_embed(TEXT[language][3]), ephemeral=True
+            )
 
         MESSAGES[language].append(int(message.id))
-        translated_text = self.translator.translate_text(message.content, target_lang=language).text
+        translated_text = self.translator.translate_text(
+            message.content, target_lang=language
+        ).text
 
         embed = create_embed(
             title=TEXT[language][0],
             description=translated_text,
             color=0xA6A67A,
             footer_text=f"{TEXT[language][1]} @{ctx.member.tag}",
-            footer_image=ctx.member.avatar.url
+            footer_image=ctx.member.avatar.url,
         )
-        button = interactions.Button(style=interactions.ButtonStyle.LINK, label=TEXT[language][4], url=message.jump_url)
+        button = interactions.Button(
+            style=interactions.ButtonStyle.LINK,
+            label=TEXT[language][4],
+            url=message.jump_url,
+        )
         await ctx.send(embeds=embed, components=button)

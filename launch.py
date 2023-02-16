@@ -6,7 +6,7 @@ import interactions
 
 import variables
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
+logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
     activity=interactions.Activity(

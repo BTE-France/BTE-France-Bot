@@ -18,64 +18,83 @@ class Warp:
 
 
 PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
-EDIT_BUTTON = interactions.Button(label="Editer", custom_id="warp_edit", emoji="⚙️", style=interactions.ButtonStyle.SUCCESS)
+EDIT_BUTTON = interactions.Button(
+    label="Editer",
+    custom_id="warp_edit",
+    emoji="⚙️",
+    style=interactions.ButtonStyle.SUCCESS,
+)
 EDIT_MODAL = interactions.Modal(
-    interactions.InputText(style=interactions.TextStyles.SHORT, label="Informations complémentaires", custom_id="information", required=False),
+    interactions.InputText(
+        style=interactions.TextStyles.SHORT,
+        label="Informations complémentaires",
+        custom_id="information",
+        required=False,
+    ),
     title="Edition du Warp",
-    custom_id="warp_modal"
+    custom_id="warp_modal",
 )
 WARPS = [
     Warp(
         "La Défense",
         "defense_esplanade",
         "Quartier d'affaires de Paris connu pour ses nombreux gratte-ciels.\nBusiness district of Paris known for its numerous skyscrapers.",
-        "https://imgur.com/ZOTj9dn.png"
-    ), Warp(
+        "https://imgur.com/ZOTj9dn.png",
+    ),
+    Warp(
         "Arc de Triomphe",
         "paris:etoile",
         "Arc au coeur de Paris, situé sur l'avenue des Champs-Elysées.\nArc at the heart of Paris, situated on the Avenue des Champs-Elysées.",
-        "https://imgur.com/OBemDc5.png"
-    ), Warp(
+        "https://imgur.com/OBemDc5.png",
+    ),
+    Warp(
         "Ile de la Cité",
         "Ile_de_la_Cite",
         "Le berceau de la ville de Paris, construit par la team ETB.\nThe cradle of Paris, built by the ETB team.",
-        "https://imgur.com/FcLGAae.png"
-    ), Warp(
+        "https://imgur.com/FcLGAae.png",
+    ),
+    Warp(
         "Nantes",
         "Nantes:cathedrale",
         "Cité des Ducs de Bretagne, non loin de l'océan Atlantique.\nCity of Dukes of Brittany, not far from the Atlantic ocean.",
-        "https://imgur.com/WM4frCq.png"
-    ), Warp(
+        "https://imgur.com/WM4frCq.png",
+    ),
+    Warp(
         "Turenne",
         "turenne",
         "Village en Corrèze, réalisé en 48h en tant qu'évènement communautaire.\n Village in Corrèze, realized in 48h as a community event.",
-        "https://imgur.com/j5qThvh.png"
-    ), Warp(
+        "https://imgur.com/j5qThvh.png",
+    ),
+    Warp(
         "Le Puy-Notre-Dame",
         "lepuynotredame",
         "Petite commune dans le Maine-et-Loire.\nSmall town in the Maine-et-Loire.",
-        "https://imgur.com/VFyfKzR.png"
-    ), Warp(
+        "https://imgur.com/VFyfKzR.png",
+    ),
+    Warp(
         "Le Mont-Saint-Michel",
         "mont-saint-michel",
         "Îlot roché situé en Normandie, une des icones de la France.\nTidal island located in Normandy, one of the icons of France.",
-        "https://imgur.com/M9nsIbr.png"
-    ), Warp(
+        "https://imgur.com/M9nsIbr.png",
+    ),
+    Warp(
         "Turckheim",
         "Turckheim",
         "Petite commune en Alsace avec notamment beaucoup de maisons à colombages.\nSmall town in Alsace with many half-timbered houses.",
-        "https://imgur.com/qsjFdo6.png"
-    ), Warp(
+        "https://imgur.com/qsjFdo6.png",
+    ),
+    Warp(
         "Monaco",
         "monaco",
         "Principauté située sur la côte méditéranéenne, construite par la team Build It 1:1.\nPrincipality located on the Mediterranean coast, built by the Build It 1:1 team.",
-        "https://imgur.com/gA9DGCf.png"
-    ), Warp(
+        "https://imgur.com/gA9DGCf.png",
+    ),
+    Warp(
         "Viaduc de Millau",
         "viaduc_de_millau",
         "Le viaduc avec les pylônes les plus hauts du monde (343m).\nThe viaduct with the highest pylons in the world (343m).",
-        "https://imgur.com/P7ex8lG.png"
-    )
+        "https://imgur.com/P7ex8lG.png",
+    ),
 ]
 
 
@@ -86,14 +105,16 @@ def remove_codeblock_markdown(string: str) -> str:
 class Warps(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        self.warps_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
+        self.warps_channel = await self.bot.fetch_channel(
+            variables.Channels.SCHEMATIC_WARPS
+        )
 
     @interactions.slash_command(name="warps")
     async def warps(self, ctx: interactions.SlashContext):
         "Liste des meilleurs Warps BTE France"
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)
-        chunked_warps_list = [WARPS[i:i + 10] for i in range(0, len(WARPS), 10)]
+        chunked_warps_list = [WARPS[i : i + 10] for i in range(0, len(WARPS), 10)]
 
         # Create all embeds
         chunked_embeds = []
@@ -103,7 +124,7 @@ class Warps(interactions.Extension):
                     title=warp.name,
                     color=0xFFFFFF,
                     fields=[(f"/warp {warp.warp}", warp.description, False)],
-                    image=warp.image
+                    image=warp.image,
                 )
                 for warp in warp_list
             ]
@@ -111,20 +132,28 @@ class Warps(interactions.Extension):
 
         for i, embed_list in enumerate(chunked_embeds):
             await ctx.author.send(
-                ":flag_fr: **Liste des meilleurs warps sur le serveur BTE France** :flag_fr:" if i == 0 else "",
-                embeds=embed_list
+                ":flag_fr: **Liste des meilleurs warps sur le serveur BTE France** :flag_fr:"
+                if i == 0
+                else "",
+                embeds=embed_list,
             )
         await ctx.send("Regarde tes MPs! :mailbox:")
 
     @interactions.listen(interactions.events.MessageCreate)
-    async def on_message_create(self, message_create: interactions.events.MessageCreate):
+    async def on_message_create(
+        self, message_create: interactions.events.MessageCreate
+    ):
         if message_create.message._channel_id != variables.Channels.CONSOLE:
             return
 
-        await self.search_for_warp(remove_codeblock_markdown(message_create.message.content))
+        await self.search_for_warp(
+            remove_codeblock_markdown(message_create.message.content)
+        )
 
     @interactions.listen(interactions.events.MessageUpdate)
-    async def on_message_update(self, message_update: interactions.events.MessageUpdate):
+    async def on_message_update(
+        self, message_update: interactions.events.MessageUpdate
+    ):
         if message_update.after._channel_id != variables.Channels.CONSOLE:
             return
 
@@ -132,7 +161,9 @@ class Warps(interactions.Extension):
             return
 
         # Get difference between before & after messages
-        before_msg, after_msg = remove_codeblock_markdown(message_update.before.content), remove_codeblock_markdown(message_update.after.content)
+        before_msg, after_msg = remove_codeblock_markdown(
+            message_update.before.content
+        ), remove_codeblock_markdown(message_update.after.content)
 
         if len(before_msg) > len(after_msg):
             diff = before_msg.replace(after_msg, "")
@@ -154,16 +185,28 @@ class Warps(interactions.Extension):
                 if command not in ("setwarp", "delwarp"):
                     continue
 
-                title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
-                embed = create_embed(title=title, footer_text=player, color=0x00FF00 if command == "setwarp" else 0xFF0000)
+                title = (
+                    f"Warp créé: {warp}"
+                    if command == "setwarp"
+                    else f"Warp supprimé: {warp}"
+                )
+                embed = create_embed(
+                    title=title,
+                    footer_text=player,
+                    color=0x00FF00 if command == "setwarp" else 0xFF0000,
+                )
                 await self.warps_channel.send(embeds=embed, components=EDIT_BUTTON)
                 date = datetime.now().strftime("%d/%m - %H:%M")
-                print(f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
+                print(
+                    f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}"
+                )
 
     @interactions.component_callback("warp_edit")
     async def on_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_MODAL
-        modal.components[0].value = ctx.message.embeds[0].description.replace("Information: ", "")
+        modal.components[0].value = ctx.message.embeds[0].description.replace(
+            "Information: ", ""
+        )
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("warp_modal")
@@ -171,4 +214,9 @@ class Warps(interactions.Extension):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
-        await ctx.send(f"Information ajoutée: `{information}`" if information else "Information supprimée.", ephemeral=True)
+        await ctx.send(
+            f"Information ajoutée: `{information}`"
+            if information
+            else "Information supprimée.",
+            ephemeral=True,
+        )

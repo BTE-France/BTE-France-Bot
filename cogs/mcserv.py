@@ -32,13 +32,13 @@ STAFF_USERNAMES = [
 ]
 
 # List of servers to get the status from.
-SERVERS = [
-    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")
-]
+SERVERS = [("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")]
 
 
 def escape_markdown(string: str) -> str:
-    return string.replace("_", r"\_").replace("*", r"\*")  # Escape markdown symbols that could be present in players' names
+    return string.replace("_", r"\_").replace(
+        "*", r"\*"
+    )  # Escape markdown symbols that could be present in players' names
 
 
 class MCServ(interactions.Extension):
@@ -50,7 +50,7 @@ class MCServ(interactions.Extension):
         embed = create_embed(
             title="**Statut du serveur Minecraft BTE France**",
             description="_ _\n",
-            include_thumbnail=True
+            include_thumbnail=True,
         )
 
         for _server in SERVERS:
