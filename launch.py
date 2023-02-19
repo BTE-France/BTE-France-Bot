@@ -10,11 +10,10 @@ logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
     activity=interactions.Activity(
-        type=interactions.ActivityType.WATCHING,
-        name="/help"
+        type=interactions.ActivityType.WATCHING, name="/help"
     ),
     debug_scope=variables.SERVER,
-    intents=interactions.Intents.ALL
+    intents=interactions.Intents.ALL,
 )
 
 for filename in os.listdir(Path(__file__).parent / "cogs"):
