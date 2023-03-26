@@ -3,4 +3,3 @@ mcstatus
 aiohttp
 Pillow
 deepl
-discord-py-interactions==5.0.0-alpha.1
