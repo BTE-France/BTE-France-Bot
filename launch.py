@@ -1,36 +1,29 @@
 import logging
 import os
+from pathlib import Path
 
 import interactions
 
 import variables
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
+logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
-    token=os.environ["DISCORD_TOKEN"],
-    presence=interactions.ClientPresence(
-        status=interactions.StatusType.ONLINE,
-        activities=[interactions.PresenceActivity(
-            type=interactions.PresenceActivityType.WATCHING,
-            name="/help"
-        )]
+    activity=interactions.Activity(
+        type=interactions.ActivityType.WATCHING, name="/help"
     ),
-    default_scope=variables.SERVER,
-    intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.GUILD_MESSAGE_CONTENT
+    debug_scope=variables.SERVER,
+    intents=interactions.Intents.ALL,
 )
 
-# Define all cogs
-cogs = []
-for filename in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cogs")):
+for filename in os.listdir(Path(__file__).parent / "cogs"):
     if filename.endswith(".py"):
-        cogs.append(filename.replace(".py", ""))
+        bot.load_extension("cogs." + filename.replace(".py", ""))
 
 
-@bot.event
+@interactions.listen(interactions.events.Startup)
 async def on_start():
     print("Bot is ready!")
 
 
-[bot.load("cogs." + cog) for cog in cogs]
-bot.start()
+bot.start(os.environ["DISCORD_TOKEN"])

@@ -7,72 +7,112 @@ from utils.embed import create_embed, create_info_embed
 
 
 class RandomCommands(interactions.Extension):
-    @interactions.extension_listener()
+    @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        self.guild: interactions.Guild = await interactions.get(self.client, interactions.Guild, object_id=variables.SERVER)
-        self.logs_channel = await interactions.get(self.client, interactions.Channel, object_id=variables.Channels.LOGS)
+        self.guild = await self.bot.fetch_guild(variables.SERVER)
+        self.logs_channel = await self.bot.fetch_channel(variables.Channels.LOGS)
 
-    @interactions.extension_command(name="ping", description="Ping", default_scope=False)
-    async def ping(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_info_embed(f"Pong! {int(self.client.latency)}ms."), ephemeral=True)
+    @interactions.slash_command(name="ping", scopes=[])
+    async def ping(self, ctx: interactions.SlashContext):
+        "Ping"
+        await ctx.send(
+            embeds=create_info_embed(f"Pong! {int(self.bot.latency)}ms."),
+            ephemeral=True,
+        )
 
-    @interactions.extension_command(name="clear", description="Supprimer les x derniers messages", default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
-    @interactions.option("Nombre de messages à supprimer")
-    async def clear(self, ctx: interactions.CommandContext, number: int = 1):
-        channel = await ctx.get_channel()
-        await channel.purge(amount=number)
-        await ctx.send(embeds=create_info_embed(
-            f"Tu as supprimé les {number} dernier(s) message(s)!"
-        ), ephemeral=True)
+    @interactions.slash_command(name="clear")
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    @interactions.slash_option(
+        name="number",
+        description="Nombre de messages à supprimer",
+        opt_type=interactions.OptionType.INTEGER,
+    )
+    async def clear(self, ctx: interactions.SlashContext, number: int = 1):
+        "Supprimer les x derniers messages"
+        await ctx.channel.purge(deletion_limit=number)
+        await ctx.send(
+            embeds=create_info_embed(
+                f"Tu as supprimé les {number} dernier(s) message(s)!"
+            ),
+            ephemeral=True,
+        )
 
-    @interactions.extension_message_command(name="Supprimer messages après", default_member_permissions=interactions.Permissions.MANAGE_MESSAGES)
-    async def clear_after(self, ctx: interactions.CommandContext):
-        channel = await ctx.get_channel()
-        messages = await self.client._http.get_channel_messages(channel_id=int(ctx.channel_id), limit=100, after=int(ctx.target.id))
+    @interactions.context_menu(
+        name="Supprimer messages après", context_type=interactions.CommandType.MESSAGE
+    )
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    async def clear_after(self, ctx: interactions.ContextMenuContext):
+        messages = await ctx.channel.history(limit=100, after=ctx.target_id).flatten()
         number = len(messages) + 1
-        await channel.purge(amount=number)
-        await ctx.send(embeds=create_info_embed(
-            f"Tu as supprimé les {number} dernier(s) message(s)!"
-        ), ephemeral=True)
+        await ctx.channel.purge(deletion_limit=number)
+        await ctx.send(
+            embeds=create_info_embed(
+                f"Tu as supprimé les {number} dernier(s) message(s)!"
+            ),
+            ephemeral=True,
+        )
 
-    @interactions.extension_command(name="map", description="Lien Maps BTE")
-    async def map(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_embed(
-            title="Maps de BTE",
-            description="""[**Carte Dynmap**](https://map.btefrance.fr/)
+    @interactions.slash_command(name="map")
+    async def map(self, ctx: interactions.SlashContext):
+        "Lien Maps BTE"
+        await ctx.send(
+            embeds=create_embed(
+                title="Maps de BTE",
+                description="""[**Carte Dynmap**](https://map.btefrance.fr/)
             _Carte qui permet de voir les constructions les plus notables du serveur, avec une vue satellite._
 
             [**Carte des projets**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)
             _Carte de progression qui permet de recenser toutes les constructions sur le serveur._""",
-            color=0x00FF00,
-            include_thumbnail=True
-        ))
+                color=0x00FF00,
+                include_thumbnail=True,
+            )
+        )
 
-    @interactions.extension_command(name="lire", description="Lis les règles")
-    async def lire(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_info_embed(
-            f"As-tu bien lu le salon <#{variables.Channels.COMMENT_REJOINDRE}>?"
-        ))
+    @interactions.slash_command(name="lire")
+    async def lire(self, ctx: interactions.SlashContext):
+        "Lis les règles"
+        await ctx.send(
+            embeds=create_info_embed(
+                f"As-tu bien lu le salon <#{variables.Channels.COMMENT_REJOINDRE}>?"
+            )
+        )
 
-    @interactions.extension_command(name="builder", description="Instructions pour devenir Builder")
-    async def builder(self, ctx: interactions.CommandContext):
-        await ctx.send(embeds=create_info_embed(
-            "Tu veux savoir comment devenir builder officiel? [**C'est par ici!**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)"
-        ))
+    @interactions.slash_command(name="builder")
+    async def builder(self, ctx: interactions.SlashContext):
+        "Instructions pour devenir Builder"
+        await ctx.send(
+            embeds=create_info_embed(
+                "Tu veux savoir comment devenir builder officiel? [**C'est par ici!**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)"
+            )
+        )
 
-    @interactions.extension_listener()
+    @interactions.listen(interactions.events.BanCreate)
     async def on_guild_ban_add(self, _):
         await asyncio.sleep(3)  # Leave some time for the audit log to be updated
-        audit_logs = await self.guild.get_latest_audit_log_action(interactions.AuditLogEvents.MEMBER_BAN_ADD)
-        audit_log_entry = audit_logs.audit_log_entries[0]
-        mod_user = interactions.search_iterable(audit_logs.users, lambda user: int(user.id) == int(audit_log_entry.user_id))[0]
+        audit_logs = await self.guild.fetch_audit_log(
+            action_type=interactions.AuditLogEventType.MEMBER_BAN_ADD, limit=1
+        )
+        audit_log_entry = audit_logs.entries[0]
+        mod_user = next(
+            (user for user in audit_logs.users if user.id == audit_log_entry.user_id),
+            None,
+        )
 
         if not mod_user.bot:
-            banned_user = interactions.search_iterable(audit_logs.users, lambda user: int(user.id) == int(audit_log_entry.target_id))[0]
-            await self.logs_channel.send(embeds=create_info_embed(
-                f"**{banned_user.username}#{banned_user.discriminator} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
-            ))
-
-
-def setup(client: interactions.Client):
-    RandomCommands(client)
+            banned_user = next(
+                (
+                    user
+                    for user in audit_logs.users
+                    if user.id == audit_log_entry.target_id
+                ),
+                None,
+            )
+            await self.logs_channel.send(
+                embeds=create_info_embed(
+                    f"**{banned_user.username}#{banned_user.discriminator} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
+                )
+            )

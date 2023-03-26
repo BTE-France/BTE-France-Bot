@@ -32,24 +32,25 @@ STAFF_USERNAMES = [
 ]
 
 # List of servers to get the status from.
-SERVERS = [
-    ("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")
-]
+SERVERS = [("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")]
 
 
 def escape_markdown(string: str) -> str:
-    return string.replace("_", r"\_").replace("*", r"\*")  # Escape markdown symbols that could be present in players' names
+    return string.replace("_", r"\_").replace(
+        "*", r"\*"
+    )  # Escape markdown symbols that could be present in players' names
 
 
 class MCServ(interactions.Extension):
-    @interactions.extension_command(name="mc", description="Statut du serveur Minecraft")
-    async def mc(self, ctx: interactions.CommandContext):
+    @interactions.slash_command(name="mc")
+    async def mc(self, ctx: interactions.SlashContext):
+        "Statut du serveur Minecraft"
         await ctx.defer()
 
         embed = create_embed(
             title="**Statut du serveur Minecraft BTE France**",
             description="_ _\n",
-            include_thumbnail=True
+            include_thumbnail=True,
         )
 
         for _server in SERVERS:
@@ -81,7 +82,3 @@ class MCServ(interactions.Extension):
                 embed.add_field(name=desc, value=value, inline=False)
 
         await ctx.send(embeds=embed)
-
-
-def setup(client: interactions.Client):
-    MCServ(client)
