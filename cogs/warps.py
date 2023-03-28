@@ -40,13 +40,13 @@ RANK_DICT = {
     "admin": "Staff",
     "owner": "Fondateur",
 }
-EDIT_BUTTON = interactions.Button(
+EDIT_WARP_BUTTON = interactions.Button(
     label="Editer",
     custom_id="warp_edit",
     emoji="⚙️",
     style=interactions.ButtonStyle.SUCCESS,
 )
-EDIT_MODAL = interactions.Modal(
+EDIT_WARP_MODAL = interactions.Modal(
     interactions.InputText(
         style=interactions.TextStyles.SHORT,
         label="Informations complémentaires",
@@ -55,6 +55,22 @@ EDIT_MODAL = interactions.Modal(
     ),
     title="Edition du Warp",
     custom_id="warp_modal",
+)
+EDIT_PERMS_BUTTON = interactions.Button(
+    label="Editer",
+    custom_id="perms_edit",
+    emoji="⚙️",
+    style=interactions.ButtonStyle.SUCCESS,
+)
+EDIT_PERMS_MODAL = interactions.Modal(
+    interactions.InputText(
+        style=interactions.TextStyles.SHORT,
+        label="Informations complémentaires",
+        custom_id="information",
+        required=False,
+    ),
+    title="Edition du Warp",
+    custom_id="perms_modal",
 )
 WARPS = [
     Warp(
@@ -230,7 +246,7 @@ class Warps(interactions.Extension):
                 footer_text=player,
                 color=0x00FF00 if command == "setwarp" else 0xFF0000,
             )
-            await self.warps_channel.send(embeds=embed, components=EDIT_BUTTON)
+            await self.warps_channel.send(embeds=embed, components=EDIT_WARP_BUTTON)
             date = datetime.now().strftime("%d/%m - %H:%M")
             print(
                 f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}"
@@ -252,7 +268,7 @@ class Warps(interactions.Extension):
                 footer_text=moderator,
                 color=0x00FF00 if action == "promote" else 0xFF0000,
             )
-            await self.debutant_channel.send(embeds=embed)
+            await self.debutant_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
             date = datetime.now().strftime("%d/%m - %H:%M")
             print(
                 f"[{date}] {'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}"
@@ -282,15 +298,35 @@ class Warps(interactions.Extension):
                     return rank
 
     @interactions.component_callback("warp_edit")
-    async def on_edit_button(self, ctx: interactions.ComponentContext):
-        modal = EDIT_MODAL
+    async def on_warp_edit_button(self, ctx: interactions.ComponentContext):
+        modal = EDIT_WARP_MODAL
         modal.components[0].value = ctx.message.embeds[0].description.replace(
             "Information: ", ""
         )
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("warp_modal")
-    async def on_modal_answer(self, ctx: interactions.ModalContext, information: str):
+    async def on_warp_modal_answer(self, ctx: interactions.ModalContext, information: str):
+        embed: interactions.Embed = ctx.message.embeds[0]
+        embed.description = f"Information: {information}" if information else ""
+        await ctx.message.edit(embeds=embed, components=ctx.message.components)
+        await ctx.send(
+            f"Information ajoutée: `{information}`"
+            if information
+            else "Information supprimée.",
+            ephemeral=True,
+        )
+
+    @interactions.component_callback("perms_edit")
+    async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
+        modal = EDIT_PERMS_MODAL
+        modal.components[0].value = ctx.message.embeds[0].description.replace(
+            "Information: ", ""
+        )
+        await ctx.send_modal(modal)
+
+    @interactions.modal_callback("perms_modal")
+    async def on_perms_modal_answer(self, ctx: interactions.ModalContext, information: str):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
