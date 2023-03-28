@@ -300,9 +300,8 @@ class Warps(interactions.Extension):
     @interactions.component_callback("warp_edit")
     async def on_warp_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_WARP_MODAL
-        modal.components[0].value = ctx.message.embeds[0].description.replace(
-            "Information: ", ""
-        )
+        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
+        modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("warp_modal")
@@ -320,9 +319,8 @@ class Warps(interactions.Extension):
     @interactions.component_callback("perms_edit")
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_PERMS_MODAL
-        modal.components[0].value = ctx.message.embeds[0].description.replace(
-            "Information: ", ""
-        )
+        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
+        modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("perms_modal")
