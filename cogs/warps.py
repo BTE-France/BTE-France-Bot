@@ -216,7 +216,7 @@ class Warps(interactions.Extension):
             await self.test_for_regex(msg)
 
     async def test_for_regex(self, message: str):
-        if match := WARP_PATTERN.search(message):
+        async def warp_regex(match: re.Match):
             player, command, warp = match.group(1, 2, 3)
             if command not in ("setwarp", "delwarp"):
                 return
@@ -236,9 +236,7 @@ class Warps(interactions.Extension):
                 f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}"
             )
 
-        if hasattr(self, "users_json_file") and (
-            match := LUCKPERMS_PATTERN.search(message)
-        ):
+        async def luckperms_regex(match: re.Match):
             moderator, player, action = match.group(1, 2, 3)
             if action not in ("promote", "demote"):
                 return
@@ -259,6 +257,14 @@ class Warps(interactions.Extension):
             print(
                 f"[{date}] {'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}"
             )
+
+        if match := WARP_PATTERN.search(message):
+            await warp_regex(match)
+
+        if hasattr(self, "users_json_file") and (
+            match := LUCKPERMS_PATTERN.search(message)
+        ):
+            await luckperms_regex(match)
 
     async def get_new_rank(self, player: str):
         async with aiohttp.ClientSession() as session:
