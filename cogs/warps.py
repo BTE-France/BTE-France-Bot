@@ -236,7 +236,7 @@ class Warps(interactions.Extension):
                 f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}"
             )
 
-        elif hasattr(self, "users_json_file") and (
+        if hasattr(self, "users_json_file") and (
             match := LUCKPERMS_PATTERN.search(message)
         ):
             moderator, player, action = match.group(1, 2, 3)
