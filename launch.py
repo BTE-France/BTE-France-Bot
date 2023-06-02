@@ -4,15 +4,12 @@ from pathlib import Path
 
 import interactions
 
-import variables
-
 logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
     activity=interactions.Activity(
         type=interactions.ActivityType.WATCHING, name="/help"
     ),
-    debug_scope=variables.SERVER,
     intents=interactions.Intents.ALL,
 )
 
