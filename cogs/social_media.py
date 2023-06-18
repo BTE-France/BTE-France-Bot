@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import interactions
 
-from utils.embed import create_embed
+from utils import create_embed
 
 
 @dataclass

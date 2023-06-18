@@ -1,19 +1,17 @@
 import os
-from datetime import datetime
 
 import aiohttp
 import interactions
 
 import variables
+from utils import log
 
 
 class BuilderSync(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        try:
-            api_key = os.environ["BTE_API_KEY"]
-        except KeyError:
-            print("BTE API key not found, cannot synchronize builders!")
+        if not (api_key := os.getenv("BTE_API_KEY")):
+            log("No BTE_API_KEY variable found!")
             return
         self.headers = {
             "Host": "buildtheearth.net",
@@ -34,7 +32,7 @@ class BuilderSync(interactions.Extension):
                 ) as response:
                     json_response = await response.json()
         except Exception as e:
-            print("Error while accessing BTE API:\n ", e)
+            log("Error while accessing BTE API:\n ", e)
             return
 
         for user in json_response["members"]:
@@ -49,7 +47,4 @@ class BuilderSync(interactions.Extension):
                     reason="Automatically added as a Builder!",
                 )
                 await member.remove_role(role=variables.Roles.BUILDER_NON_CONFIRME)
-                date = datetime.now().strftime("%d/%m - %H:%M")
-                print(
-                    f"[{date}] Added {member.user.username}#{member.user.discriminator} as a Builder!"
-                )
+                log(f"Added {member.user.tag} as a Builder!")

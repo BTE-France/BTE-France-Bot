@@ -3,7 +3,7 @@ import random
 
 import interactions
 
-from utils.embed import create_embed
+from utils import create_embed
 
 # In percentage (0 to 100)
 BAN_PROBABILITY = 70

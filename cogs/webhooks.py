@@ -2,7 +2,7 @@ import aiohttp
 import interactions
 
 import variables
-from utils.embed import create_embed, create_error_embed, create_info_embed
+from utils import create_embed, create_error_embed, create_info_embed
 
 # Webhooks are formatted as a list of dictionaries, with each dictionary representing one message to be sent.
 WEBHOOKS = {

@@ -1,4 +1,4 @@
 # BTE-France-Bot
 Discord Bot for the BTE France server
 
-Join us at  https://discord.gg/n3CwumSqVX!
+Join us at  https://discord.btefrance.fr !

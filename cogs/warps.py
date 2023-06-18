@@ -3,13 +3,12 @@ import os
 import random
 import re
 from dataclasses import dataclass
-from datetime import datetime
 
 import aiohttp
 import interactions
 
 import variables
-from utils.embed import create_embed
+from utils import create_embed, log
 
 
 @dataclass
@@ -149,12 +148,10 @@ class Warps(interactions.Extension):
         self.debutant_channel = await self.bot.fetch_channel(
             variables.Channels.DEBUTANT
         )
-        try:
-            self.users_json_file = os.environ["LUCKPERMS_USERS_JSON_FILE"]
-        except KeyError:
-            print(
-                "LuckPerms users.json file not found, cannot synchronize rank promotions!"
-            )
+        if users_json_file := os.getenv("LUCKPERMS_USERS_JSON_FILE"):
+            self.users_json_file = users_json_file
+        else:
+            log("No LUCKPERMS_USERS_JSON_FILE variable found!")
 
     @interactions.slash_command(name="warps")
     async def warps(self, ctx: interactions.SlashContext):
@@ -162,7 +159,7 @@ class Warps(interactions.Extension):
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)
         chunked_warps_list = [
-            WARPS[i : i + 10] for i in range(0, len(WARPS), 10)
+            WARPS[i : i + 10] for i in range(0, len(WARPS), 10)  # noqa
         ]  # noqa
 
         # Create all embeds
@@ -247,10 +244,7 @@ class Warps(interactions.Extension):
                 color=0x00FF00 if command == "setwarp" else 0xFF0000,
             )
             await self.warps_channel.send(embeds=embed, components=EDIT_WARP_BUTTON)
-            date = datetime.now().strftime("%d/%m - %H:%M")
-            print(
-                f"[{date}] {'Added' if command == 'setwarp' else 'Removed'} warp {warp}"
-            )
+            log(f"{'Added' if command == 'setwarp' else 'Removed'} warp {warp}")
 
         async def luckperms_regex(match: re.Match):
             moderator, player, action = match.group(1, 2, 3)
@@ -269,10 +263,7 @@ class Warps(interactions.Extension):
                 color=0x00FF00 if action == "promote" else 0xFF0000,
             )
             await self.debutant_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
-            date = datetime.now().strftime("%d/%m - %H:%M")
-            print(
-                f"[{date}] {'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}"
-            )
+            log(f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}")
 
         if match := WARP_PATTERN.search(message):
             await warp_regex(match)

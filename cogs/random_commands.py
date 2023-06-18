@@ -3,7 +3,7 @@ import asyncio
 import interactions
 
 import variables
-from utils.embed import create_embed, create_info_embed
+from utils import create_embed, create_info_embed
 
 
 class RandomCommands(interactions.Extension):
@@ -113,6 +113,6 @@ class RandomCommands(interactions.Extension):
             )
             await self.logs_channel.send(
                 embeds=create_info_embed(
-                    f"**{banned_user.username}#{banned_user.discriminator} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
+                    f"**{banned_user.tag} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
                 )
             )

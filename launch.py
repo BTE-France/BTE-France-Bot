@@ -3,14 +3,18 @@ import os
 from pathlib import Path
 
 import interactions
+from dotenv import load_dotenv
 
+from utils import log
+
+load_dotenv()
 logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
     activity=interactions.Activity(
         type=interactions.ActivityType.WATCHING, name="/help"
     ),
-    intents=interactions.Intents.ALL,
+    intents=interactions.Intents.ALL
 )
 
 for filename in os.listdir(Path(__file__).parent / "cogs"):
@@ -20,7 +24,10 @@ for filename in os.listdir(Path(__file__).parent / "cogs"):
 
 @interactions.listen(interactions.events.Startup)
 async def on_start():
-    print("Bot is ready!")
+    log("Bot is ready!")
 
 
-bot.start(os.environ["DISCORD_TOKEN"])
+if token := os.getenv("DISCORD_TOKEN"):
+    bot.start(token)
+else:
+    log("No DISCORD_TOKEN variable found!")

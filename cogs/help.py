@@ -1,6 +1,6 @@
 import interactions
 
-from utils.embed import create_embed
+from utils import create_embed
 
 
 class Help(interactions.Extension):
@@ -10,7 +10,7 @@ class Help(interactions.Extension):
         embed = create_embed(
             title="Help!",
             color=0xFF0000,
-            footer_text="Contacte @mAxYoLo01#4491 si tu trouves des bugs / suggestions!",
+            footer_text="Contacte @maxyolo01 si tu trouves des bugs / suggestions!",
             include_thumbnail=True,
         )
 

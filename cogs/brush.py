@@ -4,7 +4,7 @@ import random
 import interactions
 from PIL import Image
 
-from utils.embed import create_embed, create_error_embed
+from utils import create_embed, create_error_embed
 
 
 class Brush(interactions.Extension):
