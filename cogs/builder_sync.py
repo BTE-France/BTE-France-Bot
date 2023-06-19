@@ -32,7 +32,7 @@ class BuilderSync(interactions.Extension):
                 ) as response:
                     json_response = await response.json()
         except Exception as e:
-            log("Error while accessing BTE API:\n ", e)
+            log("Error while accessing BTE API:\n " + e)
             return
 
         for user in json_response["members"]:
