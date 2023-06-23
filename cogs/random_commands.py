@@ -39,9 +39,7 @@ class RandomCommands(interactions.Extension):
             ephemeral=True,
         )
 
-    @interactions.context_menu(
-        name="Supprimer messages après", context_type=interactions.CommandType.MESSAGE
-    )
+    @interactions.message_context_menu(name="Supprimer messages après")
     @interactions.slash_default_member_permission(
         interactions.Permissions.MANAGE_MESSAGES
     )
@@ -116,3 +114,13 @@ class RandomCommands(interactions.Extension):
                     f"**{banned_user.tag} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
                 )
             )
+
+    @interactions.message_context_menu(name="Copier message")
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    async def copy(self, ctx: interactions.ContextMenuContext):
+        await ctx.send(
+            f"```{ctx.target.content}```",
+            ephemeral=True
+        )
