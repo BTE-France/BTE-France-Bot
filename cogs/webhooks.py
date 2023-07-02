@@ -1,4 +1,3 @@
-import aiohttp
 import interactions
 
 import variables
@@ -345,13 +344,6 @@ WEBHOOKS = {
 
 
 class Webhooks(interactions.Extension):
-    @interactions.listen(interactions.events.Startup)
-    async def on_start(self):
-        guild = await self.bot.fetch_guild(variables.SERVER)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(guild.icon.url) as response:
-                self.icon_image = await response.read()
-
     @interactions.slash_command(name="webhooks")
     @interactions.slash_default_member_permission(
         interactions.Permissions.ADMINISTRATOR
@@ -382,9 +374,10 @@ class Webhooks(interactions.Extension):
             channel_id = int(ctx.channel_id)
             thread_id = None
 
-        webhook = await interactions.Webhook.create(
-            self.bot, channel_id, ctx.guild.name, self.icon_image
-        )
+        with open("resources/icon.png", "rb") as icon_file:
+            webhook = await interactions.Webhook.create(
+                self.bot, channel_id, ctx.guild.name, icon_file
+            )
         for webhook_dict in webhook_list:
             await webhook.send(**webhook_dict, thread=thread_id)
         await webhook.delete()

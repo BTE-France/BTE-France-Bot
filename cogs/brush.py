@@ -73,13 +73,13 @@ class Brush(interactions.Extension):
                 block = self.get_emoji(block_raw)
                 if block is None:
                     final_image.paste(
-                        Image.open("blocks/question.png"), (x * 16, y * 16)
+                        Image.open("resources/blocks/question.png"), (x * 16, y * 16)
                     )
                     not_found.add(block_raw)
                     percentage.add(block_raw)
                 else:
                     final_image.paste(
-                        Image.open(f"blocks/{block}.png"), (x * 16, y * 16)
+                        Image.open(f"resources/blocks/{block}.png"), (x * 16, y * 16)
                     )
                     percentage.add(block)
 

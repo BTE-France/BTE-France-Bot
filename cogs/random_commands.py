@@ -7,11 +7,6 @@ from utils import create_embed, create_info_embed
 
 
 class RandomCommands(interactions.Extension):
-    @interactions.listen(interactions.events.Startup)
-    async def on_start(self):
-        self.guild = await self.bot.fetch_guild(variables.SERVER)
-        self.logs_channel = await self.bot.fetch_channel(variables.Channels.LOGS)
-
     @interactions.slash_command(name="ping", scopes=[])
     async def ping(self, ctx: interactions.SlashContext):
         "Ping"
@@ -28,6 +23,8 @@ class RandomCommands(interactions.Extension):
         name="number",
         description="Nombre de messages à supprimer",
         opt_type=interactions.OptionType.INTEGER,
+        min_value=1,
+        max_value=100,
     )
     async def clear(self, ctx: interactions.SlashContext, number: int = 1):
         "Supprimer les x derniers messages"
@@ -44,7 +41,7 @@ class RandomCommands(interactions.Extension):
         interactions.Permissions.MANAGE_MESSAGES
     )
     async def clear_after(self, ctx: interactions.ContextMenuContext):
-        messages = await ctx.channel.history(limit=100, after=ctx.target_id).flatten()
+        messages = await ctx.channel.history(limit=99, after=ctx.target_id).flatten()
         number = len(messages) + 1
         await ctx.channel.purge(deletion_limit=number)
         await ctx.send(
@@ -89,9 +86,9 @@ class RandomCommands(interactions.Extension):
         )
 
     @interactions.listen(interactions.events.BanCreate)
-    async def on_guild_ban_add(self, _):
+    async def on_guild_ban_add(self, event: interactions.events.BanCreate):
         await asyncio.sleep(3)  # Leave some time for the audit log to be updated
-        audit_logs = await self.guild.fetch_audit_log(
+        audit_logs = await event.guild.fetch_audit_log(
             action_type=interactions.AuditLogEventType.MEMBER_BAN_ADD, limit=1
         )
         audit_log_entry = audit_logs.entries[0]
@@ -109,7 +106,7 @@ class RandomCommands(interactions.Extension):
                 ),
                 None,
             )
-            await self.logs_channel.send(
+            await event.guild.get_channel(variables.Channels.LOGS).send(
                 embeds=create_info_embed(
                     f"**{banned_user.tag} a été banni par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}"
                 )
