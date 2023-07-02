@@ -1,9 +1,33 @@
 import asyncio
+from datetime import timedelta
 
 import interactions
 
 import variables
 from utils import create_embed, create_info_embed
+
+NEW_WORD_MODAL = interactions.Modal(
+    interactions.ParagraphText(
+        label="Texte",
+        custom_id="text",
+    ),
+    title="Word",
+    custom_id="new_word_modal",
+)
+WORD_MODAL = interactions.Modal(
+    interactions.ParagraphText(
+        label="Texte",
+        custom_id="text",
+    ),
+    title="Word",
+    custom_id="word_modal",
+)
+EDIT_WORD_BUTTON = interactions.Button(
+    label="Editer",
+    custom_id="word_edit",
+    emoji="⚙️",
+    style=interactions.ButtonStyle.SUCCESS,
+)
 
 
 class RandomCommands(interactions.Extension):
@@ -117,7 +141,60 @@ class RandomCommands(interactions.Extension):
         interactions.Permissions.MANAGE_MESSAGES
     )
     async def copy(self, ctx: interactions.ContextMenuContext):
-        await ctx.send(
-            f"```{ctx.target.content}```",
-            ephemeral=True
+        await ctx.send(f"```{ctx.target.content}```", ephemeral=True)
+
+    @interactions.slash_command(name="pingn")
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    async def pingn(self, ctx: interactions.SlashContext):
+        """Ping tous les nouveaux"""
+        now = interactions.Timestamp.utcnow()
+        newbies = []
+        for member in ctx.guild.members:
+            if now - member.joined_at < timedelta(days=1):
+                newbies.append(member)
+        if not newbies:
+            return await ctx.send(
+                embed=create_info_embed("Aucun nouveau membre trouvé!"),
+                ephemeral=True,
+            )
+
+        send_button = interactions.Button(
+            style=interactions.ButtonStyle.GRAY,
+            custom_id="newbies_ping",
+            label="Ping tous les nouveaux",
         )
+        user_ids_string = " ".join([member.mention for member in newbies])
+        await ctx.send(f"`{user_ids_string}`", components=send_button, ephemeral=True)
+
+        try:
+            await self.bot.wait_for_component(components=send_button, timeout=30)
+            await ctx.channel.send(
+                f"{user_ids_string} **Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire #guide (message à changer)"
+            )
+        except asyncio.TimeoutError:
+            pass
+        # Small hack to delete the ephemeral /pingd message
+        await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
+
+    @interactions.slash_command(name="word")
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    async def word(self, ctx: interactions.SlashContext):
+        """Créer un message que le staff peut éditer"""
+        await ctx.send_modal(NEW_WORD_MODAL)
+        modal_ctx = await self.bot.wait_for_modal(NEW_WORD_MODAL)
+        text = modal_ctx.responses["text"]
+        await modal_ctx.send(text, components=EDIT_WORD_BUTTON)
+
+    @interactions.modal_callback("word_modal")
+    async def on_word_modal(self, ctx: interactions.ModalContext, text: str):
+        await ctx.edit(ctx.message, content=text)
+
+    @interactions.component_callback("word_edit")
+    async def on_word_edit_button(self, ctx: interactions.ComponentContext):
+        text = ctx.message.content or ""
+        WORD_MODAL.components[0].value = text
+        await ctx.send_modal(WORD_MODAL)
