@@ -63,7 +63,7 @@ class Guides(interactions.Extension):
         interactions.Permissions.MANAGE_MESSAGES
     )
     async def edit_guide(self, ctx: interactions.ContextMenuContext):
-        if ctx.channel.parent_id != variables.Channels.GUIDE:
+        if ctx.target.channel.parent_id != variables.Channels.GUIDE:
             return await ctx.send(
                 embed=create_error_embed(
                     f"Seul un message du bot dans un guide de <#{variables.Channels.GUIDE}> peut être édité!"
