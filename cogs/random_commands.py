@@ -52,11 +52,9 @@ class RandomCommands(interactions.Extension):
     )
     async def clear(self, ctx: interactions.SlashContext, number: int = 1):
         "Supprimer les x derniers messages"
-        await ctx.channel.purge(deletion_limit=number)
+        n = await ctx.channel.purge(deletion_limit=number)
         await ctx.send(
-            embeds=create_info_embed(
-                f"Tu as supprimé les {number} dernier(s) message(s)!"
-            ),
+            embeds=create_info_embed(f"Tu as supprimé les {n} dernier(s) message(s)!"),
             ephemeral=True,
         )
 
@@ -67,11 +65,9 @@ class RandomCommands(interactions.Extension):
     async def clear_after(self, ctx: interactions.ContextMenuContext):
         messages = await ctx.channel.history(limit=99, after=ctx.target_id).flatten()
         number = len(messages) + 1
-        await ctx.channel.purge(deletion_limit=number)
+        n = await ctx.channel.purge(deletion_limit=number)
         await ctx.send(
-            embeds=create_info_embed(
-                f"Tu as supprimé les {number} dernier(s) message(s)!"
-            ),
+            embeds=create_info_embed(f"Tu as supprimé les {n} dernier(s) message(s)!"),
             ephemeral=True,
         )
 
@@ -175,7 +171,7 @@ class RandomCommands(interactions.Extension):
             )
         except asyncio.TimeoutError:
             pass
-        # Small hack to delete the ephemeral /pingd message
+        # Small hack to delete the ephemeral /pingn message
         await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
 
     @interactions.slash_command(name="word")

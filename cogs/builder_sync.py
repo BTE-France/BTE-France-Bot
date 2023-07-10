@@ -46,5 +46,7 @@ class BuilderSync(interactions.Extension):
                     role=variables.Roles.BUILDER,
                     reason="Automatically added as a Builder!",
                 )
-                await member.remove_role(role=variables.Roles.BUILDER_NON_CONFIRME)
+                await member.remove_roles(
+                    [variables.Roles.DEBUTANT, variables.Roles.VISITEUR]
+                )
                 log(f"Added {member.user.tag} as a Builder!")
