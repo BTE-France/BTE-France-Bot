@@ -25,7 +25,7 @@ class Guides(interactions.Extension):
         await ctx.send_modal(modal)
         modal_ctx = await self.bot.wait_for_modal(modal)
         title, text = modal_ctx.responses["title"], modal_ctx.responses["text"]
-        guide_forum = ctx.guild.get_channel(variables.Channels.GUIDE)
+        guide_forum = await self.bot.fetch_channel(variables.Channels.GUIDE)
         post = await guide_forum.create_post(title, text)
         await modal_ctx.send(
             embed=create_info_embed(f"Le guide {post.mention} a été créé!"),
