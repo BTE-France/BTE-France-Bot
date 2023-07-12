@@ -31,7 +31,7 @@ EDIT_WORD_BUTTON = interactions.Button(
 
 
 class RandomCommands(interactions.Extension):
-    @interactions.slash_command(name="ping", scopes=[])
+    @interactions.slash_command(name="ping")
     async def ping(self, ctx: interactions.SlashContext):
         "Ping"
         await ctx.send(
@@ -173,24 +173,3 @@ class RandomCommands(interactions.Extension):
             pass
         # Small hack to delete the ephemeral /pingn message
         await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
-
-    @interactions.slash_command(name="word")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
-    async def word(self, ctx: interactions.SlashContext):
-        """Créer un message que le staff peut éditer"""
-        await ctx.send_modal(NEW_WORD_MODAL)
-        modal_ctx = await self.bot.wait_for_modal(NEW_WORD_MODAL)
-        text = modal_ctx.responses["text"]
-        await modal_ctx.send(text, components=EDIT_WORD_BUTTON)
-
-    @interactions.modal_callback("word_modal")
-    async def on_word_modal(self, ctx: interactions.ModalContext, text: str):
-        await ctx.edit(ctx.message, content=text)
-
-    @interactions.component_callback("word_edit")
-    async def on_word_edit_button(self, ctx: interactions.ComponentContext):
-        text = ctx.message.content or ""
-        WORD_MODAL.components[0].value = text
-        await ctx.send_modal(WORD_MODAL)
