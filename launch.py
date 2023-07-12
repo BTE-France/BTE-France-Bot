@@ -14,7 +14,9 @@ bot = interactions.Client(
     activity=interactions.Activity(
         type=interactions.ActivityType.WATCHING, name="/help"
     ),
-    intents=interactions.Intents.ALL,
+    intents=interactions.Intents.DEFAULT
+    | interactions.Intents.GUILD_MEMBERS
+    | interactions.Intents.MESSAGE_CONTENT,
 )
 
 for filename in os.listdir(Path(__file__).parent / "cogs"):
