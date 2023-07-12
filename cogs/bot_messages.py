@@ -2,6 +2,8 @@ import interactions
 
 from utils import create_error_embed, create_info_embed, log
 
+ZERO_WIDTH_SPACE_CHARACTER = "​"
+
 
 class BotMessages(interactions.Extension):
     @interactions.slash_command("bot")
@@ -20,7 +22,7 @@ class BotMessages(interactions.Extension):
         )
         await ctx.send_modal(modal)
         modal_ctx = await self.bot.wait_for_modal(modal)
-        text = convert_to_correct_text(modal_ctx.responses["text"])
+        text = modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER
         msg = await modal_ctx.channel.send(text)
         await modal_ctx.send(
             embed=create_info_embed(f"Message créé: {msg.jump_url}"), ephemeral=True
@@ -50,7 +52,7 @@ class BotMessages(interactions.Extension):
         modal_ctx = await self.bot.wait_for_modal(modal)
         title, text = (
             modal_ctx.responses["title"],
-            convert_to_correct_text(modal_ctx.responses["text"]),
+            modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER,
         )
         post = await forum.create_post(title, text)
         await modal_ctx.send(
@@ -69,7 +71,7 @@ class BotMessages(interactions.Extension):
                 embed=create_error_embed("Seul un message du bot peut être édité!"),
                 ephemeral=True,
             )
-        if not message.content.endswith("** **"):
+        if not message.content.endswith(ZERO_WIDTH_SPACE_CHARACTER):
             return await ctx.send(
                 embed=create_error_embed("Ce message du bot ne peut pas être édité!"),
                 ephemeral=True,
@@ -79,26 +81,17 @@ class BotMessages(interactions.Extension):
             interactions.ParagraphText(
                 label="Texte",
                 custom_id="text",
-                value=message.content.removesuffix("** **"),
+                value=message.content.removesuffix(ZERO_WIDTH_SPACE_CHARACTER),
                 required=True,
             ),
             title="Editer le message",
         )
         await ctx.send_modal(modal)
         modal_ctx = await self.bot.wait_for_modal(modal)
-        text = convert_to_correct_text(modal_ctx.responses["text"])
+        text = modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER
         await message.edit(content=text)
         await modal_ctx.send(
             embed=create_info_embed(f"Message édité: {message.jump_url}"),
             ephemeral=True,
         )
         log(f"Message ({message.jump_url}) was edited by {ctx.author.tag}.")
-
-
-def convert_to_correct_text(input: str) -> str:
-    text = input
-    # If the text ends with a correct bold/italic markdown (* or **), an extra space must be added
-    if text.endswith("*"):
-        text += " "
-    text += "** **"
-    return text
