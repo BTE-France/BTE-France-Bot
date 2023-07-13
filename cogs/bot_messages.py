@@ -31,7 +31,9 @@ class BotMessages(interactions.Extension):
         text = modal_ctx.responses["text"]
         if not validators.url(text):  # Text is not a valid image URL
             text += ZERO_WIDTH_SPACE_CHARACTER
-        msg = await modal_ctx.channel.send(text)
+        msg = await modal_ctx.channel.send(
+            text, allowed_mentions=interactions.AllowedMentions()
+        )
         await modal_ctx.send(
             embed=create_info_embed(f"Message créé: {msg.jump_url}"), ephemeral=True
         )
@@ -69,7 +71,9 @@ class BotMessages(interactions.Extension):
         )
         if not validators.url(text):  # Text is not a valid image URL
             text += ZERO_WIDTH_SPACE_CHARACTER
-        post = await forum.create_post(title, text)
+        post = await forum.create_post(
+            title, text, allowed_mentions=interactions.AllowedMentions()
+        )
         await modal_ctx.send(
             embed=create_info_embed(f"Post créé: {post.mention}"), ephemeral=True
         )
@@ -109,7 +113,9 @@ class BotMessages(interactions.Extension):
         text = modal_ctx.responses["text"]
         if not validators.url(text):  # Text is not a valid image URL
             text += ZERO_WIDTH_SPACE_CHARACTER
-        await message.edit(content=text)
+        await message.edit(
+            content=text, allowed_mentions=interactions.AllowedMentions()
+        )
         await modal_ctx.send(
             embed=create_info_embed(f"Message édité: {message.jump_url}"),
             ephemeral=True,
