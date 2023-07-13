@@ -1,4 +1,5 @@
 import interactions
+import validators
 
 from utils import create_error_embed, create_info_embed, log
 
@@ -27,7 +28,9 @@ class BotMessages(interactions.Extension):
         )
         await ctx.send_modal(modal)
         modal_ctx = await self.bot.wait_for_modal(modal)
-        text = modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER
+        text = modal_ctx.responses["text"]
+        if not validators.url(text):  # Text is not a valid image URL
+            text += ZERO_WIDTH_SPACE_CHARACTER
         msg = await modal_ctx.channel.send(text)
         await modal_ctx.send(
             embed=create_info_embed(f"Message créé: {msg.jump_url}"), ephemeral=True
@@ -62,8 +65,10 @@ class BotMessages(interactions.Extension):
         modal_ctx = await self.bot.wait_for_modal(modal)
         title, text = (
             modal_ctx.responses["title"],
-            modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER,
+            modal_ctx.responses["text"],
         )
+        if not validators.url(text):  # Text is not a valid image URL
+            text += ZERO_WIDTH_SPACE_CHARACTER
         post = await forum.create_post(title, text)
         await modal_ctx.send(
             embed=create_info_embed(f"Post créé: {post.mention}"), ephemeral=True
@@ -81,7 +86,9 @@ class BotMessages(interactions.Extension):
                 embed=create_error_embed("Seul un message du bot peut être édité!"),
                 ephemeral=True,
             )
-        if not message.content.endswith(ZERO_WIDTH_SPACE_CHARACTER):
+        if (not message.content.endswith(ZERO_WIDTH_SPACE_CHARACTER)) and (
+            not validators.url(message.content)
+        ):
             return await ctx.send(
                 embed=create_error_embed("Ce message du bot ne peut pas être édité!"),
                 ephemeral=True,
@@ -99,7 +106,9 @@ class BotMessages(interactions.Extension):
         )
         await ctx.send_modal(modal)
         modal_ctx = await self.bot.wait_for_modal(modal)
-        text = modal_ctx.responses["text"] + ZERO_WIDTH_SPACE_CHARACTER
+        text = modal_ctx.responses["text"]
+        if not validators.url(text):  # Text is not a valid image URL
+            text += ZERO_WIDTH_SPACE_CHARACTER
         await message.edit(content=text)
         await modal_ctx.send(
             embed=create_info_embed(f"Message édité: {message.jump_url}"),

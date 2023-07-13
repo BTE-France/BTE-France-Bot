@@ -4,3 +4,4 @@ mcstatus
 aiohttp
 Pillow
 deepl
+validators
