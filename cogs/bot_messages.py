@@ -17,7 +17,12 @@ class BotMessages(interactions.Extension):
     async def create_message(self, ctx: interactions.SlashContext):
         """Envoyer un message via le bot"""
         modal = interactions.Modal(
-            interactions.ParagraphText(label="Texte", custom_id="text", required=True),
+            interactions.ParagraphText(
+                label="Texte (max 2000 caractères)",
+                custom_id="text",
+                max_length=2000,
+                required=True,
+            ),
             title="Créer un nouveau message via le bot",
         )
         await ctx.send_modal(modal)
@@ -45,7 +50,12 @@ class BotMessages(interactions.Extension):
             interactions.ShortText(
                 label="Titre du post", custom_id="title", required=True, max_length=100
             ),
-            interactions.ParagraphText(label="Texte", custom_id="text", required=True),
+            interactions.ParagraphText(
+                label="Texte (max 2000 caractères)",
+                custom_id="text",
+                max_length=2000,
+                required=True,
+            ),
             title="Créer un nouveau post dans le forum",
         )
         await ctx.send_modal(modal)
@@ -79,9 +89,10 @@ class BotMessages(interactions.Extension):
 
         modal = interactions.Modal(
             interactions.ParagraphText(
-                label="Texte",
+                label="Texte (max 2000 caractères)",
                 custom_id="text",
                 value=message.content.removesuffix(ZERO_WIDTH_SPACE_CHARACTER),
+                max_length=2000,
                 required=True,
             ),
             title="Editer le message",
