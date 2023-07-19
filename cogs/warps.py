@@ -28,16 +28,14 @@ LUCKPERMS_PATTERN = re.compile(
 RANK_DICT = {
     "default": "Visiteur",
     "debutant": "Débutant",
-    "builders": "Builder",
+    "builder": "Builder",
     "contremaitre": "Contremaître",
     "architecte": "Architecte",
     "ingenieur": "Ingénieur",
-    "aide_archive": "Aide Archiviste",
     "archiviste": "Archiviste",
     "helper": "Helper",
     "dev": "Développeur",
-    "admin": "Staff",
-    "owner": "Fondateur",
+    "admin": "Admin",
 }
 EDIT_WARP_BUTTON = interactions.Button(
     label="Editer",
@@ -263,7 +261,9 @@ class Warps(interactions.Extension):
                 color=0x00FF00 if action == "promote" else 0xFF0000,
             )
             await self.debutant_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
-            log(f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}")
+            log(
+                f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}"
+            )
 
         if match := WARP_PATTERN.search(message):
             await warp_regex(match)
@@ -291,12 +291,18 @@ class Warps(interactions.Extension):
     @interactions.component_callback("warp_edit")
     async def on_warp_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_WARP_MODAL
-        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
+        desc = (
+            ctx.message.embeds[0].description.replace("Information: ", "")
+            if ctx.message.embeds[0].description
+            else ""
+        )
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("warp_modal")
-    async def on_warp_modal_answer(self, ctx: interactions.ModalContext, information: str):
+    async def on_warp_modal_answer(
+        self, ctx: interactions.ModalContext, information: str
+    ):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
@@ -310,12 +316,18 @@ class Warps(interactions.Extension):
     @interactions.component_callback("perms_edit")
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_PERMS_MODAL
-        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
+        desc = (
+            ctx.message.embeds[0].description.replace("Information: ", "")
+            if ctx.message.embeds[0].description
+            else ""
+        )
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("perms_modal")
-    async def on_perms_modal_answer(self, ctx: interactions.ModalContext, information: str):
+    async def on_perms_modal_answer(
+        self, ctx: interactions.ModalContext, information: str
+    ):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)

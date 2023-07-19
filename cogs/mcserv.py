@@ -30,9 +30,8 @@ STAFF_USERNAMES = [
     "azguendare",
     "dstarmc",
 ]
-
-# List of servers to get the status from.
-SERVERS = [("btefr.thesmyler.fr:7000", "Serveur Moddé 1.12 - IP: btefrance.fr")]
+SERVER_IP = "btefr.thesmyler.fr:7011"
+SERVER_DESC = "Serveur Java 1.20.1 - IP: btefrance.fr"
 
 
 def escape_markdown(string: str) -> str:
@@ -53,32 +52,28 @@ class MCServ(interactions.Extension):
             include_thumbnail=True,
         )
 
-        for _server in SERVERS:
-            ip, desc = _server
-            try:
-                query = await (await JavaServer.async_lookup(ip)).async_query()
+        try:
+            query = await (await JavaServer.async_lookup(SERVER_IP)).async_query()
 
-            except (ConnectionRefusedError, socket.timeout):
-                embed_value = ":x: Serveur hors ligne!"
-                embed_value += "\n\n_ _" if _server == SERVERS[0] else ""
-                embed.add_field(name=desc, value=embed_value, inline=False)
+        except (ConnectionRefusedError, socket.timeout):
+            embed_value = ":x: Serveur hors ligne!"
 
-            else:
-                staff, players = [], []
-                for player in query.players.names:
-                    if player.lower() in STAFF_USERNAMES:
-                        staff.append(f"**{escape_markdown(player)}**")
-                    else:
-                        players.append(escape_markdown(player))
+        else:
+            staff, players = [], []
+            for player in query.players.names:
+                if player.lower() in STAFF_USERNAMES:
+                    staff.append(f"**{escape_markdown(player)}**")
+                else:
+                    players.append(escape_markdown(player))
 
-                staff.sort(key=str.lower)
-                players.sort(key=str.lower)
+            staff.sort(key=str.lower)
+            players.sort(key=str.lower)
 
-                len_players = len(staff) + len(players)
-                title = f"{len_players} {'Joueurs Connectés' if len_players != 1 else 'Joueur Connecté'}"
+            len_players = len(staff) + len(players)
+            title = f"{len_players} {'Joueurs Connectés' if len_players != 1 else 'Joueur Connecté'}"
 
-                txt = ", ".join(staff + players)
-                value = f":white_check_mark: Serveur en ligne!\n\n**{title}**\n" + txt
-                embed.add_field(name=desc, value=value, inline=False)
+            txt = ", ".join(staff + players)
+            embed_value = f":white_check_mark: Serveur en ligne!\n\n**{title}**\n" + txt
 
+        embed.add_field(name=SERVER_DESC, value=embed_value, inline=False)
         await ctx.send(embeds=embed)
