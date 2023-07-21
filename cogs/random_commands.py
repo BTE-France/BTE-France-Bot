@@ -92,7 +92,7 @@ class RandomCommands(interactions.Extension):
         "Lis les règles"
         await ctx.send(
             embeds=create_info_embed(
-                f"As-tu bien lu le salon <#{variables.Channels.COMMENT_REJOINDRE}>?"
+                f"As-tu bien lu le salon <#{variables.Channels.DEBUTEZ_ICI}>?"
             )
         )
 
