@@ -175,6 +175,7 @@ class Ticket(interactions.Extension):
         modal_ctx = await self.bot.wait_for_modal(DEBUTANT_MODAL)
         pseudo = modal_ctx.responses["pseudo"]
         ville = modal_ctx.responses["ville"]
+        lieu = modal_ctx.responses["lieu"]
 
         await modal_ctx.send(
             embed=create_info_embed("Demande Débutant créée!"), ephemeral=True
@@ -184,7 +185,8 @@ class Ticket(interactions.Extension):
                 description=f"## **Demande de Débutant de {ctx.author.mention}**",
                 fields=[
                     ("Pseudo Minecraft", pseudo, False),
-                    ("Lieu souhaité de construction", ville, False),
+                    ("Ville", ville, False),
+                    ("Lieu souhaité de construction", lieu, False),
                 ],
                 color=0x0000FF,
                 footer_image=ctx.author.display_avatar.url,
