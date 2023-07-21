@@ -7,41 +7,11 @@ import variables
 from utils import create_embed, create_error_embed, create_info_embed, log
 
 BUILDER_BUTTON_PATTERN = re.compile(r"builder_(validate|deny)_([0-9]+)")
-BUILDER_TEXT = """# <a:btefrance:844495279977791498> Comment devenir Builder?
-
-Une fois que vous êtes satisfaits de vos constructions et que vous pensez pouvoir demander à devenir un Builder, suivez ces étapes:
-- Cliquez sur le bouton `Faire sa demande Builder` ci-dessous. Cela vous créera un fil de discussion où des membres du Staff pourront vous donner leurs ressentis sur vos constructions.
-- Dans ce fil, veuillez envoyer:
- - Une photo de vos ___***deux***___ bâtiments __Minecraft__
- - Une photo ___***StreetView***___ de vos deux bâtiments de candidature, prenez de préférence le même point de vue qu'en jeu
- - L'adresse **exacte** (ou monument) de vos bâtiments.
-
-> *A noter : au minimum deux bâtiments sont requis, sans quoi la candidature est rejetée*
-> *Les bâtiments pris en photo doivent être les vôtres (cas des zones débutants si vous construisez dedans)*
-
-## Les demandes seront traitées le plus rapidement possible, une fois la candidature validée et le grade donné, celle-ci sera supprimée du salon"""
 BUILDER_THREAD_TEXT = """### Envoyer ici :
 * Une photo de vos deux bâtiments Minecraft
 * Une photo StreetView de vos deux bâtiments de candidature, de préférence le même point de vue qu'en jeu
 * L'adresse exacte (ou monument) de vos bâtiments."""
 DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)")
-DEBUTANT_TEXT = """#  <:btefr:1111011027300139078> ・Devenir débutant
-
-Commencez à construire sur le serveur en demandant votre grade débutant.
-
-> Ce grade vous offre 2 possibilités :
-> _ _
-> - Commencer où vous voulez sur un terrain vierge (hors Paris)
-> _ _
-> - Commencer en zone débutante si vous ne savez pas où construire : `/zones`
-
-> Pour cela, cliquez sur le bouton ci-dessous et indiquez dans la demande :
-> - Votre pseudo Minecraft
-> - L'endroit exact où vous voulez construire (On conseille de commencer par des habitations simples)
-
-Vous serez ping lorsqu'un staff sera connecté sur le serveur pour qu'il puisse vous mettre le grade.
-
-Pour construire à Paris, vous devrez faire vos preuves dans une zone débutant à Paris avant de choisir votre endroit."""
 DEBUTANT_MODAL = interactions.Modal(
     interactions.ShortText(
         label="Pseudo Minecraft",
@@ -70,7 +40,6 @@ class Ticket(interactions.Extension):
         """Créer le système de ticket pour devenir builder"""
         await ctx.send("Ticket Builder créé", ephemeral=True)
         await ctx.channel.send(
-            BUILDER_TEXT,
             components=interactions.Button(
                 style=interactions.ButtonStyle.SUCCESS,
                 label="Faire sa demande Builder",
@@ -173,7 +142,6 @@ class Ticket(interactions.Extension):
         """Créer le système de ticket pour devenir débutant"""
         await ctx.send("Ticket Débutant créé", ephemeral=True)
         await ctx.channel.send(
-            DEBUTANT_TEXT,
             components=interactions.Button(
                 style=interactions.ButtonStyle.SUCCESS,
                 label="Faire sa demande Débutant",
