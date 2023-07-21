@@ -18,9 +18,14 @@ DEBUTANT_MODAL = interactions.Modal(
         custom_id="pseudo",
     ),
     interactions.ShortText(
-        label="Lieu souhaité de construction",
+        label="Ville",
+        custom_id="ville",
+        placeholder="Ex: Paris, Lyon, Montcuq...",
+    ),
+    interactions.ShortText(
+        label="Plus de détails",
         custom_id="lieu",
-        placeholder="Ex: Paris 6ème, Lyon, Marseille...",
+        placeholder="Ex: 6ème arrondissement, mairie, nom de la rue...",
     ),
     title="Demande Débutant",
     custom_id="debutant_modal",
@@ -213,8 +218,10 @@ class Ticket(interactions.Extension):
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
-        pseudo, lieu = embed.fields[0].value, embed.fields[1].value
-        await author.edit_nickname(f"{pseudo} [{lieu}]")
+        pseudo, ville = embed.fields[0].value, embed.fields[1].value
+        new_pseudo = f"{pseudo} [{ville}]"
+        if len(new_pseudo) <= 32:
+            await author.edit_nickname(new_pseudo)
         await ctx.message.delete()
         log(f"{ctx.author.tag} validated {author.tag} débutant request.")
 
