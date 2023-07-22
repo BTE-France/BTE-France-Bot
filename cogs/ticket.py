@@ -4,7 +4,13 @@ import re
 import interactions
 
 import variables
-from utils import create_embed, create_error_embed, create_info_embed, log
+from utils import (
+    create_embed,
+    create_error_embed,
+    create_info_embed,
+    escape_minecraft_username_markdown,
+    log,
+)
 
 BUILDER_BUTTON_PATTERN = re.compile(r"builder_(validate|deny)_([0-9]+)")
 BUILDER_THREAD_TEXT = """### Envoyer ici :
@@ -184,7 +190,11 @@ class Ticket(interactions.Extension):
             embed=create_embed(
                 description=f"## **Demande de Débutant de {ctx.author.mention}**",
                 fields=[
-                    ("Pseudo Minecraft", pseudo, False),
+                    (
+                        "Pseudo Minecraft",
+                        escape_minecraft_username_markdown(pseudo),
+                        False,
+                    ),
                     ("Ville", ville, False),
                     ("Lieu souhaité de construction", lieu, False),
                 ],
@@ -220,7 +230,7 @@ class Ticket(interactions.Extension):
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
-        pseudo, ville = embed.fields[0].value, embed.fields[1].value
+        pseudo, ville = embed.fields[0].value.replace("\\", ""), embed.fields[1].value
         new_pseudo = f"{pseudo} [{ville}]"
         if len(new_pseudo) <= 32:
             await author.edit_nickname(new_pseudo)
