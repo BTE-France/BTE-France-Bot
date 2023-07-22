@@ -8,7 +8,7 @@ import aiohttp
 import interactions
 
 import variables
-from utils import create_embed, log
+from utils import create_embed, escape_minecraft_username_markdown, log
 
 
 @dataclass
@@ -251,9 +251,9 @@ class Warps(interactions.Extension):
             if not (rank := await self.get_new_rank(player)):
                 return
             title = (
-                f"{player} promu au rang de {rank}."
+                f"{escape_minecraft_username_markdown(player)} promu au rang de {rank}."
                 if action == "promote"
-                else f"{player} rétrogradé au rang de {rank}."
+                else f"{escape_minecraft_username_markdown(player)} rétrogradé au rang de {rank}."
             )
             embed = create_embed(
                 title=title,

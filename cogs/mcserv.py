@@ -3,7 +3,7 @@ import socket
 import interactions
 from mcstatus import JavaServer
 
-from utils import create_embed
+from utils import create_embed, escape_minecraft_username_markdown
 
 STAFF_USERNAMES = [
     "lennah_",
@@ -34,12 +34,6 @@ SERVER_IP = "btefr.thesmyler.fr:7011"
 SERVER_DESC = "Serveur Java 1.20.1 - IP: btefrance.fr"
 
 
-def escape_markdown(string: str) -> str:
-    return string.replace("_", r"\_").replace(
-        "*", r"\*"
-    )  # Escape markdown symbols that could be present in players' names
-
-
 class MCServ(interactions.Extension):
     @interactions.slash_command(name="mc")
     async def mc(self, ctx: interactions.SlashContext):
@@ -62,9 +56,9 @@ class MCServ(interactions.Extension):
             staff, players = [], []
             for player in query.players.names:
                 if player.lower() in STAFF_USERNAMES:
-                    staff.append(f"**{escape_markdown(player)}**")
+                    staff.append(f"**{escape_minecraft_username_markdown(player)}**")
                 else:
-                    players.append(escape_markdown(player))
+                    players.append(escape_minecraft_username_markdown(player))
 
             staff.sort(key=str.lower)
             players.sort(key=str.lower)
