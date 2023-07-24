@@ -167,7 +167,7 @@ class RandomCommands(interactions.Extension):
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
             await ctx.channel.send(
-                f"{user_ids_string} **Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire #guide (message à changer)"
+                f"{user_ids_string} **Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
             )
         except asyncio.TimeoutError:
             pass
