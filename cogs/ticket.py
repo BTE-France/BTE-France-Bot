@@ -106,7 +106,7 @@ class Ticket(interactions.Extension):
 
         # Add author & all staff MC
         await thread.add_member(ctx.author)
-        msg = await thread.send(f"<@&{variables.Roles.STAFF_MINECRAFT}>", silent=True)
+        msg = await thread.send(f"<@&{variables.Roles.EVALUATEUR}>", silent=True)
         await msg.delete()
 
     @interactions.component_callback(BUILDER_BUTTON_PATTERN)
