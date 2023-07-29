@@ -139,6 +139,69 @@ class RandomCommands(interactions.Extension):
     async def copy(self, ctx: interactions.ContextMenuContext):
         await ctx.send(f"```{ctx.target.content}```", ephemeral=True)
 
+    @interactions.slash_command(name="role")
+    @interactions.slash_default_member_permission(
+        interactions.Permissions.MANAGE_MESSAGES
+    )
+    async def role(self, ctx: interactions.SlashContext):
+        ...
+
+    @role.subcommand("social")
+    async def role_social(self, ctx: interactions.SlashContext):
+        msg = await ctx.channel.send(
+            f"Si tu souhaites recevoir le rôle <@{variables.Roles.SOCIAL}>, clique dessous!",
+            components=interactions.Button(
+                style=interactions.ButtonStyle.GREEN,
+                label="Recevoir rôle Social",
+                custom_id="role_social",
+            ),
+            allowed_mentions=interactions.AllowedMentions(),
+        )
+        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"))
+
+    @interactions.component_callback("role_social")
+    async def on_role_social_button(self, ctx: interactions.ComponentContext):
+        if variables.Roles.SOCIAL in ctx.author.roles:
+            await ctx.author.remove_role(variables.Roles.SOCIAL)
+            await ctx.send(
+                embeds=create_info_embed("Tu n'as plus le rôle Social."),
+                ephemeral=True,
+            )
+        else:
+            await ctx.author.add_role(variables.Roles.SOCIAL)
+            await ctx.send(
+                embeds=create_info_embed("Tu as reçu le rôle Social!"),
+                ephemeral=True,
+            )
+
+    @role.subcommand("event")
+    async def role_event(self, ctx: interactions.SlashContext):
+        msg = await ctx.channel.send(
+            f"Si tu souhaites recevoir le rôle <@{variables.Roles.EVENT}>, clique dessous!",
+            components=interactions.Button(
+                style=interactions.ButtonStyle.GREEN,
+                label="Recevoir rôle Event",
+                custom_id="role_event",
+            ),
+            allowed_mentions=interactions.AllowedMentions(),
+        )
+        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"))
+
+    @interactions.component_callback("role_event")
+    async def on_role_event_button(self, ctx: interactions.ComponentContext):
+        if variables.Roles.EVENT in ctx.author.roles:
+            await ctx.author.remove_role(variables.Roles.EVENT)
+            await ctx.send(
+                embeds=create_info_embed("Tu n'as plus le rôle Event."),
+                ephemeral=True,
+            )
+        else:
+            await ctx.author.add_role(variables.Roles.EVENT)
+            await ctx.send(
+                embeds=create_info_embed("Tu as reçu le rôle Event!"),
+                ephemeral=True,
+            )
+
     @interactions.slash_command(name="pingn")
     @interactions.slash_default_member_permission(
         interactions.Permissions.MANAGE_MESSAGES
