@@ -149,7 +149,7 @@ class RandomCommands(interactions.Extension):
     @role.subcommand("social")
     async def role_social(self, ctx: interactions.SlashContext):
         msg = await ctx.channel.send(
-            f"Si tu souhaites recevoir le rôle <@{variables.Roles.SOCIAL}>, clique dessous!",
+            f"Si tu souhaites recevoir le rôle <@&{variables.Roles.SOCIAL}>, clique dessous!",
             components=interactions.Button(
                 style=interactions.ButtonStyle.GREEN,
                 label="Recevoir rôle Social",
@@ -157,7 +157,9 @@ class RandomCommands(interactions.Extension):
             ),
             allowed_mentions=interactions.AllowedMentions(),
         )
-        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"))
+        await ctx.send(
+            embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True
+        )
 
     @interactions.component_callback("role_social")
     async def on_role_social_button(self, ctx: interactions.ComponentContext):
@@ -177,7 +179,7 @@ class RandomCommands(interactions.Extension):
     @role.subcommand("event")
     async def role_event(self, ctx: interactions.SlashContext):
         msg = await ctx.channel.send(
-            f"Si tu souhaites recevoir le rôle <@{variables.Roles.EVENT}>, clique dessous!",
+            f"Si tu souhaites recevoir le rôle <@&{variables.Roles.EVENT}>, clique dessous!",
             components=interactions.Button(
                 style=interactions.ButtonStyle.GREEN,
                 label="Recevoir rôle Event",
@@ -185,7 +187,9 @@ class RandomCommands(interactions.Extension):
             ),
             allowed_mentions=interactions.AllowedMentions(),
         )
-        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"))
+        await ctx.send(
+            embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True
+        )
 
     @interactions.component_callback("role_event")
     async def on_role_event_button(self, ctx: interactions.ComponentContext):
