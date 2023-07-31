@@ -32,6 +32,7 @@ DEBUTANT_MODAL = interactions.Modal(
         label="Plus de détails",
         custom_id="lieu",
         placeholder="Ex: 6ème arrondissement, mairie, nom de la rue...",
+        required=False,
     ),
     title="Demande Débutant",
     custom_id="debutant_modal",
@@ -163,7 +164,9 @@ class Ticket(interactions.Extension):
 
     @interactions.component_callback("ticket_debutant")
     async def on_debutant_button(self, ctx: interactions.ComponentContext):
-        if not ctx.author.has_role(variables.Roles.VISITEUR):
+        if ctx.author.has_role(variables.Roles.BUILDER) or ctx.author.has_role(
+            variables.Roles.DEBUTANT
+        ):
             return await ctx.send(
                 embed=create_error_embed(
                     "Seuls les visiteurs peuvent faire une demande Débutant!"
@@ -171,7 +174,7 @@ class Ticket(interactions.Extension):
                 ephemeral=True,
             )
 
-        if str(ctx.author.id) in await self.get_all_debutant_user_ids(ctx.channel):
+        if str(ctx.author.id) in await self.get_all_debutant_user_ids(ctx.guild):
             return await ctx.send(
                 embed=create_error_embed("Tu as déjà créé une demande Débutant!"),
                 ephemeral=True,
@@ -183,10 +186,8 @@ class Ticket(interactions.Extension):
         ville = modal_ctx.responses["ville"]
         lieu = modal_ctx.responses["lieu"]
 
-        await modal_ctx.send(
-            embed=create_info_embed("Demande Débutant créée!"), ephemeral=True
-        )
-        await ctx.channel.send(
+        thread = await ctx.guild.fetch_thread(variables.Channels.DEBUTANT_THREAD)
+        msg = await thread.send(
             embed=create_embed(
                 description=f"## **Demande de Débutant de {ctx.author.mention}**",
                 fields=[
@@ -196,7 +197,7 @@ class Ticket(interactions.Extension):
                         False,
                     ),
                     ("Ville", ville, False),
-                    ("Lieu souhaité de construction", lieu, False),
+                    ("Plus de détails", lieu or "/", False),
                 ],
                 color=0x0000FF,
                 footer_image=ctx.author.display_avatar.url,
@@ -209,6 +210,14 @@ class Ticket(interactions.Extension):
                 custom_id=f"debutant_validate_{ctx.author.id}",
             ),
         )
+        await modal_ctx.send(
+            embed=create_info_embed(f"Demande Débutant créée: {msg.jump_url}"),
+            ephemeral=True,
+        )
+
+        # Silently add user to the thread
+        msg = await thread.send(ctx.author.mention, silent=True)
+        await msg.delete()
 
     @interactions.component_callback(DEBUTANT_BUTTON_PATTERN)
     async def on_debutant_validate(self, ctx: interactions.ComponentContext):
@@ -230,12 +239,14 @@ class Ticket(interactions.Extension):
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
+        await ctx.message.delete()
+        log(f"{ctx.author.tag} validated {author.tag} débutant request.")
+
+        # Rename user, can throw error if the user has admin perms
         pseudo, ville = embed.fields[0].value.replace("\\", ""), embed.fields[1].value
         new_pseudo = f"{pseudo} [{ville}]"
         if len(new_pseudo) <= 32:
             await author.edit_nickname(new_pseudo)
-        await ctx.message.delete()
-        log(f"{ctx.author.tag} validated {author.tag} débutant request.")
 
     @interactions.slash_command(name="pingd")
     @interactions.slash_default_member_permission(
@@ -243,15 +254,15 @@ class Ticket(interactions.Extension):
     )
     async def pingd(self, ctx: interactions.SlashContext):
         """Ping toutes les personnes ayant fait une demande débutant"""
-        if not ctx.channel == variables.Channels.DEBUTANT:
+        if not ctx.channel == variables.Channels.DEBUTANT_THREAD:
             return await ctx.send(
                 embed=create_error_embed(
-                    f"La commande ne peut être utilisée que dans <#{variables.Channels.DEBUTANT}>!"
+                    f"La commande ne peut être utilisée que dans <#{variables.Channels.DEBUTANT_THREAD}>!"
                 ),
                 ephemeral=True,
             )
 
-        user_ids = await self.get_all_debutant_user_ids(ctx.channel)
+        user_ids = await self.get_all_debutant_user_ids(ctx.guild)
         if not user_ids:
             return await ctx.send(
                 embed=create_info_embed("Aucune demande débutant trouvée!"),
@@ -277,9 +288,10 @@ class Ticket(interactions.Extension):
         # Small hack to delete the ephemeral /pingd message
         await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
 
-    async def get_all_debutant_user_ids(self, channel: interactions.GuildText):
+    async def get_all_debutant_user_ids(self, guild: interactions.Guild):
         custom_ids: list[str] = []
-        messages = await channel.fetch_messages(limit=100)
+        thread = await guild.fetch_thread(variables.Channels.DEBUTANT_THREAD)
+        messages = await thread.fetch_messages(limit=100)
         for message in messages:
             if message.components:
                 for actionrow in message.components:
