@@ -18,25 +18,6 @@ BUILDER_THREAD_TEXT = """### Envoyer ici :
 * Une photo StreetView de vos deux bâtiments de candidature, de préférence le même point de vue qu'en jeu
 * L'adresse exacte (ou monument) de vos bâtiments."""
 DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)")
-DEBUTANT_MODAL = interactions.Modal(
-    interactions.ShortText(
-        label="Pseudo Minecraft",
-        custom_id="pseudo",
-    ),
-    interactions.ShortText(
-        label="Ville",
-        custom_id="ville",
-        placeholder="Ex: Paris, Lyon, Montcuq...",
-    ),
-    interactions.ShortText(
-        label="Plus de détails",
-        custom_id="lieu",
-        placeholder="Ex: 6ème arrondissement, mairie, nom de la rue...",
-        required=False,
-    ),
-    title="Demande Débutant",
-    custom_id="debutant_modal",
-)
 
 
 class Ticket(interactions.Extension):
@@ -180,6 +161,24 @@ class Ticket(interactions.Extension):
                 ephemeral=True,
             )
 
+        DEBUTANT_MODAL = interactions.Modal(
+            interactions.ShortText(
+                label="Pseudo Minecraft",
+                custom_id="pseudo",
+            ),
+            interactions.ShortText(
+                label="Ville",
+                custom_id="ville",
+                placeholder="Ex: Paris, Lyon, Montcuq...",
+            ),
+            interactions.ShortText(
+                label="Plus de détails",
+                custom_id="lieu",
+                placeholder="Ex: 6ème arrondissement, mairie, nom de la rue...",
+                required=False,
+            ),
+            title="Demande Débutant",
+        )
         await ctx.send_modal(DEBUTANT_MODAL)
         modal_ctx = await self.bot.wait_for_modal(DEBUTANT_MODAL)
         pseudo = modal_ctx.responses["pseudo"]
