@@ -165,6 +165,7 @@ class Ticket(interactions.Extension):
             interactions.ShortText(
                 label="Pseudo Minecraft",
                 custom_id="pseudo",
+                max_length=20,
             ),
             interactions.ShortText(
                 label="Ville",
@@ -243,9 +244,14 @@ class Ticket(interactions.Extension):
 
         # Rename user, can throw error if the user has admin perms
         pseudo, ville = embed.fields[0].value.replace("\\", ""), embed.fields[1].value
-        new_pseudo = f"{pseudo} [{ville}]"
-        if len(new_pseudo) <= 32:
-            await author.edit_nickname(new_pseudo)
+        nickname = f"{pseudo} ["
+        num_characters_available = 31 - len(nickname)
+        if len(ville) > num_characters_available:
+            nickname += ville[: num_characters_available - 3] + "..."
+        else:
+            nickname += ville
+        nickname += "]"
+        await author.edit_nickname(nickname)
 
     @interactions.slash_command(name="pingd")
     @interactions.slash_default_member_permission(
