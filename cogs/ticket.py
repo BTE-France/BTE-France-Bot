@@ -286,7 +286,7 @@ class Ticket(interactions.Extension):
             await self.bot.wait_for_component(components=send_button, timeout=30)
             await ctx.channel.send(
                 user_ids_string
-                + " **Un membre du staff est connecté sur le serveur pour vous passer débutant!**"
+                + " **Un staff est connecté pour vous donner le rôle, connectez-vous EN JEU pour obtenir le grade Débutant!**"
             )
         except asyncio.TimeoutError:
             pass
