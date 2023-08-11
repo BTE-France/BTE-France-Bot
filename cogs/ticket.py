@@ -51,6 +51,14 @@ class Ticket(interactions.Extension):
                 ephemeral=True,
             )
 
+        if variables.Roles.DEBUTANT not in ctx.author.roles:
+            return await ctx.send(
+                embed=create_error_embed(
+                    f"Tu ne peux pas créer de demande car tu n'es pas encore Débutant!\nPour devenir Débutant, fais ta demande dans <#{variables.Channels.DEBUTANT}>."
+                ),
+                ephemeral=True,
+            )
+
         # Check if user has already created a thread
         thread_name = ctx.author.tag
         threads = (await ctx.channel.fetch_active_threads()).threads
