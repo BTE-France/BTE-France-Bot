@@ -328,5 +328,6 @@ class Ticket(interactions.Extension):
     @interactions.Task.create(interactions.IntervalTrigger(seconds=10))
     async def delete_old_debutant_tickets(self):
         for message in self.old_messages:
+            log(f"Automatically deleted débutant ticket with ID: {int(message.id)}")
             self.old_messages.remove(message)
             await message.delete()
