@@ -1,5 +1,6 @@
 import asyncio
 import re
+from datetime import timedelta
 
 import interactions
 
@@ -21,6 +22,11 @@ DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)")
 
 
 class Ticket(interactions.Extension):
+    @interactions.listen(interactions.events.Startup)
+    async def on_start(self):
+        self.old_messages: list[interactions.Message] = []
+        self.delete_old_debutant_tickets.start()
+
     @interactions.slash_command("ticket")
     @interactions.slash_default_member_permission(
         interactions.Permissions.ADMINISTRATOR
@@ -302,17 +308,25 @@ class Ticket(interactions.Extension):
         await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
 
     async def get_all_debutant_user_ids(self, guild: interactions.Guild):
-        custom_ids: list[str] = []
         thread = await guild.fetch_thread(variables.Channels.DEBUTANT_THREAD)
         messages = await thread.fetch_messages(limit=100)
+        user_ids: list[str] = []
+        now = interactions.Timestamp.utcnow()
         for message in messages:
             if message.components:
                 for actionrow in message.components:
                     for component in actionrow.components:
-                        custom_ids.append(component.custom_id)
+                        if match := DEBUTANT_BUTTON_PATTERN.search(component.custom_id):
+                            if now - message.timestamp > timedelta(days=10):
+                                self.old_messages.append(message)
+                            else:
+                                user_ids.append(match.group(1))
+                            break
 
-        user_ids: list[str] = []
-        for custom_id in custom_ids:
-            if match := DEBUTANT_BUTTON_PATTERN.search(custom_id):
-                user_ids.append(match.group(1))
         return user_ids
+
+    @interactions.Task.create(interactions.IntervalTrigger(seconds=10))
+    async def delete_old_debutant_tickets(self):
+        for message in self.old_messages:
+            self.old_messages.remove(message)
+            await message.delete()
