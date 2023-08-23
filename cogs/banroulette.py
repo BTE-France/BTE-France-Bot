@@ -20,15 +20,12 @@ class BanRoulette(interactions.Extension):
         name="user",
         description="Utilisateur à passer à la Ban Roulette",
         opt_type=interactions.OptionType.USER,
+        required=True,
     )
-    async def banroulette(
-        self, ctx: interactions.SlashContext, user: interactions.Member
-    ):
+    async def banroulette(self, ctx: interactions.SlashContext, user: interactions.Member):
         "Lance la Ban Roulette"
         numbers = ["1...", "2...", "3..."]
-        embed: interactions.Embed = create_embed(
-            title="Ban Roulette", include_thumbnail=True
-        )
+        embed: interactions.Embed = create_embed(title="Ban Roulette", include_thumbnail=True)
         message: interactions.Message = await ctx.send(embeds=embed)
         await asyncio.sleep(0.5)
         for i in range(len(numbers)):
