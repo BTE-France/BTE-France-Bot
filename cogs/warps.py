@@ -84,9 +84,7 @@ class Warps(interactions.Extension):
         "Liste des meilleurs Warps BTE France"
         # Randomize warps and chunk in 10 warps (max embeds per message is 10)
         random.shuffle(WARPS)
-        chunked_warps_list = [
-            WARPS[i : i + 10] for i in range(0, len(WARPS), 10)  # noqa
-        ]  # noqa
+        chunked_warps_list = [WARPS[i : i + 10] for i in range(0, len(WARPS), 10)]  # noqa
 
         # Create all embeds
         chunked_embeds = []
@@ -104,9 +102,7 @@ class Warps(interactions.Extension):
 
         for i, embed_list in enumerate(chunked_embeds):
             await ctx.author.send(
-                ":flag_fr: **Liste des meilleurs warps sur le serveur BTE France** :flag_fr:"
-                if i == 0
-                else "",
+                ":flag_fr: **Liste des meilleurs warps sur le serveur BTE France** :flag_fr:" if i == 0 else "",
                 embeds=embed_list,
             )
         await ctx.send("Regarde tes MPs! :mailbox:")

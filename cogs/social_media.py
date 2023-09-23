@@ -36,10 +36,7 @@ class SocialMedia(interactions.Extension):
     @interactions.slash_option(
         "media",
         "Nom du réseau",
-        choices=[
-            interactions.SlashCommandChoice(name=social.id, value=social.id)
-            for social in SOCIALS
-        ],
+        choices=[interactions.SlashCommandChoice(name=social.id, value=social.id) for social in SOCIALS],
         opt_type=interactions.OptionType.STRING,
         required=True,
     )

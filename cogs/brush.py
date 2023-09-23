@@ -37,9 +37,7 @@ class Brush(interactions.Extension):
                     weights.append(int(result[0]))
                 except ValueError:  # Weight is not a number
                     await ctx.send(
-                        embeds=create_error_embed(
-                            f"Pourcentage incorrect détecté: {result[0]}"
-                        ),
+                        embeds=create_error_embed(f"Pourcentage incorrect détecté: {result[0]}"),
                         ephemeral=True,
                     )
                     return
@@ -49,9 +47,7 @@ class Brush(interactions.Extension):
                     materials.append(result[0])
             else:
                 await ctx.send(
-                    embeds=create_error_embed(
-                        f"Syntaxe incorrecte dans les matériaux détectée: {result}"
-                    ),
+                    embeds=create_error_embed(f"Syntaxe incorrecte dans les matériaux détectée: {result}"),
                     ephemeral=True,
                 )
                 return
@@ -60,9 +56,7 @@ class Brush(interactions.Extension):
             weights = [100 / len(materials) for _ in materials]
         else:
             weights = [100 * weight / sum(weights) for weight in weights]
-        weighted_list = random.choices(
-            population=materials, weights=weights, k=size**2
-        )
+        weighted_list = random.choices(population=materials, weights=weights, k=size**2)
 
         await ctx.defer()
         final_image = Image.new("RGB", (size * 16, size * 16), (250, 250, 250))
@@ -72,15 +66,11 @@ class Brush(interactions.Extension):
                 block_raw = weighted_list[y * size + x]
                 block = self.get_emoji(block_raw)
                 if block is None:
-                    final_image.paste(
-                        Image.open("resources/blocks/question.png"), (x * 16, y * 16)
-                    )
+                    final_image.paste(Image.open("resources/blocks/question.png"), (x * 16, y * 16))
                     not_found.add(block_raw)
                     percentage.add(block_raw)
                 else:
-                    final_image.paste(
-                        Image.open(f"resources/blocks/{block}.png"), (x * 16, y * 16)
-                    )
+                    final_image.paste(Image.open(f"resources/blocks/{block}.png"), (x * 16, y * 16))
                     percentage.add(block)
 
         with io.BytesIO() as binary_image:
@@ -88,9 +78,7 @@ class Brush(interactions.Extension):
             binary_image.seek(0)
             file = interactions.File(file=binary_image, file_name="BTEFranceBrush.png")
             percentage = list(percentage)
-            description = "\n".join(
-                [f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))]
-            )
+            description = "\n".join([f"- {int(weights[i])}% {percentage[i]}" for i in range(len(materials))])
             if not_found:
                 description += f"\n:question: `IDs inconnus: {', '.join(sorted(not_found))} ` :question:"
             await ctx.send(

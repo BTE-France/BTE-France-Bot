@@ -27,9 +27,7 @@ class BuilderSync(interactions.Extension):
     async def get_builders(self):
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    "https://buildtheearth.net/api/v1/members", headers=self.headers
-                ) as response:
+                async with session.get("https://buildtheearth.net/api/v1/members", headers=self.headers) as response:
                     json_response = await response.json()
         except Exception as e:
             log(f"Error while accessing BTE API:\n {e}")
@@ -46,7 +44,5 @@ class BuilderSync(interactions.Extension):
                     role=variables.Roles.BUILDER,
                     reason="Automatically added as a Builder!",
                 )
-                await member.remove_roles(
-                    [variables.Roles.DEBUTANT, variables.Roles.VISITEUR]
-                )
+                await member.remove_roles([variables.Roles.DEBUTANT, variables.Roles.VISITEUR])
                 log(f"Added {member.user.tag} as a Builder!")

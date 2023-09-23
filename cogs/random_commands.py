@@ -40,9 +40,7 @@ class RandomCommands(interactions.Extension):
         )
 
     @interactions.slash_command(name="clear")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     @interactions.slash_option(
         name="number",
         description="Nombre de messages à supprimer",
@@ -59,9 +57,7 @@ class RandomCommands(interactions.Extension):
         )
 
     @interactions.message_context_menu(name="Supprimer messages après")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def clear_after(self, ctx: interactions.ContextMenuContext):
         messages = await ctx.channel.history(limit=99, after=ctx.target_id).flatten()
         number = len(messages) + 1
@@ -90,11 +86,7 @@ class RandomCommands(interactions.Extension):
     @interactions.slash_command(name="lire")
     async def lire(self, ctx: interactions.SlashContext):
         "Lis les règles"
-        await ctx.send(
-            embeds=create_info_embed(
-                f"As-tu bien lu le salon <#{variables.Channels.DEBUTEZ_ICI}>?"
-            )
-        )
+        await ctx.send(embeds=create_info_embed(f"As-tu bien lu le salon <#{variables.Channels.DEBUTEZ_ICI}>?"))
 
     @interactions.slash_command(name="builder")
     async def builder(self, ctx: interactions.SlashContext):
@@ -119,11 +111,7 @@ class RandomCommands(interactions.Extension):
 
         if not mod_user.bot:
             banned_user = next(
-                (
-                    user
-                    for user in audit_logs.users
-                    if user.id == audit_log_entry.target_id
-                ),
+                (user for user in audit_logs.users if user.id == audit_log_entry.target_id),
                 None,
             )
             await event.guild.get_channel(variables.Channels.LOGS).send(
@@ -133,16 +121,12 @@ class RandomCommands(interactions.Extension):
             )
 
     @interactions.message_context_menu(name="Copier message")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def copy(self, ctx: interactions.ContextMenuContext):
         await ctx.send(f"```{ctx.target.content}```", ephemeral=True)
 
     @interactions.slash_command(name="role")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def role(self, ctx: interactions.SlashContext):
         ...
 
@@ -157,9 +141,7 @@ class RandomCommands(interactions.Extension):
             ),
             allowed_mentions=interactions.AllowedMentions(),
         )
-        await ctx.send(
-            embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True
-        )
+        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True)
 
     @interactions.component_callback("role_social")
     async def on_role_social_button(self, ctx: interactions.ComponentContext):
@@ -187,9 +169,7 @@ class RandomCommands(interactions.Extension):
             ),
             allowed_mentions=interactions.AllowedMentions(),
         )
-        await ctx.send(
-            embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True
-        )
+        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True)
 
     @interactions.component_callback("role_event")
     async def on_role_event_button(self, ctx: interactions.ComponentContext):
@@ -207,9 +187,7 @@ class RandomCommands(interactions.Extension):
             )
 
     @interactions.slash_command(name="pingn")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingn(self, ctx: interactions.SlashContext):
         """Ping tous les nouveaux"""
         now = interactions.Timestamp.utcnow()

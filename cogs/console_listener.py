@@ -13,12 +13,8 @@ from utils import (
     log,
 )
 
-WARP_PATTERN = re.compile(
-    r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$"
-)
-LUCKPERMS_PATTERN = re.compile(
-    r"^.* ([\w*]+) issued server command: /lp user ([\w*]+) ([\w]+) rank.*$"
-)
+WARP_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
+LUCKPERMS_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /lp user ([\w*]+) ([\w]+) rank.*$")
 SCHEMATIC_PATTERN = re.compile(
     r"^.* ([\w*]+) saved /home/container/plugins/FastAsyncWorldEdit/schematics/([\w-]+\.schem)$"
 )
@@ -75,13 +71,9 @@ def remove_codeblock_markdown(string: str) -> str:
 class ConsoleListener(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        self.warps_channel = await self.bot.fetch_channel(
-            variables.Channels.SCHEMATIC_WARPS
-        )
+        self.warps_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         self.ranking_channel = await self.bot.fetch_channel(variables.Channels.RANKING)
-        self.schem_channel = await self.bot.fetch_channel(
-            variables.Channels.SCHEMATIC_WARPS
-        )
+        self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         if users_json_file := os.getenv("LUCKPERMS_USERS_JSON_FILE"):
             self.users_json_file = users_json_file
         else:
@@ -92,15 +84,11 @@ class ConsoleListener(interactions.Extension):
             log("No SCHEMATICS_FOLDER variable found!")
 
     @interactions.listen(interactions.events.MessageCreate)
-    async def on_console_message_create(
-        self, message_create: interactions.events.MessageCreate
-    ):
+    async def on_console_message_create(self, message_create: interactions.events.MessageCreate):
         if message_create.message._channel_id != variables.Channels.CONSOLE:
             return
 
-        for msg in remove_codeblock_markdown(
-            message_create.message.content
-        ).splitlines():
+        for msg in remove_codeblock_markdown(message_create.message.content).splitlines():
             msg = msg.strip()
             if not msg:
                 continue
@@ -108,9 +96,7 @@ class ConsoleListener(interactions.Extension):
             await self.test_for_regex(msg)
 
     @interactions.listen(interactions.events.MessageUpdate)
-    async def on_console_message_update(
-        self, message_update: interactions.events.MessageUpdate
-    ):
+    async def on_console_message_update(self, message_update: interactions.events.MessageUpdate):
         if message_update.after._channel_id != variables.Channels.CONSOLE:
             return
 
@@ -118,9 +104,9 @@ class ConsoleListener(interactions.Extension):
             return
 
         # Get difference between before & after messages
-        before_msg, after_msg = remove_codeblock_markdown(
-            message_update.before.content
-        ), remove_codeblock_markdown(message_update.after.content)
+        before_msg, after_msg = remove_codeblock_markdown(message_update.before.content), remove_codeblock_markdown(
+            message_update.after.content
+        )
 
         if len(before_msg) > len(after_msg):
             diff = before_msg.replace(after_msg, "")
@@ -139,11 +125,7 @@ class ConsoleListener(interactions.Extension):
             player, command, warp = match.group(1, 2, 3)
             if command not in ("setwarp", "delwarp"):
                 return
-            title = (
-                f"Warp créé: {warp}"
-                if command == "setwarp"
-                else f"Warp supprimé: {warp}"
-            )
+            title = f"Warp créé: {warp}" if command == "setwarp" else f"Warp supprimé: {warp}"
             embed = create_embed(
                 title=title,
                 footer_text=player,
@@ -169,9 +151,7 @@ class ConsoleListener(interactions.Extension):
                 color=0x00FF00 if action == "promote" else 0xFF0000,
             )
             await self.ranking_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
-            log(
-                f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}"
-            )
+            log(f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}")
 
         async def schematics_regex(match: re.Match):
             player, schem_name = match.group(1, 2)
@@ -190,29 +170,21 @@ class ConsoleListener(interactions.Extension):
                 ],
                 include_thumbnail=True,
             )
-            await self.schem_channel.send(
-                embed=embed, file=interactions.File(schem_file)
-            )
+            await self.schem_channel.send(embed=embed, file=interactions.File(schem_file))
 
         if match := WARP_PATTERN.search(message):
             await warp_regex(match)
 
-        if hasattr(self, "users_json_file") and (
-            match := LUCKPERMS_PATTERN.search(message)
-        ):
+        if hasattr(self, "users_json_file") and (match := LUCKPERMS_PATTERN.search(message)):
             await luckperms_regex(match)
 
-        if hasattr(self, "schematics_folder") and (
-            match := SCHEMATIC_PATTERN.search(message)
-        ):
+        if hasattr(self, "schematics_folder") and (match := SCHEMATIC_PATTERN.search(message)):
             await schematics_regex(match)
 
     async def get_new_rank(self, player: str):
         async with aiohttp.ClientSession() as session:
             # Convert player name to its proper UUID equivalent
-            async with session.get(
-                f"https://api.mojang.com/users/profiles/minecraft/{player}"
-            ) as response:
+            async with session.get(f"https://api.mojang.com/users/profiles/minecraft/{player}") as response:
                 id: str = (await response.json())["id"]
                 id = f"{id[:8]}-{id[8:12]}-{id[12:16]}-{id[16:20]}-{id[20:]}"
         with open(self.users_json_file, "r") as file:
@@ -226,24 +198,18 @@ class ConsoleListener(interactions.Extension):
     async def on_warp_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_WARP_MODAL
         desc = (
-            ctx.message.embeds[0].description.replace("Information: ", "")
-            if ctx.message.embeds[0].description
-            else ""
+            ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
         )
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("warp_modal")
-    async def on_warp_modal_answer(
-        self, ctx: interactions.ModalContext, information: str
-    ):
+    async def on_warp_modal_answer(self, ctx: interactions.ModalContext, information: str):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
         await ctx.send(
-            f"Information ajoutée: `{information}`"
-            if information
-            else "Information supprimée.",
+            f"Information ajoutée: `{information}`" if information else "Information supprimée.",
             ephemeral=True,
         )
 
@@ -251,23 +217,17 @@ class ConsoleListener(interactions.Extension):
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_PERMS_MODAL
         desc = (
-            ctx.message.embeds[0].description.replace("Information: ", "")
-            if ctx.message.embeds[0].description
-            else ""
+            ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
         )
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
     @interactions.modal_callback("perms_modal")
-    async def on_perms_modal_answer(
-        self, ctx: interactions.ModalContext, information: str
-    ):
+    async def on_perms_modal_answer(self, ctx: interactions.ModalContext, information: str):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""
         await ctx.message.edit(embeds=embed, components=ctx.message.components)
         await ctx.send(
-            f"Information ajoutée: `{information}`"
-            if information
-            else "Information supprimée.",
+            f"Information ajoutée: `{information}`" if information else "Information supprimée.",
             ephemeral=True,
         )

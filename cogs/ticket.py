@@ -28,9 +28,7 @@ class Ticket(interactions.Extension):
         self.delete_old_debutant_tickets.start()
 
     @interactions.slash_command("ticket")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.ADMINISTRATOR
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.ADMINISTRATOR)
     async def ticket(self, ctx: interactions.SlashContext):
         ...
 
@@ -51,9 +49,7 @@ class Ticket(interactions.Extension):
     async def on_ticket_creation(self, ctx: interactions.ComponentContext):
         if variables.Roles.BUILDER in ctx.author.roles:
             return await ctx.send(
-                embed=create_error_embed(
-                    "Tu ne peux pas créer de demande car tu es déjà Builder!"
-                ),
+                embed=create_error_embed("Tu ne peux pas créer de demande car tu es déjà Builder!"),
                 ephemeral=True,
             )
 
@@ -78,9 +74,7 @@ class Ticket(interactions.Extension):
             )
 
         thread = await ctx.channel.create_private_thread(name=thread_name)
-        await ctx.send(
-            embed=create_info_embed(f"Demande créée ({thread.mention})"), ephemeral=True
-        )
+        await ctx.send(embed=create_info_embed(f"Demande créée ({thread.mention})"), ephemeral=True)
         first_message = await thread.send(
             f"## Demande de Builder de {ctx.author.mention}\n{BUILDER_THREAD_TEXT}",
             components=[
@@ -126,9 +120,7 @@ class Ticket(interactions.Extension):
                     color=0x00FF00,
                 )
             )
-            await author.remove_roles(
-                [variables.Roles.VISITEUR, variables.Roles.DEBUTANT]
-            )
+            await author.remove_roles([variables.Roles.VISITEUR, variables.Roles.DEBUTANT])
             await author.add_role(variables.Roles.BUILDER)
             await ctx.guild.get_channel(variables.Channels.FRENCH_CHAT).send(
                 f"**<:gg:776560537777602630> Félicitations à {author.mention} qui est devenu Builder!**"
@@ -159,13 +151,9 @@ class Ticket(interactions.Extension):
 
     @interactions.component_callback("ticket_debutant")
     async def on_debutant_button(self, ctx: interactions.ComponentContext):
-        if ctx.author.has_role(variables.Roles.BUILDER) or ctx.author.has_role(
-            variables.Roles.DEBUTANT
-        ):
+        if ctx.author.has_role(variables.Roles.BUILDER) or ctx.author.has_role(variables.Roles.DEBUTANT):
             return await ctx.send(
-                embed=create_error_embed(
-                    "Seuls les visiteurs peuvent faire une demande Débutant!"
-                ),
+                embed=create_error_embed("Seuls les visiteurs peuvent faire une demande Débutant!"),
                 ephemeral=True,
             )
 
@@ -237,9 +225,7 @@ class Ticket(interactions.Extension):
     async def on_debutant_validate(self, ctx: interactions.ComponentContext):
         if not ctx.author.has_permission(interactions.Permissions.MANAGE_MESSAGES):
             return await ctx.send(
-                embed=create_error_embed(
-                    "Tu n'as pas les permissions nécessaires pour passer quelqu'un débutant!"
-                ),
+                embed=create_error_embed("Tu n'as pas les permissions nécessaires pour passer quelqu'un débutant!"),
                 ephemeral=True,
             )
         if not (match := DEBUTANT_BUTTON_PATTERN.search(ctx.custom_id)):
@@ -247,9 +233,7 @@ class Ticket(interactions.Extension):
         author_id = match.group(1)
         author = await ctx.guild.fetch_member(author_id)
 
-        await ctx.send(
-            embed=create_info_embed(f"{author.mention} passé Débutant!"), ephemeral=True
-        )
+        await ctx.send(embed=create_info_embed(f"{author.mention} passé Débutant!"), ephemeral=True)
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
@@ -268,9 +252,7 @@ class Ticket(interactions.Extension):
         await author.edit_nickname(nickname)
 
     @interactions.slash_command(name="pingd")
-    @interactions.slash_default_member_permission(
-        interactions.Permissions.MANAGE_MESSAGES
-    )
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingd(self, ctx: interactions.SlashContext):
         """Ping toutes les personnes ayant fait une demande débutant"""
         if not ctx.channel == variables.Channels.DEBUTANT_THREAD:

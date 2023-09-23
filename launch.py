@@ -11,12 +11,8 @@ load_dotenv()
 logging.basicConfig(format="[%(levelname)s] %(message)s")
 
 bot = interactions.Client(
-    activity=interactions.Activity(
-        type=interactions.ActivityType.WATCHING, name="/help"
-    ),
-    intents=interactions.Intents.DEFAULT
-    | interactions.Intents.GUILD_MEMBERS
-    | interactions.Intents.MESSAGE_CONTENT,
+    activity=interactions.Activity(type=interactions.ActivityType.WATCHING, name="/help"),
+    intents=interactions.Intents.DEFAULT | interactions.Intents.GUILD_MEMBERS | interactions.Intents.MESSAGE_CONTENT,
 )
 
 for filename in os.listdir(Path(__file__).parent / "cogs"):
