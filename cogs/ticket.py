@@ -32,6 +32,19 @@ class Ticket(interactions.Extension):
     async def ticket(self, ctx: interactions.SlashContext):
         ...
 
+    @ticket.subcommand("beginner")
+    async def ticket_beginner(self, ctx: interactions.SlashContext):
+        """Créer le système de ticket pour devenir débutant (en anglais)"""
+        await ctx.send("Ticket Beginner créé", ephemeral=True)
+        await ctx.channel.send(
+            components=interactions.Button(
+                style=interactions.ButtonStyle.SUCCESS,
+                label="Apply to get beginner rank",
+                emoji="⛏",
+                custom_id="ticket_debutant",
+            ),
+        )
+
     @ticket.subcommand("builder")
     async def ticket_builder(self, ctx: interactions.SlashContext):
         """Créer le système de ticket pour devenir builder"""
