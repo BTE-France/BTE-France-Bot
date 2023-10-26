@@ -83,6 +83,11 @@ class RandomCommands(interactions.Extension):
             )
         )
 
+    @interactions.slash_command(name="bte")
+    async def bte(self, ctx: interactions.SlashContext):
+        "Lien Discord BTE"
+        await ctx.send("https://discord.gg/GTQf7BqX2e")
+
     @interactions.slash_command(name="lire")
     async def lire(self, ctx: interactions.SlashContext):
         "Lis les règles"
