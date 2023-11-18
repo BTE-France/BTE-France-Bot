@@ -13,12 +13,78 @@ from utils import (
     log,
 )
 
+TICKET_BUILDER_PATTERN = re.compile(r"ticket_builder_(fr|en)")
+TICKET_BUILDER_FR_TEXT = """# <a:btefrance:844495279977791498> Comment devenir Builder?
+
+Après avoir publié votre progression dans <#700757392157048892>, vous pouvez demander le grade Builder.
+<:dot:1121528899621376131> Cliquez sur le bouton `Faire sa demande Builder` ci-dessous. Un fil sera ouvert pour discuter de vos constructions.
+<:dot:1121528899621376131> Dans ce fil, veuillez envoyer:
+- Des photos de vos ___***deux***___ bâtiments __Minecraft__
+- Des photos ___***StreetView***___ de vos deux bâtiments de candidature, avec le même point de vue qu'en jeu
+- L'adresse **exacte** (ou monument) de vos bâtiments.
+
+> *A noter : deux bâtiments minimum sont requis*
+> *Les bâtiments pris en photo doivent être les vôtres*
+
+## Si votre candidature est rejetée, vous pouvez la réitérer quand vous le souhaitez."""
+TICKET_BUILDER_EN_TEXT = """# <a:btefrance:844495279977791498> How to become a Builder?
+
+After publishing your progress in <#700757392157048892>, you can apply for the Builder rank.
+<:dot:1121528899621376131> Click on the `Apply for Builder rank` below. A thread will be opened to discuss your builds.
+<:dot:1121528899621376131> In this thread, please send:
+- Photos of your ___***two***___ __Minecraft__ buildings.
+- ___***StreetView***___ photos of your two application buildings, with the same viewpoint as in-game
+- The **exact** address (or monument) of your buildings.
+
+> *Note: a minimum of two buildings is required.*
+> *The buildings photographed must be your own*.
+
+## If your application is rejected, you can submit it again at any time."""
 BUILDER_BUTTON_PATTERN = re.compile(r"builder_(validate|deny)_([0-9]+)")
-BUILDER_THREAD_TEXT = """### Envoyer ici :
+BUILDER_THREAD_FR_TEXT = """### Envoyer ici :
 * Une photo de vos deux bâtiments Minecraft
 * Une photo StreetView de vos deux bâtiments de candidature, de préférence le même point de vue qu'en jeu
 * L'adresse exacte (ou monument) de vos bâtiments."""
+BUILDER_THREAD_EN_TEXT = """### Send here:
+* A photo of your two Minecraft buildings
+* A StreetView photo of your two buildings, preferably from the same viewpoint as in-game.
+* The exact address (or monument) of your buildings."""
 DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)")
+TICKET_DEBUTANT_PATTERN = re.compile(r"ticket_debutant_(fr|en)")
+TICKET_DEBUTANT_FR_TEXT = """#  <:btefr:1111011027300139078> ・Devenir débutant
+
+Commencez à construire sur le serveur en demandant votre grade débutant.
+
+> __Ce grade vous offre 2 possibilités :__
+> _ _
+> -  Commencer où vous voulez sur un terrain vierge (hors Paris)
+> _ _
+> - Commencer en zone débutante si vous ne savez pas où construire : `/zones`
+
+> __Pour cela, cliquez sur le bouton ci-dessous et indiquez dans la demande :__
+> - Votre pseudo Minecraft
+> - L'endroit **exact** où vous voulez construire (On conseille de commencer par des habitations simples)
+
+## Vous serez ping lorsqu'un staff sera connecté sur le serveur pour qu'il puisse vous mettre le grade.
+
+### Pour construire à Paris, vous devrez faire vos preuves dans une zone débutant à Paris avant de choisir votre endroit."""
+TICKET_DEBUTANT_EN_TEXT = """# <:btefr:1111011027300139078> ・Become a beginner
+
+Start building on the server by requesting your beginner rank.
+
+> __This grade offers you 2 possibilities:__
+> _ _
+> - Start wherever you want on virgin territory (outside Paris)
+> _ _
+> - Start in beginner zone if you don't know where to build: `/zones`
+
+> __To do this, click on the button below and indicate in the request:__
+> - Your Minecraft nickname
+> - The **exact** place where you want to build (We recommend starting with simple homes)
+
+## You will be pinged when a staff is connected to the server so that they can give you the rank.
+
+### To build in Paris, you will need to prove yourself in a beginner area in Paris before choosing your location."""
 
 
 class Ticket(interactions.Extension):
@@ -32,37 +98,54 @@ class Ticket(interactions.Extension):
     async def ticket(self, ctx: interactions.SlashContext):
         ...
 
-    @ticket.subcommand("beginner")
-    async def ticket_beginner(self, ctx: interactions.SlashContext):
-        """Créer le système de ticket pour devenir débutant (en anglais)"""
-        await ctx.send("Ticket Beginner créé", ephemeral=True)
-        await ctx.channel.send(
-            components=interactions.Button(
-                style=interactions.ButtonStyle.SUCCESS,
-                label="Apply to get beginner rank",
-                emoji="⛏",
-                custom_id="ticket_debutant",
-            ),
-        )
-
     @ticket.subcommand("builder")
     async def ticket_builder(self, ctx: interactions.SlashContext):
         """Créer le système de ticket pour devenir builder"""
         await ctx.send("Ticket Builder créé", ephemeral=True)
         await ctx.channel.send(
-            components=interactions.Button(
-                style=interactions.ButtonStyle.SUCCESS,
-                label="Faire sa demande Builder",
-                emoji="⛏",
-                custom_id="ticket_builder",
-            ),
+            TICKET_BUILDER_FR_TEXT,
+            components=[
+                interactions.Button(
+                    style=interactions.ButtonStyle.SUCCESS,
+                    label="Faire sa demande Builder",
+                    emoji="⛏",
+                    custom_id="ticket_builder_fr",
+                ),
+                interactions.Button(
+                    style=interactions.ButtonStyle.GRAY,
+                    label="English Translation",
+                    emoji="🇬🇧",
+                    custom_id="ticket_builder_translation",
+                ),
+            ],
         )
 
-    @interactions.component_callback("ticket_builder")
+    @interactions.component_callback("ticket_builder_translation")
+    async def on_builder_translation_button(self, ctx: interactions.ComponentContext):
+        await ctx.send(
+            TICKET_BUILDER_EN_TEXT,
+            components=interactions.Button(
+                style=interactions.ButtonStyle.SUCCESS,
+                label="Apply for Builder rank",
+                emoji="⛏",
+                custom_id="ticket_builder_en",
+            ),
+            ephemeral=True,
+        )
+
+    @interactions.component_callback(TICKET_BUILDER_PATTERN)
     async def on_ticket_creation(self, ctx: interactions.ComponentContext):
+        if not (match := TICKET_BUILDER_PATTERN.search(ctx.custom_id)):
+            return
+        fr = match.group(1) == "fr"
+
         if variables.Roles.BUILDER in ctx.author.roles:
             return await ctx.send(
-                embed=create_error_embed("Tu ne peux pas créer de demande car tu es déjà Builder!"),
+                embed=create_error_embed(
+                    "Tu ne peux pas créer de demande car tu es déjà Builder!"
+                    if fr
+                    else "You cannot apply since you already are Builder!"
+                ),
                 ephemeral=True,
             )
 
@@ -70,6 +153,8 @@ class Ticket(interactions.Extension):
             return await ctx.send(
                 embed=create_error_embed(
                     f"Tu ne peux pas créer de demande car tu n'es pas encore Débutant!\nPour devenir Débutant, fais ta demande dans <#{variables.Channels.DEBUTANT}>."
+                    if fr
+                    else f"You cannot apply since you are not yet a Beginner!\nTo become a Beginner, apply in <#{variables.Channels.DEBUTANT}>."
                 ),
                 ephemeral=True,
             )
@@ -82,14 +167,23 @@ class Ticket(interactions.Extension):
             return await ctx.send(
                 embed=create_error_embed(
                     f"Tu as déjà créé une demande Builder! ({threads[thread_names.index(thread_name)].mention})"
+                    if fr
+                    else f"You already applied for Builder! ({threads[thread_names.index(thread_name)].mention})"
                 ),
                 ephemeral=True,
             )
 
         thread = await ctx.channel.create_private_thread(name=thread_name)
-        await ctx.send(embed=create_info_embed(f"Demande créée ({thread.mention})"), ephemeral=True)
+        await ctx.send(
+            embed=create_info_embed(
+                f"Demande créée ({thread.mention})" if fr else f"Application created ({thread.mention})"
+            ),
+            ephemeral=True,
+        )
         first_message = await thread.send(
-            f"## Demande de Builder de {ctx.author.mention}\n{BUILDER_THREAD_TEXT}",
+            f"## Demande de Builder de {ctx.author.mention}\n{BUILDER_THREAD_FR_TEXT}"
+            if fr
+            else f"## Builder application from {ctx.author.mention}\n{BUILDER_THREAD_EN_TEXT}",
             components=[
                 interactions.Button(
                     style=interactions.ButtonStyle.SUCCESS,
@@ -154,46 +248,81 @@ class Ticket(interactions.Extension):
         """Créer le système de ticket pour devenir débutant"""
         await ctx.send("Ticket Débutant créé", ephemeral=True)
         await ctx.channel.send(
-            components=interactions.Button(
-                style=interactions.ButtonStyle.SUCCESS,
-                label="Faire sa demande Débutant",
-                emoji="⛏",
-                custom_id="ticket_debutant",
-            ),
+            TICKET_DEBUTANT_FR_TEXT,
+            components=[
+                interactions.Button(
+                    style=interactions.ButtonStyle.SUCCESS,
+                    label="Faire sa demande Débutant",
+                    emoji="⛏",
+                    custom_id="ticket_debutant_fr",
+                ),
+                interactions.Button(
+                    style=interactions.ButtonStyle.GRAY,
+                    label="English Translation",
+                    emoji="🇬🇧",
+                    custom_id="ticket_debutant_translation",
+                ),
+            ],
         )
 
-    @interactions.component_callback("ticket_debutant")
+    @interactions.component_callback("ticket_debutant_translation")
+    async def on_debutant_translation_button(self, ctx: interactions.ComponentContext):
+        await ctx.send(
+            TICKET_DEBUTANT_EN_TEXT,
+            components=interactions.Button(
+                style=interactions.ButtonStyle.SUCCESS,
+                label="Apply to get beginner rank",
+                emoji="⛏",
+                custom_id="ticket_debutant_en",
+            ),
+            ephemeral=True,
+        )
+
+    @interactions.component_callback(TICKET_DEBUTANT_PATTERN)
     async def on_debutant_button(self, ctx: interactions.ComponentContext):
+        if not (match := TICKET_DEBUTANT_PATTERN.search(ctx.custom_id)):
+            return
+        fr = match.group(1) == "fr"
+
         if ctx.author.has_role(variables.Roles.BUILDER) or ctx.author.has_role(variables.Roles.DEBUTANT):
             return await ctx.send(
-                embed=create_error_embed("Seuls les visiteurs peuvent faire une demande Débutant!"),
+                embed=create_error_embed(
+                    "Seuls les visiteurs peuvent faire une demande Débutant!"
+                    if fr
+                    else "Only visitors can apply for the beginner rank!"
+                ),
                 ephemeral=True,
             )
 
         if str(ctx.author.id) in await self.get_all_debutant_user_ids(ctx.guild):
             return await ctx.send(
-                embed=create_error_embed("Tu as déjà créé une demande Débutant!"),
+                embed=create_error_embed(
+                    "Tu as déjà créé une demande Débutant!" if fr else "You already applied for the beginner rank!"
+                ),
                 ephemeral=True,
             )
 
         DEBUTANT_MODAL = interactions.Modal(
             interactions.ShortText(
-                label="Pseudo Minecraft",
+                label="Pseudo Minecraft" if fr else "Minecraft Username",
                 custom_id="pseudo",
                 max_length=20,
             ),
             interactions.ShortText(
-                label="Ville",
+                label="Ville" if fr else "City",
                 custom_id="ville",
                 placeholder="Ex: Paris, Lyon, Montcuq...",
+                max_length=50,
             ),
             interactions.ShortText(
-                label="Plus de détails",
+                label="Plus de détails" if fr else "Additional details",
                 custom_id="lieu",
-                placeholder="Ex: 6ème arrondissement, mairie, nom de la rue...",
+                placeholder="Ex: 6ème arrondissement, mairie, nom de la rue..."
+                if fr
+                else "Ex: townhall, name of the street...",
                 required=False,
             ),
-            title="Demande Débutant",
+            title="Demande Débutant" if fr else "Beginner application",
         )
         await ctx.send_modal(DEBUTANT_MODAL)
         modal_ctx = await self.bot.wait_for_modal(DEBUTANT_MODAL)
@@ -226,7 +355,9 @@ class Ticket(interactions.Extension):
             ),
         )
         await modal_ctx.send(
-            embed=create_info_embed(f"Demande Débutant créée: {msg.jump_url}"),
+            embed=create_info_embed(
+                f"Demande Débutant créée: {msg.jump_url}" if fr else f"Beginner application created: {msg.jump_url}"
+            ),
             ephemeral=True,
         )
 
