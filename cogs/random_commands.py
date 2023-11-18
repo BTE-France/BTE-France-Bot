@@ -4,7 +4,7 @@ from datetime import timedelta
 import interactions
 
 import variables
-from utils import create_embed, create_info_embed
+from utils import create_embed, create_error_embed, create_info_embed
 
 NEW_WORD_MODAL = interactions.Modal(
     interactions.ParagraphText(
@@ -50,22 +50,72 @@ class RandomCommands(interactions.Extension):
     )
     async def clear(self, ctx: interactions.SlashContext, number: int = 1):
         "Supprimer les x derniers messages"
-        n = await ctx.channel.purge(deletion_limit=number)
-        await ctx.send(
-            embeds=create_info_embed(f"Tu as supprimé les {n} dernier(s) message(s)!"),
-            ephemeral=True,
-        )
+        messages = await ctx.channel.history(limit=number).flatten()
+        after = messages[-1].id
+        number = len(messages)
+        await self._clear(ctx, number, after)
 
     @interactions.message_context_menu(name="Supprimer messages après")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def clear_after(self, ctx: interactions.ContextMenuContext):
-        messages = await ctx.channel.history(limit=99, after=ctx.target_id).flatten()
+        after = ctx.target_id
+        messages = await ctx.channel.history(limit=99, after=after).flatten()
         number = len(messages) + 1
-        n = await ctx.channel.purge(deletion_limit=number)
+        await self._clear(ctx, number, after)
+
+    async def _clear(
+        self,
+        ctx: interactions.SlashContext | interactions.ContextMenuContext,
+        number: int,
+        after: interactions.Snowflake,
+    ):
+        n = await ctx.channel.purge(deletion_limit=number)  # n = actual number of messages deleted
+        if n == number:
+            return await ctx.send(
+                embeds=create_info_embed(f"✅ Tu as supprimé les {n} dernier(s) message(s)!"),
+                ephemeral=True,
+            )
+
+        confirm_button = interactions.Button(
+            style=interactions.ButtonStyle.GREEN,
+            emoji="✅",
+            label="Oui",
+        )
         await ctx.send(
-            embeds=create_info_embed(f"Tu as supprimé les {n} dernier(s) message(s)!"),
+            embeds=create_info_embed(
+                f"Message(s) supprimé(s): {n}\n{number - n} message(s) n'ont pas été supprimés car ils datent d'il y a plus de 14 jours.\nVeux-tu quand même les supprimer? **⚠️ Peut durer longtemps ⚠️**"
+            ),
+            components=confirm_button,
             ephemeral=True,
         )
+
+        delete_messages = False
+        try:
+            component = await self.bot.wait_for_component(components=confirm_button, timeout=30)
+            delete_messages = True
+        except asyncio.TimeoutError:
+            pass
+
+        # Small hack to delete the ephemeral clear confirm message
+        await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
+
+        if delete_messages:
+            if not component.ctx.author.has_permission(interactions.Permissions.ADMINISTRATOR):
+                return await component.ctx.send(
+                    embeds=create_error_embed(
+                        f"❌ Seuls les administrateurs peuvent supprimer les messages qui datent d'il y a plus de 14 jours!"
+                    ),
+                    ephemeral=True,
+                )
+
+            await component.ctx.defer(ephemeral=True)
+            await self.bot.http.delete_message(ctx.channel_id, after)
+            async for message in ctx.channel.history(after=after):
+                await self.bot.http.delete_message(ctx.channel_id, message.id)
+            return await component.ctx.send(
+                embeds=create_info_embed(f"✅ Tu as supprimé les {number} dernier(s) message(s)!"),
+                ephemeral=True,
+            )
 
     @interactions.slash_command(name="map")
     async def map(self, ctx: interactions.SlashContext):
