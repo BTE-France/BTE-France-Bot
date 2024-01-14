@@ -8,6 +8,7 @@ RULES_FR_TEXT = """> <:dot:1113767008752914492> Pas de racisme, sexisme, homopho
 > <:dot:1113767008752914492> Aucun contenu érotique/sexuel/gore.
 > <:dot:1113767008752914492> Pas de politique ou sujets lourds.
 > <:dot:1113767008752914492> Respect des [CGU Discord](https://discord.com/terms).
+> <:dot:1113767008752914492> Respect des [règles en jeu](https://discord.com/channels/694003889506091100/1130179699570643005).
 > <:dot:1113767008752914492> **__Pas de Minecraft cracké !__** Uniquement le launcher officiel est autorisé.
 > <:dot:1113767008752914492> Pas de comportements toxiques et criminels.
 > <:dot:1113767008752914492> Pas de perturbation du chat (spam, ASCII, flood, spoil, pings et markdown intensifs...)
@@ -20,6 +21,7 @@ RULES_EN_TEXT = """> <:dot:1113767008752914492> No racism, sexism, homophobia or
 > <:dot:1113767008752914492> No erotic/sexual/gore content.
 > <:dot:1113767008752914492> No politics or heavy topics.
 > <:dot:1113767008752914492> Respect of [Discord's TOS](https://discord.com/terms).
+> <:dot:1113767008752914492> Respect of [ingame rules](https://discord.com/channels/694003889506091100/1163807707174817872).
 > <:dot:1113767008752914492> **__No cracked Minecraft!__** Only the official launcher is allowed.
 > <:dot:1113767008752914492> No toxic or criminal behavior.
 > <:dot:1113767008752914492> No chat disturbances (spam, ASCII, flood, spoil, intensive pings and markdown...).

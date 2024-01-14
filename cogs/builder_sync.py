@@ -21,7 +21,7 @@ class BuilderSync(interactions.Extension):
 
         self.guild = await self.bot.fetch_guild(variables.SERVER)
         await self.guild.gateway_chunk()  # Fetch all members of the server
-        self.get_builders.start()
+        # self.get_builders.start() #  Disabled since new BTE API
 
     @interactions.Task.create(interactions.IntervalTrigger(minutes=1))
     async def get_builders(self):

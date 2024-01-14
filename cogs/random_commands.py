@@ -28,9 +28,14 @@ EDIT_WORD_BUTTON = interactions.Button(
     emoji="⚙️",
     style=interactions.ButtonStyle.SUCCESS,
 )
+PINGN_MSG = f"**Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
 
 
 class RandomCommands(interactions.Extension):
+    @interactions.listen(interactions.events.Startup)
+    async def on_start(self):
+        self.auto_pingn.start()
+
     @interactions.slash_command(name="ping")
     async def ping(self, ctx: interactions.SlashContext):
         "Ping"
@@ -245,12 +250,8 @@ class RandomCommands(interactions.Extension):
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingn(self, ctx: interactions.SlashContext):
         """Ping tous les nouveaux"""
-        now = interactions.Timestamp.utcnow()
-        newbies = []
-        for member in ctx.guild.members:
-            if now - member.joined_at < timedelta(days=1):
-                newbies.append(member)
-        if not newbies:
+        users_str = await self.get_new_players(ctx.guild)
+        if not users_str:
             return await ctx.send(
                 embed=create_info_embed("Aucun nouveau membre trouvé!"),
                 ephemeral=True,
@@ -261,15 +262,33 @@ class RandomCommands(interactions.Extension):
             custom_id="newbies_ping",
             label="Ping tous les nouveaux",
         )
-        user_ids_string = " ".join([member.mention for member in newbies])
-        await ctx.send(f"`{user_ids_string}`", components=send_button, ephemeral=True)
+        await ctx.send(f"`{users_str}`", components=send_button, ephemeral=True)
 
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
-            await ctx.channel.send(
-                f"{user_ids_string} **Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
-            )
+            await ctx.channel.send(f"{users_str} {PINGN_MSG}")
         except asyncio.TimeoutError:
             pass
         # Small hack to delete the ephemeral /pingn message
         await self.bot.http.delete_interaction_message(self.bot.app.id, ctx.token)
+
+    @interactions.Task.create(interactions.TimeTrigger(hour=18, utc=False))
+    async def auto_pingn(self):
+        users_str = await self.get_new_players(self.bot.get_guild(variables.SERVER))
+        if not users_str:
+            return
+
+        channel = self.bot.get_channel(variables.Channels.FRENCH_CHAT)
+        await channel.send(f"{users_str} {PINGN_MSG}")
+
+    async def get_new_players(self, guild: interactions.Guild) -> str | None:
+        now = interactions.Timestamp.utcnow()
+        newbies = []
+        for member in guild.members:
+            if now - member.joined_at < timedelta(days=1):
+                newbies.append(member)
+
+        if not newbies:
+            return None
+
+        return " ".join([member.mention for member in newbies])
