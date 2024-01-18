@@ -151,11 +151,7 @@ class RandomCommands(interactions.Extension):
     @interactions.slash_command(name="builder")
     async def builder(self, ctx: interactions.SlashContext):
         "Instructions pour devenir Builder"
-        await ctx.send(
-            embeds=create_info_embed(
-                "Tu veux savoir comment devenir builder officiel? [**C'est par ici!**](https://docs.google.com/document/d/1DHMOEcmepY_jGlS_-tvCvpJmSbaoHmofnamTJleQYik/edit?usp=sharing)"
-            )
-        )
+        await ctx.send(embeds=create_info_embed(f"Comment devenir Builder? > <#{variables.Channels.BUILDER}>"))
 
     @interactions.listen(interactions.events.BanCreate)
     async def on_guild_ban_add(self, event: interactions.events.BanCreate):
