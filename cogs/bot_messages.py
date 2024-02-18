@@ -35,8 +35,7 @@ RULES_EN_TEXT = """> <:dot:1113767008752914492> No racism, sexism, homophobia or
 class BotMessages(interactions.Extension):
     @interactions.slash_command("bot")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
-    async def _bot(self, ctx: interactions.SlashContext):
-        ...
+    async def _bot(self, ctx: interactions.SlashContext): ...
 
     @_bot.subcommand("create_message")
     async def create_message(self, ctx: interactions.SlashContext):
@@ -139,9 +138,7 @@ class BotMessages(interactions.Extension):
     async def send_predefined_message(self, ctx: interactions.SlashContext, message: str):
         """Envoyer un message préécrit"""
         if message == "rules":
-            msg = await ctx.channel.send(
-                "https://media.discordapp.net/attachments/1113857454015533117/1113904168604803173/regle2.png"
-            )
+            msg = await ctx.channel.send("https://media.discordapp.net/attachments/1113857454015533117/1113904168604803173/regle2.png")
             await ctx.channel.send(RULES_FR_TEXT)
             await ctx.channel.send(
                 components=interactions.Button(

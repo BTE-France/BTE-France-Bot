@@ -15,9 +15,7 @@ from utils import (
 
 WARP_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
 LUCKPERMS_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /lp user ([\w*]+) ([\w]+) rank.*$")
-SCHEMATIC_PATTERN = re.compile(
-    r"^.* ([\w*]+) saved /home/container/plugins/FastAsyncWorldEdit/schematics/([\w-]+\.schem)$"
-)
+SCHEMATIC_PATTERN = re.compile(r"^.* ([\w*]+) saved /home/container/plugins/FastAsyncWorldEdit/schematics/([\w-]+\.schem)$")
 RANK_DICT = {
     "default": "Visiteur",
     "debutant": "Débutant",
@@ -104,9 +102,7 @@ class ConsoleListener(interactions.Extension):
             return
 
         # Get difference between before & after messages
-        before_msg, after_msg = remove_codeblock_markdown(message_update.before.content), remove_codeblock_markdown(
-            message_update.after.content
-        )
+        before_msg, after_msg = remove_codeblock_markdown(message_update.before.content), remove_codeblock_markdown(message_update.after.content)
 
         if len(before_msg) > len(after_msg):
             diff = before_msg.replace(after_msg, "")
@@ -197,9 +193,7 @@ class ConsoleListener(interactions.Extension):
     @interactions.component_callback("warp_edit")
     async def on_warp_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_WARP_MODAL
-        desc = (
-            ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
-        )
+        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
@@ -216,9 +210,7 @@ class ConsoleListener(interactions.Extension):
     @interactions.component_callback("perms_edit")
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_PERMS_MODAL
-        desc = (
-            ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
-        )
+        desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 

@@ -107,9 +107,7 @@ class RandomCommands(interactions.Extension):
         if delete_messages:
             if not component.ctx.author.has_permission(interactions.Permissions.ADMINISTRATOR):
                 return await component.ctx.send(
-                    embeds=create_error_embed(
-                        f"❌ Seuls les administrateurs peuvent supprimer les messages qui datent d'il y a plus de 14 jours!"
-                    ),
+                    embeds=create_error_embed(f"❌ Seuls les administrateurs peuvent supprimer les messages qui datent d'il y a plus de 14 jours!"),
                     ephemeral=True,
                 )
 
@@ -156,9 +154,7 @@ class RandomCommands(interactions.Extension):
     @interactions.listen(interactions.events.BanCreate)
     async def on_guild_ban_add(self, event: interactions.events.BanCreate):
         await asyncio.sleep(3)  # Leave some time for the audit log to be updated
-        audit_logs = await event.guild.fetch_audit_log(
-            action_type=interactions.AuditLogEventType.MEMBER_BAN_ADD, limit=1
-        )
+        audit_logs = await event.guild.fetch_audit_log(action_type=interactions.AuditLogEventType.MEMBER_BAN_ADD, limit=1)
         audit_log_entry = audit_logs.entries[0]
         mod_user = next(
             (user for user in audit_logs.users if user.id == audit_log_entry.user_id),
@@ -183,8 +179,7 @@ class RandomCommands(interactions.Extension):
 
     @interactions.slash_command(name="role")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
-    async def role(self, ctx: interactions.SlashContext):
-        ...
+    async def role(self, ctx: interactions.SlashContext): ...
 
     @role.subcommand("social")
     async def role_social(self, ctx: interactions.SlashContext):
@@ -246,23 +241,25 @@ class RandomCommands(interactions.Extension):
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingn(self, ctx: interactions.SlashContext):
         """Ping tous les nouveaux"""
-        users_str = await self.get_new_players(ctx.guild)
-        if not users_str:
+        users = await self.get_new_players(ctx.guild)
+        if not users:
             return await ctx.send(
                 embed=create_info_embed("Aucun nouveau membre trouvé!"),
                 ephemeral=True,
             )
+        users_str = self.generate_users_str(users)
 
         send_button = interactions.Button(
             style=interactions.ButtonStyle.GRAY,
             custom_id="newbies_ping",
             label="Ping tous les nouveaux",
         )
-        await ctx.send(f"`{users_str}`", components=send_button, ephemeral=True)
+        await ctx.send(embed=create_info_embed(users_str[0]), components=send_button, ephemeral=True)
 
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
-            await ctx.channel.send(f"{users_str} {PINGN_MSG}")
+            for user_str in users_str:
+                await ctx.channel.send(user_str)
         except asyncio.TimeoutError:
             pass
         # Small hack to delete the ephemeral /pingn message
@@ -270,21 +267,34 @@ class RandomCommands(interactions.Extension):
 
     @interactions.Task.create(interactions.TimeTrigger(hour=18, utc=False))
     async def auto_pingn(self):
-        users_str = await self.get_new_players(self.bot.get_guild(variables.SERVER))
-        if not users_str:
+        users = await self.get_new_players(self.bot.get_guild(variables.SERVER))
+        if not users:
             return
+        users_str = self.generate_users_str(users)
 
         channel = self.bot.get_channel(variables.Channels.FRENCH_CHAT)
-        await channel.send(f"{users_str} {PINGN_MSG}")
+        for user_str in users_str:
+            await channel.send(user_str)
 
-    async def get_new_players(self, guild: interactions.Guild) -> str | None:
+    async def get_new_players(self, guild: interactions.Guild) -> list[str]:
         now = interactions.Timestamp.utcnow()
         newbies = []
         for member in guild.members:
             if now - member.joined_at < timedelta(days=1):
                 newbies.append(member)
 
-        if not newbies:
-            return None
+        return [member.mention for member in newbies]
 
-        return " ".join([member.mention for member in newbies])
+    def generate_users_str(self, users: list[str]) -> list[str]:
+        """Generate multiple strings to counter the max 2000 characters per message"""
+        max_users_str_length = 2000 - len(PINGN_MSG)
+        users_strs = []
+        last_users_str = ""
+        while users:
+            if len(f"{last_users_str} {users[0]}") < max_users_str_length:
+                last_users_str += users.pop(0) + " "
+            else:
+                users_strs.append(last_users_str + PINGN_MSG)
+                last_users_str = ""
+        users_strs.append(last_users_str + PINGN_MSG)
+        return users_strs
