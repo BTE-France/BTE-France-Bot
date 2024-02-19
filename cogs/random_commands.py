@@ -28,7 +28,7 @@ EDIT_WORD_BUTTON = interactions.Button(
     emoji="⚙️",
     style=interactions.ButtonStyle.SUCCESS,
 )
-PINGN_MSG = f"**Bienvenue sur le serveur BTE France!** Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
+PINGN_MSG = f"\n## Bienvenue sur le serveur BTE France!\n## Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
 
 
 class RandomCommands(interactions.Extension):
