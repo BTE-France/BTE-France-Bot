@@ -206,7 +206,7 @@ class Ticket(interactions.Extension):
 
     @interactions.component_callback(BUILDER_BUTTON_PATTERN)
     async def on_ticket_button(self, ctx: interactions.ComponentContext):
-        if not ctx.author.has_permission(interactions.Permissions.MANAGE_MESSAGES):
+        if interactions.Permissions.MANAGE_MESSAGES not in ctx.channel.permissions_for(ctx.author):
             return await ctx.send(
                 embed=create_error_embed("Tu n'as pas les permissions nécessaires pour valider ou refuser une demande!"),
                 ephemeral=True,
@@ -356,7 +356,7 @@ class Ticket(interactions.Extension):
 
     @interactions.component_callback(DEBUTANT_BUTTON_PATTERN)
     async def on_debutant_validate(self, ctx: interactions.ComponentContext):
-        if not ctx.author.has_permission(interactions.Permissions.MANAGE_MESSAGES):
+        if interactions.Permissions.MANAGE_MESSAGES not in ctx.channel.permissions_for(ctx.author):
             return await ctx.send(
                 embed=create_error_embed("Tu n'as pas les permissions nécessaires pour passer quelqu'un débutant!"),
                 ephemeral=True,
