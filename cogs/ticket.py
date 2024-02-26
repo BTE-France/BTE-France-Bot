@@ -132,8 +132,8 @@ class Ticket(interactions.Extension):
             ephemeral=True,
         )
 
-    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     @interactions.component_callback(TICKET_BUILDER_PATTERN)
+    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     async def on_ticket_creation(self, ctx: interactions.ComponentContext):
         if not (match := TICKET_BUILDER_PATTERN.search(ctx.custom_id)):
             return
@@ -274,8 +274,8 @@ class Ticket(interactions.Extension):
             ephemeral=True,
         )
 
-    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     @interactions.component_callback(TICKET_DEBUTANT_PATTERN)
+    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     async def on_debutant_button(self, ctx: interactions.ComponentContext):
         if not (match := TICKET_DEBUTANT_PATTERN.search(ctx.custom_id)):
             return
