@@ -95,8 +95,7 @@ class Ticket(interactions.Extension):
 
     @interactions.slash_command("ticket")
     @interactions.slash_default_member_permission(interactions.Permissions.ADMINISTRATOR)
-    async def ticket(self, ctx: interactions.SlashContext):
-        ...
+    async def ticket(self, ctx: interactions.SlashContext): ...
 
     @ticket.subcommand("builder")
     async def ticket_builder(self, ctx: interactions.SlashContext):
@@ -133,6 +132,7 @@ class Ticket(interactions.Extension):
             ephemeral=True,
         )
 
+    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     @interactions.component_callback(TICKET_BUILDER_PATTERN)
     async def on_ticket_creation(self, ctx: interactions.ComponentContext):
         if not (match := TICKET_BUILDER_PATTERN.search(ctx.custom_id)):
@@ -142,9 +142,7 @@ class Ticket(interactions.Extension):
         if variables.Roles.BUILDER in ctx.author.roles:
             return await ctx.send(
                 embed=create_error_embed(
-                    "Tu ne peux pas créer de demande car tu es déjà Builder!"
-                    if fr
-                    else "You cannot apply since you already are Builder!"
+                    "Tu ne peux pas créer de demande car tu es déjà Builder!" if fr else "You cannot apply since you already are Builder!"
                 ),
                 ephemeral=True,
             )
@@ -175,15 +173,15 @@ class Ticket(interactions.Extension):
 
         thread = await ctx.channel.create_private_thread(name=thread_name)
         await ctx.send(
-            embed=create_info_embed(
-                f"Demande créée ({thread.mention})" if fr else f"Application created ({thread.mention})"
-            ),
+            embed=create_info_embed(f"Demande créée ({thread.mention})" if fr else f"Application created ({thread.mention})"),
             ephemeral=True,
         )
         first_message = await thread.send(
-            f"## Demande de Builder de {ctx.author.mention}\n{BUILDER_THREAD_FR_TEXT}"
-            if fr
-            else f"## Builder application from {ctx.author.mention}\n{BUILDER_THREAD_EN_TEXT}",
+            (
+                f"## Demande de Builder de {ctx.author.mention}\n{BUILDER_THREAD_FR_TEXT}"
+                if fr
+                else f"## Builder application from {ctx.author.mention}\n{BUILDER_THREAD_EN_TEXT}"
+            ),
             components=[
                 interactions.Button(
                     style=interactions.ButtonStyle.SUCCESS,
@@ -210,9 +208,7 @@ class Ticket(interactions.Extension):
     async def on_ticket_button(self, ctx: interactions.ComponentContext):
         if not ctx.author.has_permission(interactions.Permissions.MANAGE_MESSAGES):
             return await ctx.send(
-                embed=create_error_embed(
-                    "Tu n'as pas les permissions nécessaires pour valider ou refuser une demande!"
-                ),
+                embed=create_error_embed("Tu n'as pas les permissions nécessaires pour valider ou refuser une demande!"),
                 ephemeral=True,
             )
         if not (match := BUILDER_BUTTON_PATTERN.search(ctx.custom_id)):
@@ -278,6 +274,7 @@ class Ticket(interactions.Extension):
             ephemeral=True,
         )
 
+    @interactions.auto_defer(ephemeral=True, time_until_defer=1.5)
     @interactions.component_callback(TICKET_DEBUTANT_PATTERN)
     async def on_debutant_button(self, ctx: interactions.ComponentContext):
         if not (match := TICKET_DEBUTANT_PATTERN.search(ctx.custom_id)):
@@ -287,18 +284,14 @@ class Ticket(interactions.Extension):
         if ctx.author.has_role(variables.Roles.BUILDER) or ctx.author.has_role(variables.Roles.DEBUTANT):
             return await ctx.send(
                 embed=create_error_embed(
-                    "Seuls les visiteurs peuvent faire une demande Débutant!"
-                    if fr
-                    else "Only visitors can apply for the beginner rank!"
+                    "Seuls les visiteurs peuvent faire une demande Débutant!" if fr else "Only visitors can apply for the beginner rank!"
                 ),
                 ephemeral=True,
             )
 
         if str(ctx.author.id) in await self.get_all_debutant_user_ids(ctx.guild):
             return await ctx.send(
-                embed=create_error_embed(
-                    "Tu as déjà créé une demande Débutant!" if fr else "You already applied for the beginner rank!"
-                ),
+                embed=create_error_embed("Tu as déjà créé une demande Débutant!" if fr else "You already applied for the beginner rank!"),
                 ephemeral=True,
             )
 
@@ -317,9 +310,7 @@ class Ticket(interactions.Extension):
             interactions.ShortText(
                 label="Plus de détails" if fr else "Additional details",
                 custom_id="lieu",
-                placeholder="Ex: 6ème arrondissement, mairie, nom de la rue..."
-                if fr
-                else "Ex: townhall, name of the street...",
+                placeholder="Ex: 6ème arrondissement, mairie, nom de la rue..." if fr else "Ex: townhall, name of the street...",
                 required=False,
             ),
             title="Demande Débutant" if fr else "Beginner application",
@@ -355,9 +346,7 @@ class Ticket(interactions.Extension):
             ),
         )
         await modal_ctx.send(
-            embed=create_info_embed(
-                f"Demande Débutant créée: {msg.jump_url}" if fr else f"Beginner application created: {msg.jump_url}"
-            ),
+            embed=create_info_embed(f"Demande Débutant créée: {msg.jump_url}" if fr else f"Beginner application created: {msg.jump_url}"),
             ephemeral=True,
         )
 
@@ -401,9 +390,7 @@ class Ticket(interactions.Extension):
         """Ping toutes les personnes ayant fait une demande débutant"""
         if not ctx.channel == variables.Channels.DEBUTANT_THREAD:
             return await ctx.send(
-                embed=create_error_embed(
-                    f"La commande ne peut être utilisée que dans <#{variables.Channels.DEBUTANT_THREAD}>!"
-                ),
+                embed=create_error_embed(f"La commande ne peut être utilisée que dans <#{variables.Channels.DEBUTANT_THREAD}>!"),
                 ephemeral=True,
             )
 
@@ -425,8 +412,7 @@ class Ticket(interactions.Extension):
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
             await ctx.channel.send(
-                user_ids_string
-                + " **Un staff est connecté pour vous donner le rôle, connectez-vous EN JEU pour obtenir le grade Débutant!**"
+                user_ids_string + " **Un staff est connecté pour vous donner le rôle, connectez-vous EN JEU pour obtenir le grade Débutant!**"
             )
         except asyncio.TimeoutError:
             pass
