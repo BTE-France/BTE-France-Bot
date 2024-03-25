@@ -316,21 +316,18 @@ class Ticket(interactions.Extension):
             title="Demande Débutant" if fr else "Beginner application",
         )
         await ctx.send_modal(DEBUTANT_MODAL)
-        modal_ctx = await self.bot.wait_for_modal(DEBUTANT_MODAL)
-        pseudo = modal_ctx.responses["pseudo"]
+        modal_ctx: interactions.ModalContext = await self.bot.wait_for_modal(DEBUTANT_MODAL)
+        pseudo = escape_minecraft_username_markdown(modal_ctx.responses["pseudo"])
         ville = modal_ctx.responses["ville"]
         lieu = modal_ctx.responses["lieu"]
 
+        await modal_ctx.defer(ephemeral=True)
         thread = await ctx.guild.fetch_thread(variables.Channels.DEBUTANT_THREAD)
         msg = await thread.send(
             embed=create_embed(
                 description=f"## **Demande de Débutant de {ctx.author.mention}**",
                 fields=[
-                    (
-                        "Pseudo Minecraft",
-                        escape_minecraft_username_markdown(pseudo),
-                        False,
-                    ),
+                    ("Pseudo Minecraft", pseudo, False),
                     ("Ville", ville, False),
                     ("Plus de détails", lieu or "/", False),
                 ],
