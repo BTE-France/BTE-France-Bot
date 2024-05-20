@@ -20,6 +20,7 @@ RANK_DICT = {
     "default": "Visiteur",
     "debutant": "Débutant",
     "builder": "Builder",
+    "macon": "Maçon",
     "contremaitre": "Contremaître",
     "architecte": "Architecte",
     "ingenieur": "Ingénieur",
