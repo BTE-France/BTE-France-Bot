@@ -21,7 +21,7 @@ QUALITY_DICT = {
     "Bleu (commune terminée)": 3,
 }
 DEFAULT_JSON_DICT = {
-    "label": "Test",
+    "label": "Marqueurs",
     "toggleable": True,
     "default-hidden": False,
     "sorting": 0,
@@ -48,7 +48,7 @@ class Bluemap(interactions.Extension):
         self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
         self.update_bluemap.start()
 
-    @interactions.Task.create(interactions.IntervalTrigger(minutes=10))
+    @interactions.Task.create(interactions.IntervalTrigger(hours=1))
     async def update_bluemap(self):
         sheetUrl = f"https://docs.google.com/spreadsheets/export?id={self.bluemap_gsheet_id}&format=xlsx"
         table = pd.read_excel(sheetUrl, sheet_name="Database", header=1, usecols="B:G").dropna(axis=0)
@@ -68,18 +68,21 @@ class Bluemap(interactions.Extension):
         if items_added := diff.get("dictionary_item_added"):
             fields = []
             for item in items_added:
-                fields.append(item.removeprefix("root['").removesuffix("']"))
-            embed.add_field("✅ Ajouté", "\n".join(fields))
+                id = item.removeprefix("root['").removesuffix("']")
+                fields.append(new_markers[id]["label"])
+            embed.add_field("✅ Ajouté", "\n".join(fields), inline=True)
         if items_changed := diff.get("values_changed"):
             fields = []
             for item in items_changed.keys():
-                fields.append(item.removeprefix("root['").split("'")[0])
-            embed.add_field(":arrows_counterclockwise: Modifié", "\n".join(fields))
+                id = item.removeprefix("root['").split("'")[0]
+                fields.append(new_markers[id]["label"])
+            embed.add_field(":arrows_counterclockwise: Modifié", "\n".join(fields), inline=True)
         if items_removed := diff.get("dictionary_item_removed"):
             fields = []
             for item in items_removed:
-                fields.append(item.removeprefix("root['").removesuffix("']"))
-            embed.add_field("❌ Supprimé", "\n".join(fields))
+                id = item.removeprefix("root['").removesuffix("']")
+                fields.append(old_markers[id]["label"])
+            embed.add_field("❌ Supprimé", "\n".join(fields), inline=True)
         await self.schem_channel.send(embed=embed)
 
         # add max distance for each marker (takes time so done only when an update is needed)
