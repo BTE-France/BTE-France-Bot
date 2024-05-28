@@ -5,3 +5,6 @@ aiohttp
 Pillow
 deepl
 validators
+pandas
+openpyxl
+deepdiff
