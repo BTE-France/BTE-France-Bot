@@ -48,7 +48,7 @@ class Bluemap(interactions.Extension):
         self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
         self.update_bluemap.start()
 
-    @interactions.Task.create(interactions.IntervalTrigger(minutes=1))
+    @interactions.Task.create(interactions.IntervalTrigger(minutes=10))
     async def update_bluemap(self):
         sheetUrl = f"https://docs.google.com/spreadsheets/export?id={self.bluemap_gsheet_id}&format=xlsx"
         table = pd.read_excel(sheetUrl, sheet_name="Database", header=1, usecols="B:G").dropna(axis=0)
