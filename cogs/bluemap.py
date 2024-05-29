@@ -6,7 +6,7 @@ import pandas as pd
 from deepdiff import DeepDiff
 
 import variables
-from utils import log
+from utils import create_error_embed, create_info_embed, log
 
 ICONS_DICT = {
     "Orange (projet débuté)": "orange",
@@ -46,10 +46,11 @@ class Bluemap(interactions.Extension):
 
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
-        self.update_bluemap.start()
 
-    @interactions.Task.create(interactions.IntervalTrigger(hours=1))
-    async def update_bluemap(self):
+    @interactions.slash_command("bluemap-update")
+    @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
+    @interactions.auto_defer(ephemeral=True)
+    async def update_bluemap(self, ctx: interactions.SlashContext):
         sheetUrl = f"https://docs.google.com/spreadsheets/export?id={self.bluemap_gsheet_id}&format=xlsx"
         table = pd.read_excel(sheetUrl, sheet_name="Database", header=1, usecols="B:G").dropna(axis=0)
         new_markers = dict(sorted(self.generate_markers_dict(table).items()))
@@ -60,7 +61,7 @@ class Bluemap(interactions.Extension):
                     del marker["max-distance"]
 
         if old_markers == new_markers:
-            return  # Database hasn't changed, no need to continue
+            return await ctx.send(embed=create_error_embed("Aucune mise à jour de la base de donnée n'a été faite!"), ephemeral=True)
 
         # Send diff in channel
         embed = interactions.Embed("Update BlueMap", timestamp=interactions.Timestamp.now())
@@ -83,7 +84,7 @@ class Bluemap(interactions.Extension):
                 id = item.removeprefix("root['").removesuffix("']")
                 fields.append(old_markers[id]["label"])
             embed.add_field("❌ Supprimé", "\n".join(fields), inline=True)
-        await self.schem_channel.send(embed=embed)
+        msg = await self.schem_channel.send(embed=embed)
 
         # add max distance for each marker (takes time so done only when an update is needed)
         for marker in new_markers.values():
@@ -94,6 +95,8 @@ class Bluemap(interactions.Extension):
         with open(self.bluemap_json_file, "w") as file:
             json.dump(new_json_dict, file, indent=2)
         await self.console_channel.send("bluemap reload light")
+
+        await ctx.send(embed=create_info_embed(f"Mise à jour de la BlueMap effectuée: {msg.jump_url}"), ephemeral=True)
 
     def generate_markers_dict(self, table: pd.DataFrame) -> dict:
         markers = {}
