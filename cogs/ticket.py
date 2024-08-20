@@ -426,7 +426,7 @@ class Ticket(interactions.Extension):
                 for actionrow in message.components:
                     for component in actionrow.components:
                         if match := DEBUTANT_BUTTON_PATTERN.search(component.custom_id):
-                            if now - message.timestamp > timedelta(days=10):
+                            if now - message.timestamp > timedelta(days=30):
                                 self.old_messages.append(message)
                             else:
                                 user_ids.append(match.group(1))
