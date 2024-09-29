@@ -7,6 +7,7 @@ import interactions
 
 import variables
 from utils import (
+    RANK_DICT,
     create_embed,
     escape_minecraft_username_markdown,
     format_byte_size,
@@ -16,19 +17,6 @@ from utils import (
 WARP_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /([\w-]+) ([\w:'-]+).*$")
 LUCKPERMS_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /lp user ([\w*]+) ([\w]+) rank.*$")
 SCHEMATIC_PATTERN = re.compile(r"^.* ([\w*]+) saved /home/container/plugins/FastAsyncWorldEdit/schematics/([\w-]+\.schem)$")
-RANK_DICT = {
-    "default": "Visiteur",
-    "debutant": "Débutant",
-    "builder": "Builder",
-    "macon": "Maçon",
-    "contremaitre": "Contremaître",
-    "architecte": "Architecte",
-    "ingenieur": "Ingénieur",
-    "archiviste": "Archiviste",
-    "helper": "Helper",
-    "dev": "Développeur",
-    "admin": "Admin",
-}
 EDIT_WARP_BUTTON = interactions.Button(
     label="Editer",
     custom_id="warp_edit",
