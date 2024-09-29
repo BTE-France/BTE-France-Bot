@@ -37,7 +37,7 @@ class MCServ(interactions.Extension):
             for user_dict in users.values():
                 name = user_dict["name"]
                 for group in user_dict["parents"]:
-                    if role := group.get("group"):
+                    if (role := group.get("group")) in list(RANK_DICT.keys()):  # exclude regional groups
                         self.user_role_dict[name.lower()] = role
                         break
 
