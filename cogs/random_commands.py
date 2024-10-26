@@ -172,6 +172,27 @@ class RandomCommands(interactions.Extension):
                 )
             )
 
+    @interactions.listen(interactions.events.MemberRemove)
+    async def on_guild_kick_add(self, event: interactions.events.MemberRemove):
+        await asyncio.sleep(3)  # Leave some time for the audit log to be updated
+        audit_logs = await event.guild.fetch_audit_log(action_type=interactions.AuditLogEventType.MEMBER_KICK, limit=1)
+        audit_log_entry = audit_logs.entries[0]
+        kicked_user = next(
+            (user for user in audit_logs.users if user.id == audit_log_entry.target_id),
+            None,
+        )
+        if kicked_user.id != event.member.id or audit_log_entry.id.created_at < interactions.Timestamp.utcnow() - timedelta(minutes=1):
+            return  # old kick
+
+        mod_user = next(
+            (user for user in audit_logs.users if user.id == audit_log_entry.user_id),
+            None,
+        )
+
+        await event.guild.get_channel(variables.Channels.LOGS).send(
+            embeds=create_info_embed(f"**{kicked_user.tag} a été kick par {mod_user.mention} pour la raison suivante:**\n{audit_log_entry.reason}")
+        )
+
     @interactions.message_context_menu(name="Copier message")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def copy(self, ctx: interactions.ContextMenuContext):
