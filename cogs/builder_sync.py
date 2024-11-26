@@ -4,7 +4,7 @@ import aiohttp
 import interactions
 
 import variables
-from utils import log, get_env
+from utils import get_env, log
 
 
 class BuilderSync(interactions.Extension):
@@ -12,7 +12,7 @@ class BuilderSync(interactions.Extension):
     async def on_start(self):
         self.headers = {
             "Host": "buildtheearth.net",
-            "Authorization": f"Bearer {get_env("BTE_API_KEY")}",
+            "Authorization": f"Bearer {get_env('BTE_API_KEY')}",
             "Accept": "application/json",
         }
 
