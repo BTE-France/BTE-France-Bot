@@ -11,6 +11,7 @@ from utils import (
     create_embed,
     escape_minecraft_username_markdown,
     format_byte_size,
+    get_env,
     log,
 )
 
@@ -61,14 +62,8 @@ class ConsoleListener(interactions.Extension):
         self.warps_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         self.ranking_channel = await self.bot.fetch_channel(variables.Channels.RANKING)
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
-        if users_json_file := os.getenv("LUCKPERMS_USERS_JSON_FILE"):
-            self.users_json_file = users_json_file
-        else:
-            log("No LUCKPERMS_USERS_JSON_FILE variable found!")
-        if schematics_folder := os.getenv("SCHEMATICS_FOLDER"):
-            self.schematics_folder = schematics_folder
-        else:
-            log("No SCHEMATICS_FOLDER variable found!")
+        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
+        self.schematics_folder = get_env("SCHEMATICS_FOLDER")
 
     @interactions.listen(interactions.events.MessageCreate)
     async def on_console_message_create(self, message_create: interactions.events.MessageCreate):

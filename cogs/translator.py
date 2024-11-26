@@ -3,7 +3,7 @@ import os
 import deepl
 import interactions
 
-from utils import create_embed, create_error_embed, log
+from utils import create_embed, create_error_embed, get_env, log
 
 # List of messages (to avoid same message been translated multiple times)
 MESSAGES = {deepl.Language.FRENCH: [], deepl.Language.ENGLISH_BRITISH: []}
@@ -28,10 +28,7 @@ TEXT = {
 class Translator(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        if auth_key := os.getenv("DEEPL_TOKEN"):
-            self.translator = deepl.Translator(auth_key)
-        else:
-            log("No DEEPL_TOKEN variable found!")
+        self.translator = deepl.Translator(get_env("DEEPL_TOKEN"))
 
     @interactions.context_menu(name="Traduire en français", context_type=interactions.CommandType.MESSAGE)
     async def translate_french(self, ctx: interactions.ContextMenuContext):

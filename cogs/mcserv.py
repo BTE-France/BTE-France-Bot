@@ -10,7 +10,7 @@ from utils import (
     RANK_EMOTE_DICT,
     create_embed,
     escape_minecraft_username_markdown,
-    log,
+    get_env,
 )
 
 SERVER_IP = "btefrance.fr:7011"
@@ -21,12 +21,9 @@ class MCServ(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
         self.user_role_dict = {}
-        if users_json_file := os.getenv("LUCKPERMS_USERS_JSON_FILE"):
-            self.users_json_file = users_json_file
-            await self.update_user_role_dict()
-            self.update_user_role_dict.start()
-        else:
-            log("No LUCKPERMS_USERS_JSON_FILE variable found!")
+        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
+        await self.update_user_role_dict()
+        self.update_user_role_dict.start()
 
     @interactions.Task.create(interactions.IntervalTrigger(minutes=1))
     def update_user_role_dict(self):

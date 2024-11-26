@@ -1,10 +1,11 @@
 import asyncio
 from datetime import timedelta
 
+import aiohttp
 import interactions
 
 import variables
-from utils import create_embed, create_error_embed, create_info_embed
+from utils import create_embed, create_error_embed, create_info_embed, get_env
 
 NEW_WORD_MODAL = interactions.Modal(
     interactions.ParagraphText(
@@ -35,6 +36,7 @@ class RandomCommands(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
         self.auto_pingn.start()
+        self.send_up_status.start()
 
     @interactions.slash_command(name="ping")
     async def ping(self, ctx: interactions.SlashContext):
@@ -319,3 +321,9 @@ class RandomCommands(interactions.Extension):
                 last_users_str = ""
         users_strs.append(last_users_str + PINGN_MSG)
         return users_strs
+
+    @interactions.Task.create(interactions.IntervalTrigger(seconds=50))
+    async def send_up_status(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(get_env("UP_STATUS_URL")) as resp:
+                pass  # nothing to do more than just sending a GET request

@@ -6,7 +6,7 @@ import pandas as pd
 from deepdiff import DeepDiff
 
 import variables
-from utils import create_error_embed, create_info_embed, log
+from utils import create_error_embed, create_info_embed, get_env, log
 
 ICONS_DICT = {
     "Orange (projet débuté)": "orange",
@@ -37,13 +37,8 @@ JUMP = 20
 class Bluemap(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        if (bluemap_gsheet_id := os.getenv("BLUEMAP_GSHEET_ID")) and (bluemap_json_file := os.getenv("BLUEMAP_JSON_FILE")):
-            self.bluemap_gsheet_id = bluemap_gsheet_id
-            self.bluemap_json_file = bluemap_json_file
-        else:
-            log("Bluemap variable(s) missing!")
-            return
-
+        self.bluemap_gsheet_id = get_env("BLUEMAP_GSHEET_ID")
+        self.bluemap_json_file = get_env("BLUEMAP_JSON_FILE")
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
 

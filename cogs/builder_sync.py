@@ -4,18 +4,15 @@ import aiohttp
 import interactions
 
 import variables
-from utils import log
+from utils import log, get_env
 
 
 class BuilderSync(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        if not (api_key := os.getenv("BTE_API_KEY")):
-            log("No BTE_API_KEY variable found!")
-            return
         self.headers = {
             "Host": "buildtheearth.net",
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {get_env("BTE_API_KEY")}",
             "Accept": "application/json",
         }
 

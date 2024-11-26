@@ -1,3 +1,5 @@
+import os
+
 RANK_DICT = {
     "admin": "Admin",
     "dev": "Développeur",
@@ -37,3 +39,9 @@ def format_byte_size(num, suffix="B"):
             return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
+
+
+def get_env(var_name):
+    if not (env_var := os.getenv(var_name)):
+        raise Exception(f"{var_name} environment variable not found!")
+    return env_var

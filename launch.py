@@ -5,7 +5,7 @@ from pathlib import Path
 import interactions
 from dotenv import load_dotenv
 
-from utils import log
+from utils import get_env, log
 
 load_dotenv()
 logging.basicConfig(format="[%(levelname)s] %(message)s")
@@ -25,7 +25,4 @@ async def on_start():
     log("Bot is ready!")
 
 
-if token := os.getenv("DISCORD_TOKEN"):
-    bot.start(token)
-else:
-    log("No DISCORD_TOKEN variable found!")
+bot.start(get_env("DISCORD_TOKEN"))
