@@ -14,7 +14,7 @@ from utils import (
 )
 
 SERVER_IP = "btefrance.fr:7011"
-SERVER_DESC = "Serveur Java 1.20.1 - IP: btefrance.fr"
+SERVER_DESC = "Serveur Java 1.21.1 - IP: btefrance.fr"
 
 
 class MCServ(interactions.Extension):
