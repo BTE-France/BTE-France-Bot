@@ -62,22 +62,22 @@ class Bluemap(interactions.Extension):
         embed = interactions.Embed("Update BlueMap", timestamp=interactions.Timestamp.now())
         diff = DeepDiff(old_markers, new_markers)
         if items_added := diff.get("dictionary_item_added"):
-            fields = []
+            fields = set()
             for item in items_added:
                 id = item.removeprefix("root['").removesuffix("']")
-                fields.append(new_markers[id]["label"])
+                fields.add(new_markers[id]["label"])
             embed.add_field("✅ Ajouté", "\n".join(fields), inline=True)
         if items_changed := diff.get("values_changed"):
-            fields = []
+            fields = set()
             for item in items_changed.keys():
                 id = item.removeprefix("root['").split("'")[0]
-                fields.append(new_markers[id]["label"])
+                fields.add(new_markers[id]["label"])
             embed.add_field(":arrows_counterclockwise: Modifié", "\n".join(fields), inline=True)
         if items_removed := diff.get("dictionary_item_removed"):
-            fields = []
+            fields = set()
             for item in items_removed:
                 id = item.removeprefix("root['").removesuffix("']")
-                fields.append(old_markers[id]["label"])
+                fields.add(old_markers[id]["label"])
             embed.add_field("❌ Supprimé", "\n".join(fields), inline=True)
         msg = await self.schem_channel.send(embed=embed)
 
