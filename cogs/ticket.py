@@ -85,6 +85,7 @@ Start building on the server by requesting your beginner rank.
 ## You will be pinged when a staff is connected to the server so that they can give you the rank.
 
 ### To build in Paris, you will need to prove yourself in a beginner area in Paris before choosing your location."""
+PINGD_MSG = "\n**Un staff est connecté pour vous donner le rôle Débutant, connectez-vous EN JEU pour obtenir le grade Débutant!**"
 
 
 class Ticket(interactions.Extension):
@@ -403,14 +404,24 @@ class Ticket(interactions.Extension):
             custom_id="debutant_ping",
             label="Ping toutes les demandes de débutant",
         )
-        user_ids_string = " ".join([f"<@{id}>" for id in user_ids])
-        await ctx.send(f"`{user_ids_string}`", components=send_button, ephemeral=True)
+        # Generate multiple strings to counter the max 2000 characters per message
+        max_users_str_length = 2000 - len(PINGD_MSG)
+        users_strs = []
+        last_users_str = ""
+        users = [f"<@{id}>" for id in user_ids]
+        while users:
+            if len(f"{last_users_str} {users[0]}") < max_users_str_length:
+                last_users_str += users.pop(0) + " "
+            else:
+                users_strs.append(last_users_str + PINGD_MSG)
+                last_users_str = ""
+        users_strs.append(last_users_str + PINGD_MSG)
+        await ctx.send(embed=create_info_embed(f"{len(user_ids)} joueur(s) vont être mentionné(s)!"), components=send_button, ephemeral=True)
 
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
-            await ctx.channel.send(
-                user_ids_string + " **Un staff est connecté pour vous donner le rôle, connectez-vous EN JEU pour obtenir le grade Débutant!**"
-            )
+            for user_str in users_strs:
+                await ctx.channel.send(user_str)
         except asyncio.TimeoutError:
             pass
         # Small hack to delete the ephemeral /pingd message
