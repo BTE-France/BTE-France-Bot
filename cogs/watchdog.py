@@ -57,30 +57,26 @@ class WarpsFolderHandler(AIOEventHandler):
         )
         await self.ext.warps_channel.send(embeds=embed, components=EDIT_WARP_BUTTON)
 
-    async def on_created(self, event: watchdog.events.FileCreatedEvent):
-        if event.is_directory or not event.src_path.endswith(".yml"):
+    async def on_moved(self, event: watchdog.events.FileMovedEvent):
+        # why do we not listen to FileCreated or FileModified events?
+        # because in Linux, there is a temporary .yml.tmp that is created BEFORE the final .yml file:
+        # FileCreated .tmp > FileOpened .tmp > FileModified .tmp > FileClosed .tmp > FileMoved .tmp to .yml
+        # therefore we only listen to the final FileMovedEvent
+        if event.is_directory:
             return
-        warp_dict = self.get_warp_file_dict(event.src_path)
-        self.warps_dict[Path(event.src_path).name] = warp_dict
+        warp_dict = self.get_warp_file_dict(event.dest_path)
+        self.warps_dict[Path(event.dest_path).name] = warp_dict
         await self.send_embed(warp_dict, "créé", 0x00FF00)
         log(f"Added warp {warp_dict.get('name')}")
 
     async def on_deleted(self, event: watchdog.events.FileDeletedEvent):
-        if event.is_directory or not event.src_path.endswith(".yml"):
+        if event.is_directory:
             return
         warp_dict = self.warps_dict.get(Path(event.src_path).name)
         if warp_dict is not None:
             del self.warps_dict[Path(event.src_path).name]
             await self.send_embed(warp_dict, "supprimé", 0xFF0000)
             log(f"Deleted warp {warp_dict.get('name')}")
-
-    async def on_modified(self, event: watchdog.events.FileModifiedEvent):
-        if event.is_directory or not event.src_path.endswith(".yml"):
-            return
-        warp_dict = self.get_warp_file_dict(event.src_path)
-        self.warps_dict[Path(event.src_path).name] = warp_dict
-        await self.send_embed(warp_dict, "modifié", 0x0000FF)
-        log(f"Modified warp {warp_dict.get('name')}")
 
 
 class Watchdog(interactions.Extension):
