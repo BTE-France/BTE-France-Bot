@@ -40,6 +40,9 @@ class WarpsFolderHandler(AIOEventHandler):
             self.warps_dict[file] = self.get_warp_file_dict(os.path.join(self.warps_folder, file))
 
     def get_warp_file_dict(self, filename) -> dict:
+        if not os.path.exists(filename):
+            log(f"[ERROR] {filename} does not exist!")
+            return
         with open(filename, "r") as f:
             yaml_data = yaml.load(f, Loader=yaml.FullLoader)
             return yaml_data
@@ -55,7 +58,7 @@ class WarpsFolderHandler(AIOEventHandler):
         await self.ext.warps_channel.send(embeds=embed, components=EDIT_WARP_BUTTON)
 
     async def on_created(self, event: watchdog.events.FileCreatedEvent):
-        if event.is_directory:
+        if event.is_directory or not event.src_path.endswith(".yml"):
             return
         warp_dict = self.get_warp_file_dict(event.src_path)
         self.warps_dict[Path(event.src_path).name] = warp_dict
@@ -63,7 +66,7 @@ class WarpsFolderHandler(AIOEventHandler):
         log(f"Added warp {warp_dict.get('name')}")
 
     async def on_deleted(self, event: watchdog.events.FileDeletedEvent):
-        if event.is_directory:
+        if event.is_directory or not event.src_path.endswith(".yml"):
             return
         warp_dict = self.warps_dict.get(Path(event.src_path).name)
         if warp_dict is not None:
@@ -72,7 +75,7 @@ class WarpsFolderHandler(AIOEventHandler):
             log(f"Deleted warp {warp_dict.get('name')}")
 
     async def on_modified(self, event: watchdog.events.FileModifiedEvent):
-        if event.is_directory:
+        if event.is_directory or not event.src_path.endswith(".yml"):
             return
         warp_dict = self.get_warp_file_dict(event.src_path)
         self.warps_dict[Path(event.src_path).name] = warp_dict
