@@ -1,5 +1,7 @@
 import os
 
+import aiohttp
+
 RANK_DICT = {
     "admin": "Admin",
     "dev": "Développeur",
@@ -45,3 +47,18 @@ def get_env(var_name):
     if not (env_var := os.getenv(var_name)):
         raise Exception(f"{var_name} environment variable not found!")
     return env_var
+
+
+async def minecraft_username_to_uuid(username: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://api.mojang.com/users/profiles/minecraft/{username}") as response:
+            id: str = (await response.json()).get("id")
+            id = f"{id[:8]}-{id[8:12]}-{id[12:16]}-{id[16:20]}-{id[20:]}"
+            return id
+
+
+async def minecraft_uuid_to_username(uuid: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://api.minecraftservices.com/minecraft/profile/lookup/{uuid}") as response:
+            username: str = (await response.json()).get("name")
+            return username

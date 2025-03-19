@@ -8,3 +8,5 @@ validators
 pandas
 openpyxl
 deepdiff
+hachiko @ git+https://github.com/claudiopastorini/hachiko@fix-observer-positional-argument
+pyyaml
