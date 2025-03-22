@@ -129,7 +129,7 @@ class ConsoleListener(interactions.Extension):
             await schematics_regex(match)
 
     async def get_new_rank(self, player: str):
-        uuid = minecraft_username_to_uuid(player)
+        uuid = await minecraft_username_to_uuid(player)
         with open(self.users_json_file, "r") as file:
             users = json.load(file)
             # Get the new rank
