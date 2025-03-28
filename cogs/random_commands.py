@@ -260,6 +260,34 @@ class RandomCommands(interactions.Extension):
                 ephemeral=True,
             )
 
+    @role.subcommand("temp")
+    async def role_temp(self, ctx: interactions.SlashContext):
+        msg = await ctx.channel.send(
+            f"Si tu souhaites participer à la photo de groupe, clique dessous!",
+            components=interactions.Button(
+                style=interactions.ButtonStyle.GREEN,
+                label="Participer à l'event",
+                custom_id="role_temp",
+            ),
+            allowed_mentions=interactions.AllowedMentions(),
+        )
+        await ctx.send(embed=create_info_embed(f"Message envoyé: {msg.jump_url}"), ephemeral=True)
+
+    @interactions.component_callback("role_temp")
+    async def on_role_temp_button(self, ctx: interactions.ComponentContext):
+        if 1354425080826040340 in ctx.author.roles:
+            await ctx.author.remove_role(1354425080826040340)
+            await ctx.send(
+                embeds=create_info_embed("Tu ne participes plus à la photo de groupe."),
+                ephemeral=True,
+            )
+        else:
+            await ctx.author.add_role(1354425080826040340)
+            await ctx.send(
+                embeds=create_info_embed("Tu peux participer à la photo de groupe!"),
+                ephemeral=True,
+            )
+
     @interactions.slash_command(name="pingn")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingn(self, ctx: interactions.SlashContext):
