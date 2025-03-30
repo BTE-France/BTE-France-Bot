@@ -66,8 +66,6 @@ Commencez à construire sur le serveur en demandant votre grade débutant.
 > - Votre pseudo Minecraft
 > - L'endroit **exact** où vous voulez construire (On conseille de commencer par des habitations simples)
 
-## Vous serez ping lorsqu'un staff sera connecté sur le serveur pour qu'il puisse vous mettre le grade.
-
 ### Pour construire à Paris, vous devrez faire vos preuves dans une zone débutant à Paris avant de choisir votre endroit."""
 TICKET_DEBUTANT_EN_TEXT = """# <:btefr:1111011027300139078> ・Become a beginner
 
@@ -82,8 +80,6 @@ Start building on the server by requesting your beginner rank.
 > __To do this, click on the button below and indicate in the request:__
 > - Your Minecraft nickname
 > - The **exact** place where you want to build (We recommend starting with simple homes)
-
-## You will be pinged when a staff is connected to the server so that they can give you the rank.
 
 ### To build in Paris, you will need to prove yourself in a beginner area in Paris before choosing your location."""
 PINGD_MSG = "\n**Un staff est connecté pour vous donner le rôle Débutant, connectez-vous EN JEU pour obtenir le grade Débutant!**"
