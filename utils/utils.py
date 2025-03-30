@@ -62,3 +62,11 @@ async def minecraft_uuid_to_username(uuid: str):
         async with session.get(f"https://api.minecraftservices.com/minecraft/profile/lookup/{uuid}") as response:
             username: str = (await response.json()).get("name")
             return username
+
+
+async def minecraft_user_head(username: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://mc-heads.net/avatar/{username}") as response:
+            id: str = (await response.json()).get("id")
+            id = f"{id[:8]}-{id[8:12]}-{id[12:16]}-{id[16:20]}-{id[20:]}"
+            return id
