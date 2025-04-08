@@ -12,6 +12,7 @@ from utils import (
     escape_minecraft_username_markdown,
     log,
     minecraft_username_to_uuid,
+    minecraft_uuid_to_username,
 )
 
 TICKET_BUILDER_PATTERN = re.compile(r"ticket_builder_(fr|en)")
@@ -83,6 +84,14 @@ Start building on the server by requesting your beginner rank.
 
 ### To build in Paris, you will need to prove yourself in a beginner area in Paris before choosing your location."""
 PINGD_MSG = "\n**Un staff est connecté pour vous donner le rôle Débutant, connectez-vous EN JEU pour obtenir le grade Débutant!**"
+WELCOME_DEBUTANT_FR = """## :flag_fr:  Félicitations, tu es désormais débutant sur BTE France!
+
+Tu peux désormais te mettre en créatif (`/gamemode creative`) et te [téléporter](https://discord.com/channels/694003889506091100/1206681108067000351) pour commencer à construire. 
+Voici quelques guides pour bien débuter: https://discord.com/channels/694003889506091100/1112855109123194910"""
+WELCOME_DEBUTANT_EN = """## :flag_gb:  Congratulations, you're now a beginner on BTE France!
+
+You can now go in creative mode (`/gamemode creative`) and [teleport](https://discord.com/channels/694003889506091100/1216046022887870536) to start building. 
+Here are a few guides to get you started: https://discord.com/channels/694003889506091100/1163798527772725249"""
 
 
 class Ticket(interactions.Extension):
@@ -319,7 +328,7 @@ class Ticket(interactions.Extension):
 
         pseudo = modal_ctx.responses["pseudo"]
         try:
-            await minecraft_username_to_uuid(pseudo)
+            uuid = await minecraft_username_to_uuid(pseudo)
         except TypeError:
             # this username does not exist
             return await modal_ctx.send(
@@ -328,6 +337,9 @@ class Ticket(interactions.Extension):
                 ),
                 ephemeral=True,
             )
+        pseudo = await minecraft_uuid_to_username(
+            uuid
+        )  # make sure pseudo is well formatted with capital letters, required for later LuckPerms function
         ville = modal_ctx.responses["ville"]
         lieu = modal_ctx.responses["lieu"]
 
@@ -401,6 +413,9 @@ class Ticket(interactions.Extension):
                 footer_text=f"Validée par {ctx.author.tag}",
             )
         )
+
+        welcome_msg = WELCOME_DEBUTANT_FR if author.has_role(variables.Roles.FRANCAIS) else WELCOME_DEBUTANT_EN
+        await author.send(welcome_msg)
 
         # Rename user, can throw error if the user has admin perms
         nickname = f"{username} ["
