@@ -6,7 +6,7 @@ load_dotenv()
 
 
 BTE_FRANCE_ICON = "https://i.imgur.com/1ZPB2Wt.png"
-if os.getenv("DEV"):
+if os.getenv("DEV") == "True":
     # BTE France Tests server
     SERVER = 1110447122194636892
 

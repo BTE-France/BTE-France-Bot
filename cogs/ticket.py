@@ -482,10 +482,13 @@ class Ticket(interactions.Extension):
                 for actionrow in message.components:
                     for component in actionrow.components:
                         if match := DEBUTANT_BUTTON_PATTERN.search(component.custom_id):
-                            if now - message.timestamp > timedelta(days=30):
+                            user_id = match.group(1)
+                            if (now - message.timestamp > timedelta(days=30)) or (
+                                await guild.fetch_member(user_id) is None
+                            ):  # if message is too old or user left guild
                                 self.old_messages.append(message)
                             else:
-                                user_ids.append(match.group(1))
+                                user_ids.append(user_id)
                             break
 
         return user_ids
