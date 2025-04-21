@@ -1,4 +1,5 @@
 import asyncio
+import json
 import re
 from datetime import timedelta
 
@@ -10,6 +11,7 @@ from utils import (
     create_error_embed,
     create_info_embed,
     escape_minecraft_username_markdown,
+    get_env,
     log,
     minecraft_username_to_uuid,
     minecraft_uuid_to_username,
@@ -99,6 +101,7 @@ class Ticket(interactions.Extension):
     async def on_start(self):
         self.old_messages: list[interactions.Message] = []
         self.delete_old_debutant_tickets.start()
+        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
 
     @interactions.slash_command("ticket")
     @interactions.slash_default_member_permission(interactions.Permissions.ADMINISTRATOR)
@@ -221,10 +224,13 @@ class Ticket(interactions.Extension):
         if not (match := BUILDER_BUTTON_PATTERN.search(ctx.custom_id)):
             return
         action, author_id = match.group(1, 2)
+        await ctx.defer(ephemeral=True)
+
         author = await ctx.guild.fetch_member(author_id)
+        uuid = self.discord_id_to_minecraft_uuid(author_id)
 
         if action == "validate":
-            await ctx.send(
+            await ctx.channel.send(
                 embed=create_embed(
                     description=f"✅ **Demande acceptée par {ctx.author.mention}**",
                     color=0x00FF00,
@@ -235,14 +241,38 @@ class Ticket(interactions.Extension):
             await ctx.guild.get_channel(variables.Channels.FRENCH_CHAT).send(
                 f"**<:gg:776560537777602630> Félicitations à {author.mention} qui est devenu Builder!**"
             )
+            if uuid is None:  # Discord <-> MC relation not found, therefore cannot pass Builder on the server
+                await ctx.send(
+                    embed=create_info_embed(f"Demande validée mais sans passer l'utilisateur Builder sur le serveur Minecraft automatiquement!")
+                )
+            else:
+                username = await minecraft_uuid_to_username(uuid)
+                # promote user through console channel, and verify user was actually promoted
+                console_channel = ctx.bot.get_channel(variables.Channels.CONSOLE)
+                msg = await console_channel.send(f"lp user {username} promote rank")
+                await asyncio.sleep(3)  # make sure that promotion message was sent in console correctly
+                messages: list[interactions.Message] = await console_channel.history(limit=2).flatten()
+                for message in messages:
+                    if f"Promoting {username} along track rank from debutant to builder in context global".lower() in message.content.lower():
+                        await ctx.send(
+                            embed=create_info_embed(f"Demande validée et `{username}` passé Builder sur le serveur Minecraft automatiquement!")
+                        )
+                        break
+                else:
+                    await ctx.send(
+                        embed=create_info_embed(
+                            f"Demande validée mais erreur en passant `{username}` Builder sur le serveur Minecraft automatiquement! Vérifier pourquoi: {msg.jump_url}"
+                        )
+                    )
             log(f"{ctx.author.tag} validated {author.tag} builder request.")
         elif action == "deny":
-            await ctx.send(
+            await ctx.channel.send(
                 embed=create_embed(
                     description=f"❌ **Demande refusée par {ctx.author.mention}**",
                     color=0xFF0000,
                 )
             )
+            await ctx.send(embed=create_info_embed(f"Demande refusée."))
             log(f"{ctx.author.tag} denied {author.tag} builder request.")
         await ctx.channel.archive(locked=True)
 
@@ -372,6 +402,15 @@ class Ticket(interactions.Extension):
         msg = await thread.send(ctx.author.mention, silent=True)
         await msg.delete()
 
+    def discord_id_to_minecraft_uuid(self, discord_id: int) -> str | None:
+        with open(self.users_json_file, "r") as file:
+            users = json.load(file)
+            for uuid, user_dict in users.items():
+                for perm_dict in user_dict.get("permissions", []):
+                    if perm_dict.get("permission", "") == f"discord_id_{discord_id}":
+                        return uuid
+        return None
+
     @interactions.component_callback(DEBUTANT_BUTTON_PATTERN)
     async def on_debutant_validate(self, ctx: interactions.ComponentContext):
         if interactions.Permissions.MANAGE_MESSAGES not in ctx.channel.permissions_for(ctx.author):
@@ -390,7 +429,7 @@ class Ticket(interactions.Extension):
         await asyncio.sleep(3)  # make sure that promotion message was sent in console correctly
         messages: list[interactions.Message] = await console_channel.history(limit=2).flatten()
         for message in messages:
-            if f"Promoting {username} along track rank from default to debutant in context global" in message.content:
+            if f"Promoting {username} along track rank from default to debutant in context global".lower() in message.content.lower():
                 break
         else:
             return await ctx.send(
@@ -413,6 +452,9 @@ class Ticket(interactions.Extension):
                 footer_text=f"Validée par {ctx.author.tag}",
             )
         )
+        msg = await console_channel.send(
+            f"lp user {username} permission set discord_id_{author_id} true"
+        )  # needed for later Débutant to Builder promotion
 
         welcome_msg = WELCOME_DEBUTANT_FR if author.has_role(variables.Roles.FRANCAIS) else WELCOME_DEBUTANT_EN
         await author.send(welcome_msg)
