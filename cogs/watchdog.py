@@ -48,10 +48,16 @@ class WarpsFolderHandler(AIOEventHandler):
             return yaml_data
 
     async def send_embed(self, warp_dict: dict, _type: str, color: int):
+        x, y, z = int(warp_dict.get("x")), int(warp_dict.get("y")), int(warp_dict.get("z"))
         title = f"Warp {_type}: {warp_dict.get('name')}"
         embed = create_embed(
             title=title,
-            fields=[("X", int(warp_dict.get("x")), True), ("Y", int(warp_dict.get("y")), True), ("Z", int(warp_dict.get("z")), True)],
+            fields=[
+                ("X", x, True),
+                ("Y", y, True),
+                ("Z", z, True),
+                ("Lien Bluemap", f"https://map.btefrance.fr/#btefrance:{x}:{y}:{z}:40:0:0:0:0:perspective", False),
+            ],
             footer_text=await minecraft_uuid_to_username(warp_dict.get("lastowner")),
             color=color,
         )
