@@ -1,9 +1,10 @@
+import asyncio
 import json
 import os
 import re
 
-import aiohttp
 import interactions
+from aiosseclient import Event, aiosseclient
 
 import variables
 from utils import (
@@ -13,7 +14,7 @@ from utils import (
     format_byte_size,
     get_env,
     log,
-    minecraft_username_to_uuid,
+    lp_get_user,
 )
 
 LUCKPERMS_PATTERN = re.compile(r"^.* ([\w*]+) issued server command: /lp user ([\w*]+) ([\w]+) rank.*$")
@@ -45,8 +46,8 @@ class ConsoleListener(interactions.Extension):
     async def on_start(self):
         self.ranking_channel = await self.bot.fetch_channel(variables.Channels.RANKING)
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
-        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
         self.schematics_folder = get_env("SCHEMATICS_FOLDER")
+        await self.luckperms_sse_handler()
 
     @interactions.listen(interactions.events.MessageCreate)
     async def on_console_message_create(self, message_create: interactions.events.MessageCreate):
@@ -84,25 +85,6 @@ class ConsoleListener(interactions.Extension):
             await self.test_for_regex(msg)
 
     async def test_for_regex(self, message: str):
-        async def luckperms_regex(match: re.Match):
-            moderator, player, action = match.group(1, 2, 3)
-            if action not in ("promote", "demote"):
-                return
-            if not (rank := await self.get_new_rank(player)):
-                return
-            title = (
-                f"{escape_minecraft_username_markdown(player)} promu au rang de {rank}."
-                if action == "promote"
-                else f"{escape_minecraft_username_markdown(player)} rétrogradé au rang de {rank}."
-            )
-            embed = create_embed(
-                title=title,
-                footer_text=moderator,
-                color=0x00FF00 if action == "promote" else 0xFF0000,
-            )
-            await self.ranking_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
-            log(f"{'Promoted' if action == 'promote' else 'Demoted'} {player} to {rank}")
-
         async def schematics_regex(match: re.Match):
             player, schem_name = match.group(1, 2)
             schem_file = os.path.join(self.schematics_folder, schem_name)
@@ -122,29 +104,52 @@ class ConsoleListener(interactions.Extension):
             )
             await self.schem_channel.send(embed=embed, file=interactions.File(schem_file))
 
-        if hasattr(self, "users_json_file") and (match := LUCKPERMS_PATTERN.search(message)):
-            await luckperms_regex(match)
-
         if hasattr(self, "schematics_folder") and (match := SCHEMATIC_PATTERN.search(message)):
             await schematics_regex(match)
 
-    async def get_new_rank(self, player: str):
-        uuid = await minecraft_username_to_uuid(player)
-        with open(self.users_json_file, "r") as file:
-            users = json.load(file)
-            # Get the new rank
-            for rank in [child["group"] for child in users[uuid]["parents"]]:
-                if rank := RANK_DICT.get(rank):
-                    return rank
+    async def luckperms_sse_handler(self):
+        while True:
+            async for event in aiosseclient(
+                "https://luckperms.btefrance.fr/event/log-broadcast", headers={"Authorization": f"Bearer {get_env('LUCKPERMS_REST_AUTH_KEY')}"}
+            ):
+                await self.parse_event(event)
+            log("Connection to LuckPerms SSE API lost, retring in 60 seconds...")
+            await asyncio.sleep(60)
 
-    @interactions.component_callback("perms_edit")
+    async def parse_event(self, event: Event):
+        # Events whose source is directly the REST API will NOT appear here, only external events appear (Console or Minecraft)
+        if event.event != "message":
+            return
+        data = json.loads(event.data)
+        desc = data.get("entry").get("description")
+        if desc not in ("promote rank", "demote rank"):
+            return
+        source = data.get("entry").get("source").get("name")
+        target = data.get("entry").get("target").get("name")
+        user = await lp_get_user(data.get("entry").get("target").get("uniqueId"))
+        rank = RANK_DICT.get(user.get("metadata").get("primaryGroup"))
+
+        title = (
+            f"{escape_minecraft_username_markdown(target)} promu au rang de {rank}."
+            if desc == "promote rank"
+            else f"{escape_minecraft_username_markdown(target)} rétrogradé au rang de {rank}."
+        )
+        embed = create_embed(
+            title=title,
+            footer_text=source,
+            color=0x00FF00 if desc == "promote rank" else 0xFF0000,
+        )
+        await self.ranking_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
+        log(f"{'Promoted' if desc == 'promote rank' else 'Demoted'} {target} to {rank}")
+
+    @interactions.component_callback(EDIT_PERMS_BUTTON.custom_id)
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
         modal = EDIT_PERMS_MODAL
         desc = ctx.message.embeds[0].description.replace("Information: ", "") if ctx.message.embeds[0].description else ""
         modal.components[0].value = desc
         await ctx.send_modal(modal)
 
-    @interactions.modal_callback("perms_modal")
+    @interactions.modal_callback(EDIT_PERMS_MODAL.custom_id)
     async def on_perms_modal_answer(self, ctx: interactions.ModalContext, information: str):
         embed: interactions.Embed = ctx.message.embeds[0]
         embed.description = f"Information: {information}" if information else ""

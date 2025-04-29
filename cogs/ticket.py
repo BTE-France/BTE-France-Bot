@@ -1,5 +1,4 @@
 import asyncio
-import json
 import re
 from datetime import timedelta
 
@@ -7,14 +6,18 @@ import interactions
 
 import variables
 from utils import (
+    RANK_DICT,
     create_embed,
     create_error_embed,
     create_info_embed,
     escape_minecraft_username_markdown,
-    get_env,
     log,
+    lp_add_node_to_user,
+    lp_get_user,
+    lp_lookup_user,
+    lp_promote_user,
+    lp_search_nodes,
     minecraft_username_to_uuid,
-    minecraft_uuid_to_username,
 )
 
 TICKET_BUILDER_PATTERN = re.compile(r"ticket_builder_(fr|en)")
@@ -53,7 +56,7 @@ BUILDER_THREAD_EN_TEXT = """### Send here:
 * A photo of your two Minecraft buildings
 * A StreetView photo of your two buildings, preferably from the same viewpoint as in-game.
 * The exact address (or monument) of your buildings."""
-DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)_([\w*]+)")
+DEBUTANT_BUTTON_PATTERN = re.compile(r"debutant_validate_([0-9]+)_([\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})")
 TICKET_DEBUTANT_PATTERN = re.compile(r"ticket_debutant_(fr|en)")
 TICKET_DEBUTANT_FR_TEXT = """#  <:btefr:1111011027300139078> ・Devenir débutant
 
@@ -101,7 +104,6 @@ class Ticket(interactions.Extension):
     async def on_start(self):
         self.old_messages: list[interactions.Message] = []
         self.delete_old_debutant_tickets.start()
-        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
 
     @interactions.slash_command("ticket")
     @interactions.slash_default_member_permission(interactions.Permissions.ADMINISTRATOR)
@@ -227,7 +229,6 @@ class Ticket(interactions.Extension):
         await ctx.defer(ephemeral=True)
 
         author = await ctx.guild.fetch_member(author_id)
-        uuid = self.discord_id_to_minecraft_uuid(author_id)
 
         if action == "validate":
             await ctx.channel.send(
@@ -241,28 +242,27 @@ class Ticket(interactions.Extension):
             await ctx.guild.get_channel(variables.Channels.FRENCH_CHAT).send(
                 f"**<:gg:776560537777602630> Félicitations à {author.mention} qui est devenu Builder!**"
             )
-            if uuid is None:  # Discord <-> MC relation not found, therefore cannot pass Builder on the server
+            nodes: list = await lp_search_nodes(f"discord_id_{author_id}")
+            if len(nodes) == 0:  # Discord <-> MC relation not found, therefore cannot pass Builder on the server
                 await ctx.send(
                     embed=create_info_embed(f"Demande validée mais sans passer l'utilisateur Builder sur le serveur Minecraft automatiquement!")
                 )
             else:
-                username = await minecraft_uuid_to_username(uuid)
-                # promote user through console channel, and verify user was actually promoted
-                console_channel = ctx.bot.get_channel(variables.Channels.CONSOLE)
-                msg = await console_channel.send(f"lp user {username} promote rank")
-                await asyncio.sleep(3)  # make sure that promotion message was sent in console correctly
-                messages: list[interactions.Message] = await console_channel.history(limit=2).flatten()
-                for message in messages:
-                    if f"Promoting {username} along track rank from debutant to builder in context global".lower() in message.content.lower():
-                        await ctx.send(
-                            embed=create_info_embed(f"Demande validée et `{username}` passé Builder sur le serveur Minecraft automatiquement!")
+                uuid = nodes[0].get("uniqueId")
+                user = await lp_get_user(uuid)
+                username = user.get("username")
+                if (rank := user.get("metadata", {}).get("primaryGroup")) != "debutant":  # user is NOT a debutant
+                    return await ctx.send(embed=create_error_embed(f"[ERREUR] `{username}` est déjà {RANK_DICT.get(rank)}!"))
+                promote = await lp_promote_user(uuid)
+                if promote is None or not promote.get("success"):
+                    await ctx.send(
+                        embed=create_error_embed(
+                            f"[ERREUR] `{username}` n'a pas pu être passé Builder sur Minecraft?\nRésultat opération:`{promote}`"
                         )
-                        break
+                    )
                 else:
                     await ctx.send(
-                        embed=create_info_embed(
-                            f"Demande validée mais erreur en passant `{username}` Builder sur le serveur Minecraft automatiquement! Vérifier pourquoi: {msg.jump_url}"
-                        )
+                        embed=create_info_embed(f"Demande validée et `{username}` passé Builder sur le serveur Minecraft automatiquement!")
                     )
             log(f"{ctx.author.tag} validated {author.tag} builder request.")
         elif action == "deny":
@@ -335,18 +335,18 @@ class Ticket(interactions.Extension):
         DEBUTANT_MODAL = interactions.Modal(
             interactions.ShortText(
                 label="Pseudo Minecraft" if fr else "Minecraft Username",
-                custom_id="pseudo",
+                custom_id="username",
                 max_length=20,
             ),
             interactions.ShortText(
                 label="Ville" if fr else "City",
-                custom_id="ville",
+                custom_id="city",
                 placeholder="Ex: Paris, Lyon, Montcuq...",
                 max_length=50,
             ),
             interactions.ShortText(
                 label="Plus de détails" if fr else "Additional details",
-                custom_id="lieu",
+                custom_id="details",
                 placeholder="Ex: 6ème arrondissement, mairie, nom de la rue..." if fr else "Ex: townhall, name of the street...",
                 required=False,
             ),
@@ -356,31 +356,41 @@ class Ticket(interactions.Extension):
         modal_ctx: interactions.ModalContext = await self.bot.wait_for_modal(DEBUTANT_MODAL)
         await modal_ctx.defer(ephemeral=True)
 
-        pseudo = modal_ctx.responses["pseudo"]
-        try:
-            uuid = await minecraft_username_to_uuid(pseudo)
-        except TypeError:
-            # this username does not exist
-            return await modal_ctx.send(
-                embed=create_error_embed(
-                    f"Le pseudo Minecraft `{pseudo}` n'a pas été trouvé!" if fr else f"The Minecraft username `{pseudo}` has not been found!"
-                ),
-                ephemeral=True,
-            )
-        pseudo = await minecraft_uuid_to_username(
-            uuid
-        )  # make sure pseudo is well formatted with capital letters, required for later LuckPerms function
-        ville = modal_ctx.responses["ville"]
-        lieu = modal_ctx.responses["lieu"]
+        username = modal_ctx.responses["username"]
+        user_dict = await lp_lookup_user(username)
+        if user_dict is None:  # username either never connected on server, or doesn't exist
+            try:
+                await minecraft_username_to_uuid(username)
+                await modal_ctx.send(
+                    embed=create_error_embed(
+                        f"Le pseudo Minecraft `{username}` ne s'est jamais connecté sur le serveur!"
+                        if fr
+                        else f"The Minecraft username `{username}` has never connected to the server!"
+                    ),
+                    ephemeral=True,
+                )
+            except TypeError:
+                # this username does not exist
+                await modal_ctx.send(
+                    embed=create_error_embed(
+                        f"Le pseudo Minecraft `{username}` n'existe pas!" if fr else f"The Minecraft username `{username}` does not exist!"
+                    ),
+                    ephemeral=True,
+                )
+            return
+        uuid = user_dict.get("uniqueId")
+
+        city = modal_ctx.responses["city"]
+        details = modal_ctx.responses["details"]
 
         thread = await ctx.guild.fetch_thread(variables.Channels.DEBUTANT_THREAD)
         msg = await thread.send(
             embed=create_embed(
                 description=f"## **Demande de Débutant de {ctx.author.mention}**",
                 fields=[
-                    ("Pseudo Minecraft", escape_minecraft_username_markdown(pseudo), False),
-                    ("Ville", ville, False),
-                    ("Plus de détails", lieu or "/", False),
+                    ("Pseudo Minecraft", escape_minecraft_username_markdown(username), False),
+                    ("Ville", city, False),
+                    ("Plus de détails", details or "/", False),
                 ],
                 color=0x0000FF,
                 footer_image=ctx.author.display_avatar.url,
@@ -390,7 +400,7 @@ class Ticket(interactions.Extension):
                 style=interactions.ButtonStyle.SUCCESS,
                 label="Valider la demande",
                 emoji="✅",
-                custom_id=f"debutant_validate_{ctx.author.id}_{pseudo}",
+                custom_id=f"debutant_validate_{ctx.author.id}_{uuid}",
             ),
         )
         await modal_ctx.send(
@@ -402,15 +412,6 @@ class Ticket(interactions.Extension):
         msg = await thread.send(ctx.author.mention, silent=True)
         await msg.delete()
 
-    def discord_id_to_minecraft_uuid(self, discord_id: int) -> str | None:
-        with open(self.users_json_file, "r") as file:
-            users = json.load(file)
-            for uuid, user_dict in users.items():
-                for perm_dict in user_dict.get("permissions", []):
-                    if perm_dict.get("permission", "") == f"discord_id_{discord_id}":
-                        return uuid
-        return None
-
     @interactions.component_callback(DEBUTANT_BUTTON_PATTERN)
     async def on_debutant_validate(self, ctx: interactions.ComponentContext):
         if interactions.Permissions.MANAGE_MESSAGES not in ctx.channel.permissions_for(ctx.author):
@@ -420,41 +421,36 @@ class Ticket(interactions.Extension):
             )
         if not (match := DEBUTANT_BUTTON_PATTERN.search(ctx.custom_id)):
             return
-        author_id, username = match.group(1, 2)
+        author_id, uuid = match.group(1, 2)
         await ctx.defer(ephemeral=True)
 
-        # promote user through console channel, and verify user was actually promoted
-        console_channel = ctx.bot.get_channel(variables.Channels.CONSOLE)
-        msg = await console_channel.send(f"lp user {username} promote rank")
-        await asyncio.sleep(3)  # make sure that promotion message was sent in console correctly
-        messages: list[interactions.Message] = await console_channel.history(limit=2).flatten()
-        for message in messages:
-            if f"Promoting {username} along track rank from default to debutant in context global".lower() in message.content.lower():
-                break
-        else:
+        user = await lp_get_user(uuid)
+        username = user.get("username")
+        if (rank := user.get("metadata", {}).get("primaryGroup")) != "default":  # user is NOT a visiteur
+            return await ctx.send(embed=create_error_embed(f"[ERREUR] `{username}` est déjà {RANK_DICT.get(rank)}!"))
+        promote = await lp_promote_user(uuid)
+        if promote is None or not promote.get("success"):
             return await ctx.send(
-                embed=create_error_embed(f"[ERREUR] `{username}` n'a pas pu être passé Débutant sur Minecraft? Vérifier pourquoi: {msg.jump_url}")
+                embed=create_error_embed(f"[ERREUR] `{username}` n'a pas pu être passé Débutant sur Minecraft?\nRésultat opération:`{promote}`")
             )
 
         author = await ctx.guild.fetch_member(author_id)
-        await ctx.send(embed=create_info_embed(f"{author.mention} passé Débutant: {msg.jump_url}"), ephemeral=True)
+        await ctx.send(embed=create_info_embed(f"{author.mention} passé Débutant!"), ephemeral=True)
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
-        ville, details = embed.fields[1].value, embed.fields[2].value
+        city, details = embed.fields[1].value, embed.fields[2].value
         await ctx.message.delete()
         log(f"{ctx.author.tag} validated {author.tag} débutant request.")
         await ctx.bot.get_channel(variables.Channels.RANKING).send(
             embed=create_embed(
                 description=f"## **Demande de Débutant de {author.mention} validée**",
                 color=0x00FF00,
-                fields=[("Minecraft", escape_minecraft_username_markdown(username), False), ("Ville", ville, False), ("Détails", details, False)],
+                fields=[("Minecraft", escape_minecraft_username_markdown(username), False), ("Ville", city, False), ("Détails", details, False)],
                 footer_text=f"Validée par {ctx.author.tag}",
             )
         )
-        msg = await console_channel.send(
-            f"lp user {username} permission set discord_id_{author_id} true"
-        )  # needed for later Débutant to Builder promotion
+        await lp_add_node_to_user(uuid, {"key": f"discord_id_{author_id}", "value": True})  # needed for later Débutant to Builder promotion
 
         welcome_msg = WELCOME_DEBUTANT_FR if author.has_role(variables.Roles.FRANCAIS) else WELCOME_DEBUTANT_EN
         await author.send(welcome_msg)
@@ -462,10 +458,10 @@ class Ticket(interactions.Extension):
         # Rename user, can throw error if the user has admin perms
         nickname = f"{username} ["
         num_characters_available = 31 - len(nickname)
-        if len(ville) > num_characters_available:
-            nickname += ville[: num_characters_available - 3] + "..."
+        if len(city) > num_characters_available:
+            nickname += city[: num_characters_available - 3] + "..."
         else:
-            nickname += ville
+            nickname += city
         nickname += "]"
         await author.edit_nickname(nickname)
 
