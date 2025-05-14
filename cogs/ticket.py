@@ -265,7 +265,7 @@ class Ticket(interactions.Extension):
                     await ctx.send(
                         embed=create_info_embed(f"Demande validée et `{username}` passé Builder sur le serveur Minecraft automatiquement!")
                     )
-                    await ctx.guild.get_channel(variables.Channels.CONSOLE).send(BROADCAST_PROMOTE_MESSAGE.format(username, "builder"))
+                    await ctx.guild.get_channel(variables.Channels.CONSOLE).send(BROADCAST_PROMOTE_MESSAGE.format(username, RANK_DICT.get("builder")))
             log(f"{ctx.author.tag} validated {author.tag} builder request.")
         elif action == "deny":
             await ctx.channel.send(
@@ -438,7 +438,7 @@ class Ticket(interactions.Extension):
 
         author = await ctx.guild.fetch_member(author_id)
         await ctx.send(embed=create_info_embed(f"{author.mention} passé Débutant!"), ephemeral=True)
-        await ctx.guild.get_channel(variables.Channels.CONSOLE).send(BROADCAST_PROMOTE_MESSAGE.format(username, "debutant"))
+        await ctx.guild.get_channel(variables.Channels.CONSOLE).send(BROADCAST_PROMOTE_MESSAGE.format(username, RANK_DICT.get("debutant")))
         await author.remove_role(variables.Roles.VISITEUR)
         await author.add_role(variables.Roles.DEBUTANT)
         embed = ctx.message.embeds[0]
