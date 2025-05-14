@@ -30,6 +30,8 @@ RANK_EMOTE_DICT = {
     "default": "<:visiteur:1289872530277924915>",
 }
 
+BROADCAST_PROMOTE_MESSAGE = "ebcast &b&lFélicitations à &a&l{0} &b&lqui passe {1}!"
+
 
 def escape_minecraft_username_markdown(string: str) -> str:
     return string.replace("_", r"\_").replace("*", r"\*")  # Escape markdown symbols that could be present in players' names

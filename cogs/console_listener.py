@@ -8,6 +8,7 @@ from aiosseclient import Event, aiosseclient
 
 import variables
 from utils import (
+    BROADCAST_PROMOTE_MESSAGE,
     RANK_DICT,
     create_embed,
     escape_minecraft_username_markdown,
@@ -46,6 +47,7 @@ class ConsoleListener(interactions.Extension):
     async def on_start(self):
         self.ranking_channel = await self.bot.fetch_channel(variables.Channels.RANKING)
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
+        self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
         self.schematics_folder = get_env("SCHEMATICS_FOLDER")
         await self.luckperms_sse_handler()
 
@@ -141,6 +143,8 @@ class ConsoleListener(interactions.Extension):
         )
         await self.ranking_channel.send(embeds=embed, components=EDIT_PERMS_BUTTON)
         log(f"{'Promoted' if desc == 'promote rank' else 'Demoted'} {target} to {rank}")
+        if desc == "promote rank":
+            await self.console_channel.send(BROADCAST_PROMOTE_MESSAGE.format(target, rank))
 
     @interactions.component_callback(EDIT_PERMS_BUTTON.custom_id)
     async def on_perms_edit_button(self, ctx: interactions.ComponentContext):
