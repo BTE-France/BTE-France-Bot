@@ -30,7 +30,7 @@ RANK_EMOTE_DICT = {
     "default": "<:visiteur:1289872530277924915>",
 }
 
-BROADCAST_PROMOTE_MESSAGE = "ebcast &b&lFélicitations à &a&l{0} &b&lqui passe {1}!"
+BROADCAST_PROMOTE_MESSAGE = "ebcast &#fbc918&l⭐ &b&lFélicitations à &a&l{0} &b&lqui passe {1}!"
 
 
 def escape_minecraft_username_markdown(string: str) -> str:
