@@ -1,5 +1,3 @@
-import json
-import os
 import socket
 
 import interactions
@@ -10,34 +8,15 @@ from utils import (
     RANK_EMOTE_DICT,
     create_embed,
     escape_minecraft_username_markdown,
-    get_env,
+    lp_get_user,
+    lp_lookup_user,
 )
 
 SERVER_IP = "btefrance.fr:7011"
-SERVER_DESC = "Serveur Java 1.21.1 - IP: btefrance.fr"
+SERVER_DESC = "Serveur Java {version} - IP: btefrance.fr"
 
 
 class MCServ(interactions.Extension):
-    @interactions.listen(interactions.events.Startup)
-    async def on_start(self):
-        self.user_role_dict = {}
-        self.users_json_file = get_env("LUCKPERMS_USERS_JSON_FILE")
-        await self.update_user_role_dict()
-        self.update_user_role_dict.start()
-
-    @interactions.Task.create(interactions.IntervalTrigger(minutes=1))
-    def update_user_role_dict(self):
-        """Find staff players that have helper or above role using the LuckPerms file"""
-        self.user_role_dict = {}
-        with open(self.users_json_file, "r") as file:
-            users = json.load(file)
-            for user_dict in users.values():
-                name = user_dict["name"]
-                for group in user_dict["parents"]:
-                    if (role := group.get("group")) in list(RANK_DICT.keys()):  # exclude regional groups
-                        self.user_role_dict[name.lower()] = role
-                        break
-
     @interactions.slash_command(name="mc")
     async def mc(self, ctx: interactions.SlashContext):
         "Statut du serveur Minecraft"
@@ -51,14 +30,18 @@ class MCServ(interactions.Extension):
 
         try:
             query = await (await JavaServer.async_lookup(SERVER_IP)).async_query()
+            version = query.software.version
 
         except (ConnectionRefusedError, socket.timeout):
             embed_value = ":x: Serveur hors ligne!"
+            version = ""
 
         else:
             users_per_role_dict = {}
             for player in query.players.names:
-                player_role = self.user_role_dict.get(player.lower(), "default")
+                uuid = (await lp_lookup_user(player)).get("uniqueId")
+                user_dict = await lp_get_user(uuid)
+                player_role = user_dict.get("metadata", {}).get("primaryGroup", "default")
                 if player_role not in users_per_role_dict:
                     users_per_role_dict[player_role] = [escape_minecraft_username_markdown(player)]
                 else:
@@ -82,5 +65,5 @@ class MCServ(interactions.Extension):
             txt = "\n".join(txt_per_role)
             embed_value = f":white_check_mark: Serveur en ligne!\n\n**{title}**\n" + txt
 
-        embed.add_field(name=SERVER_DESC, value=embed_value, inline=False)
+        embed.add_field(name=SERVER_DESC.replace("{version}", version), value=embed_value, inline=False)
         await ctx.send(embeds=embed)
