@@ -456,7 +456,10 @@ class Ticket(interactions.Extension):
         await lp_add_node_to_user(uuid, {"key": f"discord_id_{author_id}", "value": True})  # needed for later Débutant to Builder promotion
 
         welcome_msg = WELCOME_DEBUTANT_FR if author.has_role(variables.Roles.FRANCAIS) else WELCOME_DEBUTANT_EN
-        await author.send(welcome_msg)
+        try:
+            await author.send(welcome_msg)
+        except interactions.errors.HTTPException:
+            log(f"Could not send private message to {author.tag}")
 
         # Rename user, can throw error if the user has admin perms
         nickname = f"{username} ["
