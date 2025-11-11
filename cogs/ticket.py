@@ -267,6 +267,16 @@ class Ticket(interactions.Extension):
                     )
                     await ctx.guild.get_channel(variables.Channels.CONSOLE).send(BROADCAST_PROMOTE_MESSAGE.format(username, RANK_DICT.get("builder")))
             log(f"{ctx.author.tag} validated {author.tag} builder request.")
+            await ctx.bot.get_channel(variables.Channels.RANKING).send(
+                embed=create_embed(
+                    description=f"## **Demande de Builder de {author.mention} validée**",
+                    color=0x00FF00,
+                    fields=[
+                        ("Minecraft", escape_minecraft_username_markdown(username), False),
+                    ],
+                    footer_text=f"Validée par {ctx.author.tag}",
+                )
+            )
         elif action == "deny":
             await ctx.channel.send(
                 embed=create_embed(
