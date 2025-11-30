@@ -1,110 +1,221 @@
+import copy
 import json
 import os
+import re
 
 import interactions
 import pandas as pd
 from deepdiff import DeepDiff
 
 import variables
-from utils import create_error_embed, create_info_embed, get_env, log
+from utils import create_embed, create_error_embed, create_info_embed, get_env
 
 ICONS_DICT = {
-    "Orange (projet débuté)": "orange",
-    "Jaune (projet avancé)": "yellow",
-    "Vert (projet terminé)": "green",
-    "Bleu (commune terminée)": "blue",
+    "orange": "Orange (projet débuté)",
+    "yellow": "Jaune (projet avancé)",
+    "green": "Vert (projet terminé)",
+    "blue": "Bleu (commune terminée)",
 }
-QUALITY_DICT = {
-    "Orange (projet débuté)": 0,
-    "Jaune (projet avancé)": 1,
-    "Vert (projet terminé)": 2,
-    "Bleu (commune terminée)": 3,
-}
-DEFAULT_JSON_DICT = {
-    "label": "Marqueurs",
-    "toggleable": True,
-    "default-hidden": False,
-    "sorting": 0,
-}
+QUALITY_DICT = {"orange": 0, "yellow": 1, "green": 2, "blue": 3}
+DEFAULT_JSON_DICT = {"label": "Marqueurs", "toggleable": True, "default-hidden": False, "sorting": 0}
 MIN_DISTANCE = 50
 PROPORTIONALITY = 25
 MINIMUM_ZOOM_FILTER = 2500
 MAXIMUM_ZOOM_FILTER = 1000000
 MAXIMUM_NEIGHBORS = 3
 JUMP = 20
+BLUEMAP_MODAL = interactions.Modal(
+    interactions.ShortText(label="ID", custom_id="id", placeholder="Doit être unique, et respecter le patterne [a-z-]+"),
+    interactions.ShortText(label="Nom", custom_id="label", placeholder="Nom, peut contenir n'importe quel caractère"),
+    interactions.ShortText(label="Coordonnées", custom_id="coords", placeholder="Coordonnées sous format x,y,z"),
+    interactions.LabelComponent(
+        label="Icône",
+        component=interactions.StringSelectMenu(
+            *[interactions.StringSelectOption(label=value, value=key) for key, value in ICONS_DICT.items()],
+            custom_id="icon",
+        ),
+    ),
+    title="Création d'un marqueur Bluemap",
+)
 
 
 class Bluemap(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
-        self.bluemap_gsheet_id = get_env("BLUEMAP_GSHEET_ID")
-        self.bluemap_json_file = get_env("BLUEMAP_JSON_FILE")
+        self.bluemap_markers_json_file = get_env("BLUEMAP_MARKERS_JSON_FILE")
+        self.bluemap_output_json_file = get_env("BLUEMAP_OUTPUT_JSON_FILE")
         self.schem_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
         self.console_channel = await self.bot.fetch_channel(variables.Channels.CONSOLE)
+        with open(self.bluemap_markers_json_file, "r", encoding="utf8") as markers_file:
+            self.markers: dict = json.load(markers_file)
 
-    @interactions.slash_command("bluemap-update")
+    @interactions.slash_command("bluemap")
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
-    @interactions.auto_defer(ephemeral=True)
-    async def update_bluemap(self, ctx: interactions.SlashContext):
-        sheetUrl = f"https://docs.google.com/spreadsheets/export?id={self.bluemap_gsheet_id}&format=xlsx"
-        table = pd.read_excel(sheetUrl, sheet_name="Database", header=1, usecols="B:G").dropna(axis=0)
-        new_markers = dict(sorted(self.generate_markers_dict(table).items()))
-        with open(self.bluemap_json_file, "r") as file:
-            old_markers = dict(sorted(json.load(file)["markers"].items()))
-            for marker in old_markers.values():
-                if marker.get("max-distance"):
-                    del marker["max-distance"]
+    async def bluemap(self, ctx: interactions.SlashContext): ...
 
-        if old_markers == new_markers:
-            return await ctx.send(embed=create_error_embed("Aucune mise à jour de la base de donnée n'a été faite!"), ephemeral=True)
+    @bluemap.subcommand("add", sub_cmd_description="Créer un nouveau marqueur Bluemap")
+    async def bluemap_add(self, ctx: interactions.SlashContext):
+        await ctx.send_modal(BLUEMAP_MODAL)
+        modal_ctx = await self.bot.wait_for_modal(BLUEMAP_MODAL)
 
-        # Send diff in channel
-        embed = interactions.Embed("Update BlueMap", timestamp=interactions.Timestamp.now())
-        diff = DeepDiff(old_markers, new_markers)
-        if items_added := diff.get("dictionary_item_added"):
-            fields = set()
-            for item in items_added:
-                id = item.removeprefix("root['").removesuffix("']")
-                fields.add(new_markers[id]["label"])
-            embed.add_field("✅ Ajouté", "\n".join(fields), inline=True)
-        if items_changed := diff.get("values_changed"):
-            fields = set()
-            for item in items_changed.keys():
-                id = item.removeprefix("root['").split("'")[0]
-                fields.add(new_markers[id]["label"])
-            embed.add_field(":arrows_counterclockwise: Modifié", "\n".join(fields), inline=True)
-        if items_removed := diff.get("dictionary_item_removed"):
-            fields = set()
-            for item in items_removed:
-                id = item.removeprefix("root['").removesuffix("']")
-                fields.add(old_markers[id]["label"])
-            embed.add_field("❌ Supprimé", "\n".join(fields), inline=True)
-        msg = await self.schem_channel.send(embed=embed)
+        answer, responses = self.sanitize_bluemap_modal(modal_ctx.responses)
+        if answer:  # incorrect values
+            return await modal_ctx.send(embed=create_error_embed(answer), ephemeral=True)
 
-        # add max distance for each marker (takes time so done only when an update is needed)
-        for marker in new_markers.values():
-            marker["max-distance"] = self.calculate_max_distance(marker, new_markers)
+        if (id := responses["id"]) in self.markers:
+            return await modal_ctx.send(embed=create_error_embed(f"Le marqueur `{id}` existe déjà!"), ephemeral=True)
+
+        self.markers[id] = {"label": responses["label"], "x": responses["x"], "y": responses["y"], "z": responses["z"], "icon": responses["icon"][0]}
+        await modal_ctx.defer(ephemeral=True)
+        await self.update_markers()
+        await modal_ctx.send(embed=create_info_embed(f"Le marqueur `{id}` a bien été créé."), ephemeral=True)
+        await self.schem_channel.send(
+            embed=create_embed(
+                title="BlueMap: Marqueur créé",
+                fields=[
+                    ("ID", id, False),
+                    ("Nom", responses["label"], False),
+                    ("X", responses["x"], True),
+                    ("Y", responses["y"], True),
+                    ("Z", responses["z"], True),
+                    ("Icône", ICONS_DICT.get(responses["icon"][0]), False),
+                ],
+                footer_text=ctx.author.tag,
+                color=0x00FF00,
+            )
+        )
+
+    @bluemap.subcommand("modify", sub_cmd_description="Modifier un marqueur Bluemap")
+    @interactions.slash_option(name="id", description="ID du marqueur", opt_type=interactions.OptionType.STRING, required=True, autocomplete=True)
+    async def bluemap_modify(self, ctx: interactions.SlashContext, id: str):
+        if id not in self.markers:
+            return await ctx.send(embed=create_error_embed(f"Le marqueur `{id}` n'existe pas!"), ephemeral=True)
+        old_marker = self.markers[id]
+
+        # autocomplete modal
+        modal_modify = copy.deepcopy(BLUEMAP_MODAL)
+        modal_modify.title = f"Modification du marqueur Bluemap {id}"[:45]
+        modal_modify.components.pop(0)  # delete ID field (since shouldn't be modified!)
+        modal_modify.components[0].value = old_marker["label"]
+        modal_modify.components[1].value = f"{old_marker['x']},{old_marker['y']},{old_marker['z']}"
+        for i, option in enumerate(modal_modify.components[2].component.options):
+            if option.value == old_marker["icon"]:
+                modal_modify.components[2].component.options[i].default = True
+                break
+
+        await ctx.send_modal(modal_modify)
+        modal_ctx = await self.bot.wait_for_modal(modal_modify)
+
+        answer, responses = self.sanitize_bluemap_modal(modal_ctx.responses)
+        if answer:  # incorrect values
+            return await modal_ctx.send(embed=create_error_embed(answer), ephemeral=True)
+
+        new_marker = {"label": responses["label"], "x": responses["x"], "y": responses["y"], "z": responses["z"], "icon": responses["icon"][0]}
+        if old_marker == new_marker:
+            return await modal_ctx.send(embed=create_error_embed(f"Aucun attribut du marqueur `{id}` n'a été modifié!"), ephemeral=True)
+
+        self.markers[id] = new_marker
+        await modal_ctx.defer(ephemeral=True)
+        await self.update_markers()
+        await modal_ctx.send(embed=create_info_embed(f"Le marqueur `{id}` a bien été modifié."), ephemeral=True)
+        await self.schem_channel.send(
+            embed=create_embed(
+                title="BlueMap: Marqueur modifié",
+                fields=[
+                    ("ID", id, False),
+                    ("Nom", responses["label"], False),
+                    ("X", responses["x"], True),
+                    ("Y", responses["y"], True),
+                    ("Z", responses["z"], True),
+                    ("Icône", ICONS_DICT.get(responses["icon"][0]), False),
+                ],
+                footer_text=ctx.author.tag,
+                color=0x0000FF,
+            )
+        )
+
+    @bluemap_modify.autocomplete("id")
+    async def on_bluemap_modify_autocomplete(self, ctx: interactions.AutocompleteContext):
+        await ctx.send(self.get_autocomplete_marker_ids(ctx))
+
+    @bluemap.subcommand("delete", sub_cmd_description="Supprimer un marqueur Bluemap")
+    @interactions.slash_option(name="id", description="ID du marqueur", opt_type=interactions.OptionType.STRING, required=True, autocomplete=True)
+    async def bluemap_delete(self, ctx: interactions.SlashContext, id: str):
+        if id not in self.markers:
+            return await ctx.send(embed=create_error_embed(f"Le marqueur `{id}` n'existe pas!"), ephemeral=True)
+
+        del self.markers[id]
+        await ctx.defer(ephemeral=True)
+        await self.update_markers()
+        await ctx.send(embed=create_info_embed(f"Le marqueur `{id}` a bien été supprimé."), ephemeral=True)
+        await self.schem_channel.send(
+            embed=create_embed(
+                title="BlueMap: Marqueur supprimé",
+                fields=[("ID", id, False)],
+                footer_text=ctx.author.tag,
+                color=0xFF0000,
+            )
+        )
+
+    @bluemap_delete.autocomplete("id")
+    async def on_bluemap_delete_autocomplete(self, ctx: interactions.AutocompleteContext):
+        await ctx.send(self.get_autocomplete_marker_ids(ctx))
+
+    def sanitize_bluemap_modal(self, responses: dict):
+        answer = None
+        responses_sanitized = responses.copy()
+        for custom_id, response in responses.items():
+            match custom_id:
+                case "id":
+                    if not re.match(re.compile(r"^[a-z-]+$"), response):
+                        answer = f"L'ID `{response}` ne respecte pas le bon format `[a-z-]+`"
+                        break
+                case "coords":
+                    if not re.match(re.compile(r"^-?\d+,-?\d+,-?\d+$"), response):
+                        answer = f"Les coordonnées `{response}` ne respectent pas le bon format `x,y,z`"
+                        break
+                    else:
+                        x, y, z = response.split(",")
+                        responses_sanitized["x"] = int(x)
+                        responses_sanitized["y"] = int(y)
+                        responses_sanitized["z"] = int(z)
+        return answer, responses_sanitized
+
+    async def update_markers(self):
+        # update markers json file
+        with open(self.bluemap_markers_json_file, "w", encoding="utf8") as markers_file:
+            json.dump(self.markers, markers_file, indent=2)
+
+        # generate actual Bluemap markers dict
+        output_markers = self.generate_markers_dict()
+        for marker in output_markers.values():
+            marker["max-distance"] = self.calculate_max_distance(marker, output_markers)
 
         # save new Bluemap config and reload
-        new_json_dict = {**DEFAULT_JSON_DICT, "markers": new_markers}
-        with open(self.bluemap_json_file, "w") as file:
+        new_json_dict = {**DEFAULT_JSON_DICT, "markers": output_markers}
+        with open(self.bluemap_output_json_file, "w") as file:
             json.dump(new_json_dict, file, indent=2)
         await self.console_channel.send("bluemap reload light")
 
-        await ctx.send(embed=create_info_embed(f"Mise à jour de la BlueMap effectuée: {msg.jump_url}"), ephemeral=True)
+    def get_autocomplete_marker_ids(self, ctx: interactions.AutocompleteContext):
+        choices = []
+        for id in self.markers.keys():
+            if ctx.input_text in id:
+                choices.append(id)
+        return choices[:25]
 
-    def generate_markers_dict(self, table: pd.DataFrame) -> dict:
+    def generate_markers_dict(self) -> dict:
         markers = {}
-        for _, row in table.iterrows():
+        for id, input_marker in self.markers.items():
             marker = {}
-            marker["label"] = row["Label"]
-            marker["position"] = {"x": int(row["X"]), "y": int(row["Y"]), "z": int(row["Z"])}
-            marker["icon"] = f"assets/icons/{ICONS_DICT.get(row['Icône'])}.png"
-            marker["quality"] = QUALITY_DICT.get(row["Icône"])  # used later for calculating max distance
+            marker["label"] = input_marker["label"]
+            marker["position"] = {"x": input_marker["x"], "y": input_marker["y"], "z": input_marker["z"]}
+            marker["icon"] = f"assets/icons/{input_marker['icon']}.png"
+            marker["quality"] = QUALITY_DICT.get(input_marker["icon"])  # used later for calculating max distance
             marker["type"] = "poi"
             marker["anchor"] = {"x": 20, "y": 40}
             marker["min-distance"] = MIN_DISTANCE
-            markers[row["ID"]] = marker
+            markers[id] = marker
         return markers
 
     def calculate_max_distance(self, input_marker: dict, markers: dict[str, dict]):

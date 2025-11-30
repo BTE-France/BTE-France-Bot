@@ -128,11 +128,8 @@ class RandomCommands(interactions.Extension):
         await ctx.send(
             embeds=create_embed(
                 title="Maps de BTE",
-                description="""[**Carte Bluemap/Dynmap**](https://map.btefrance.fr/)
-            _Carte qui permet de voir toutes les constructions sur le serveur, avec notamment une vue Spectateur qui permet de se déplacer comme si l'on était en jeu._
-
-            [**Carte des projets**](https://www.google.com/maps/d/edit?mid=17R3mouwkPRlzvkT4NKH1idmB9M9xTCcv&usp=sharing)
-            _Carte de progression qui permet de recenser toutes les constructions sur le serveur._""",
+                description="""[**Carte Bluemap**](https://map.btefrance.fr/)
+            _Carte qui permet de voir toutes les constructions sur le serveur, avec notamment une vue Spectateur qui permet de se déplacer comme si l'on était en jeu._""",
                 color=0x00FF00,
                 include_thumbnail=True,
             )

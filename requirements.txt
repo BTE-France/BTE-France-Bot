@@ -1,4 +1,4 @@
-interactions.py==5.11.0
+interactions.py @ git+https://github.com/interactions-py/interactions.py.git@selects-in-modals # selects in modals not yet merged to main branch :(
 python-dotenv
 mcstatus
 aiohttp
