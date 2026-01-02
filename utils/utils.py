@@ -5,7 +5,7 @@ import aiohttp
 RANK_DICT = {
     "admin": "Admin",
     "dev": "Développeur",
-    "helper": "Helper",
+    "helper": "Support",
     "archiviste": "Archiviste",
     "ingenieur": "Ingénieur",
     "architecte": "Architecte",
