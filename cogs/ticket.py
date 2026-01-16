@@ -230,6 +230,7 @@ class Ticket(interactions.Extension):
         await ctx.defer(ephemeral=True)
 
         author = await ctx.guild.fetch_member(author_id)
+        username = "?"
 
         if action == "validate":
             await ctx.channel.send(
