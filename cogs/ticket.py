@@ -184,7 +184,9 @@ class Ticket(interactions.Extension):
                 ephemeral=True,
             )
 
-        thread = await ctx.channel.create_private_thread(name=thread_name, auto_archive_duration=interactions.AutoArchiveDuration.ONE_WEEK)
+        thread = await ctx.channel.create_private_thread(
+            name=thread_name, invitable=False, auto_archive_duration=interactions.AutoArchiveDuration.ONE_WEEK
+        )
         await ctx.send(
             embed=create_info_embed(f"Demande créée ({thread.mention})" if fr else f"Application created ({thread.mention})"),
             ephemeral=True,
