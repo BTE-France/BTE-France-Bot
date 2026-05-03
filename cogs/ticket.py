@@ -179,7 +179,7 @@ Si tous les critères du salon <#1129014494941687918> sont validés, tu peux env
                     interactions.Button(
                         style=interactions.ButtonStyle.DANGER,
                         label="Refuser la demande",
-                        emoji="❌",
+                        emoji="✖️",
                         custom_id=f"builder_deny_{ctx.author.id}",
                     ),
                 ]
@@ -295,7 +295,7 @@ Avoir Axiom implique de grandes responsabilités donc nous devons te faire confi
                 interactions.Button(
                     style=interactions.ButtonStyle.DANGER,
                     label="Refuser la demande",
-                    emoji="❌",
+                    emoji="✖️",
                     custom_id=f"axiom_deny_{ctx.author.id}",
                 ),
             ],
