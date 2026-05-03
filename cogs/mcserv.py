@@ -59,7 +59,7 @@ class MCServ(interactions.Extension):
             txt_per_role = []
             for role, users in users_per_role_dict.items():
                 txt = f"{RANK_EMOTE_DICT.get(role)} {RANK_DICT.get(role)}{'s' if len(users) > 1 else ''}: {', '.join(users)}"
-                if role in ("admin", "dev", "helper"):
+                if role in ("admin", "moderateur", "dev", "helper"):
                     txt = f"**{txt}**"
                 txt_per_role.append(txt)
             txt = "\n".join(txt_per_role)
