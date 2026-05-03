@@ -4,6 +4,7 @@ import aiohttp
 
 RANK_DICT = {
     "admin": "Admin",
+    "moderateur": "Modérateur",
     "dev": "Développeur",
     "helper": "Support",
     "archiviste": "Archiviste",
@@ -18,6 +19,7 @@ RANK_DICT = {
 
 RANK_EMOTE_DICT = {
     "admin": "<:admin:1289875079563575377>",
+    "moderateur": "<:moderateur:1289872542936469525>",
     "dev": "<:developpeur:1289872707122630708>",
     "helper": "<:support:1289872539509723147>",
     "archiviste": "<:archiviste:1289872538205425714>",
