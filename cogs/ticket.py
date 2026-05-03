@@ -28,7 +28,7 @@ TICKET_CREATION_MSG = """# 📨  Tickets
 ### Pour cela, cliquez sur le bouton `Créer un ticket`, vous avez trois choix :
 
 ## <:upvote:748611592517583021>  Promotion
-> Crée un ticket candidature pour le grade honorifique situé au-dessus de votre grade actuel (ex.: vous êtes Contremaître, vous postulez pour Architecte). **Disponible à partir de Builder.**
+> Crée un ticket candidature pour devenir Builder, __ou__ pour le grade honorifique situé au-dessus de votre grade actuel (ex.: vous êtes Contremaître, vous postulez pour Architecte). **Disponible à partir de Débutant.**
 
 ## <:axiom:1437503730378342400>  Axiom
 > Pour demander la permission Axiom, **disponible à partir de Builder.**
@@ -164,7 +164,10 @@ class TicketExtension(interactions.Extension):
         )
         await ctx.send(embed=create_info_embed(f"Demande créée: {thread.mention}"), ephemeral=True)
         first_message = await thread.send(
-            f"## Demande de {role.name} de {ctx.author.mention}\n*Personnaliser texte ici en fonction du rôle*",
+            f"""## Demande de {role.name} de {ctx.author.mention}
+Merci pour ta candidature ! 
+
+Si tous les critères du salon <#1129014494941687918> sont validés, tu peux envoyer les screens de tous tes builds que tu juges pertinents.""",
             components=(
                 [
                     interactions.Button(
@@ -266,6 +269,8 @@ class TicketExtension(interactions.Extension):
     async def axiom_ticket_creation(self, ctx: interactions.ModalContext):
         if variables.Roles.AXIOM in ctx.author.roles:
             return await ctx.send(embed=create_error_embed("Tu as déjà le rôle Axiom!"), ephemeral=True)
+        if variables.Roles.VISITEUR in ctx.author.roles or variables.Roles.DEBUTANT in ctx.author.roles:
+            return await ctx.send(embed=create_error_embed("Seuls les builders peuvent faire une demande pour Axiom!"), ephemeral=True)
 
         thread = await ctx.channel.create_private_thread(
             name=f"[Axiom] {ctx.author.tag}", invitable=False, auto_archive_duration=interactions.AutoArchiveDuration.ONE_WEEK
@@ -273,7 +278,13 @@ class TicketExtension(interactions.Extension):
         await ctx.send(embed=create_info_embed(f"Ticket créé: {thread.mention}"), ephemeral=True)
 
         first_message = await thread.send(
-            f"## Ticket créé par {ctx.author.mention}\n*Rajouter blablabla*",
+            f"""# 🪄 Demande Axiom de {ctx.author.mention}
+
+## Ce qui est demandé :
+
+**Avoir des bases** d'Axiom, présenter clairement tes motivations, ton utilisation prévue sur tes projets, ton niveau/expérience, ainsi que des exemples de builds réalisés si tu en as.
+
+Avoir Axiom implique de grandes responsabilités donc nous devons te faire confiance pour ne pas faire crash le serveur !""",
             components=[
                 interactions.Button(
                     style=interactions.ButtonStyle.SUCCESS,
