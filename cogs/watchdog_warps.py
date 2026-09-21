@@ -3,12 +3,11 @@ from pathlib import Path
 
 import interactions
 import watchdog.events
-import watchdog.observers
 import yaml
 from hachiko.hachiko import AIOEventHandler, AIOWatchdog
 
 import variables
-from utils import create_embed, get_env, log, minecraft_uuid_to_username
+from utils import EventQueue, create_embed, get_env, log, minecraft_uuid_to_username
 
 EDIT_WARP_BUTTON = interactions.Button(
     label="Editer",
@@ -36,6 +35,7 @@ class WarpsFolderHandler(AIOEventHandler):
 
         # initialize a list that contains all warp files as dict
         self.warps_dict = {}
+        self.event_queue = EventQueue(self.process_event)
         for file in os.listdir(self.warps_folder):
             self.warps_dict[file] = self.get_warp_file_dict(os.path.join(self.warps_folder, file))
 
@@ -64,28 +64,49 @@ class WarpsFolderHandler(AIOEventHandler):
         await self.ext.warps_channel.send(embeds=embed, components=EDIT_WARP_BUTTON)
 
     async def on_moved(self, event: watchdog.events.FileMovedEvent):
-        # why do we not listen to FileCreated or FileModified events?
+        # why do we not listen to FileCreated or FileModified events on Linux?
         # because in Linux, there is a temporary .yml.tmp that is created BEFORE the final .yml file:
         # FileCreated .tmp > FileOpened .tmp > FileModified .tmp > FileClosed .tmp > FileMoved .tmp to .yml
         # therefore we only listen to the final FileMovedEvent
+        if os.name != "nt":  # Linux
+            self.event_queue.queue(event, event.dest_path)
+
+    async def on_created(self, event: watchdog.events.FileCreatedEvent):
+        if os.name == "nt":  # Windows
+            self.event_queue.queue(event, event.src_path)
+
+    async def on_modified(self, event: watchdog.events.FileModifiedEvent):
+        if os.name == "nt":  # Windows
+            self.event_queue.queue(event, event.src_path)
+
+    async def process_event(self, event: watchdog.events.FileSystemEvent, filename: str):
+        if isinstance(event, watchdog.events.FileDeletedEvent):
+            await self._on_delete(event, filename)
+        else:
+            await self._on_add(event, filename)
+
+    async def _on_add(self, event: watchdog.events.FileSystemEvent, filename: str):
         if event.is_directory:
             return
-        warp_dict = self.get_warp_file_dict(event.dest_path)
-        self.warps_dict[Path(event.dest_path).name] = warp_dict
+        warp_dict = self.get_warp_file_dict(filename)
+        self.warps_dict[Path(filename).name] = warp_dict
         await self.send_embed(warp_dict, "créé", 0x00FF00)
         log(f"Added warp {warp_dict.get('name')}")
 
     async def on_deleted(self, event: watchdog.events.FileDeletedEvent):
+        self.event_queue.queue(event, event.src_path)
+
+    async def _on_delete(self, event: watchdog.events.FileDeletedEvent, filename: str):
         if event.is_directory:
             return
-        warp_dict = self.warps_dict.get(Path(event.src_path).name)
+        warp_dict = self.warps_dict.get(Path(filename).name)
         if warp_dict is not None:
-            del self.warps_dict[Path(event.src_path).name]
+            del self.warps_dict[Path(filename).name]
             await self.send_embed(warp_dict, "supprimé", 0xFF0000)
             log(f"Deleted warp {warp_dict.get('name')}")
 
 
-class Watchdog(interactions.Extension):
+class WatchdogWarps(interactions.Extension):
     @interactions.listen(interactions.events.Startup)
     async def on_start(self):
         self.warps_channel = await self.bot.fetch_channel(variables.Channels.SCHEMATIC_WARPS)
