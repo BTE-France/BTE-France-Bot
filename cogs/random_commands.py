@@ -260,7 +260,7 @@ class RandomCommands(interactions.Extension):
     @role.subcommand("temp")
     async def role_temp(self, ctx: interactions.SlashContext):
         msg = await ctx.channel.send(
-            f"Si tu souhaites participer à la photo de groupe, clique dessous!",
+            "Si tu souhaites participer à l'évent du Muséum, clique sur le bouton ci-dessous !",
             components=interactions.Button(
                 style=interactions.ButtonStyle.GREEN,
                 label="Participer à l'event",
@@ -272,16 +272,16 @@ class RandomCommands(interactions.Extension):
 
     @interactions.component_callback("role_temp")
     async def on_role_temp_button(self, ctx: interactions.ComponentContext):
-        if 1354425080826040340 in ctx.author.roles:
-            await ctx.author.remove_role(1354425080826040340)
+        if 1549772721729179728 in ctx.author.roles:
+            await ctx.author.remove_role(1549772721729179728)
             await ctx.send(
-                embeds=create_info_embed("Tu ne participes plus à la photo de groupe."),
+                embeds=create_info_embed("Tu ne participes plus à l'event."),
                 ephemeral=True,
             )
         else:
-            await ctx.author.add_role(1354425080826040340)
+            await ctx.author.add_role(1549772721729179728)
             await ctx.send(
-                embeds=create_info_embed("Tu peux participer à la photo de groupe!"),
+                embeds=create_info_embed("Tu peux participer à l'event!"),
                 ephemeral=True,
             )
 
