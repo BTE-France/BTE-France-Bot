@@ -38,7 +38,7 @@ class MCServ(interactions.Extension):
 
         else:
             users_per_role_dict = {}
-            for player in query.players.names:
+            for player in query.players.list:
                 uuid = (await lp_lookup_user(player)).get("uniqueId")
                 user_dict = await lp_get_user(uuid)
                 player_role = user_dict.get("metadata", {}).get("primaryGroup", "default")
