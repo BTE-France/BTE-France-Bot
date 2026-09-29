@@ -29,7 +29,8 @@ EDIT_WORD_BUTTON = interactions.Button(
     emoji="⚙️",
     style=interactions.ButtonStyle.SUCCESS,
 )
-PINGN_MSG = f"\n## Bienvenue sur le serveur BTE France!\n## Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
+PINGN_MSG_FR = f"\n## Bienvenue sur le serveur BTE France!\n## Pour visiter ou construire, n'hésitez pas à lire <#{variables.Channels.DEBUTEZ_ICI}>!"
+PINGN_MSG_EN = f"\n## Welcome to the BTE France server!\n## To visit or build, don't hesitate to read <#{variables.Channels.DEBUTEZ_ICI_EN}>!"
 
 
 class RandomCommands(interactions.Extension):
@@ -289,25 +290,31 @@ class RandomCommands(interactions.Extension):
     @interactions.slash_default_member_permission(interactions.Permissions.MANAGE_MESSAGES)
     async def pingn(self, ctx: interactions.SlashContext):
         """Ping tous les nouveaux"""
-        users = await self.get_new_players(ctx.guild)
-        if not users:
+        french_users, english_users = await self.get_new_players(ctx.guild)
+        if not french_users and not english_users:
             return await ctx.send(
                 embed=create_info_embed("Aucun nouveau membre trouvé!"),
                 ephemeral=True,
             )
-        users_str = self.generate_users_str(users)
+        french_users_str = self.generate_users_str(french_users, PINGN_MSG_FR)
+        english_users_str = self.generate_users_str(english_users, PINGN_MSG_EN)
 
         send_button = interactions.Button(
             style=interactions.ButtonStyle.GRAY,
             custom_id="newbies_ping",
             label="Ping tous les nouveaux",
         )
-        await ctx.send(embed=create_info_embed(users_str[0]), components=send_button, ephemeral=True)
+        preview = "\n\n".join(users_str[0] for users_str in (french_users_str, english_users_str) if users_str)
+        await ctx.send(embed=create_info_embed(preview), components=send_button, ephemeral=True)
 
         try:
             await self.bot.wait_for_component(components=send_button, timeout=30)
-            for user_str in users_str:
-                await ctx.channel.send(user_str)
+            channel = self.bot.get_channel(variables.Channels.FRENCH_CHAT)
+            for user_str in french_users_str:
+                await channel.send(user_str)
+            channel = self.bot.get_channel(variables.Channels.ENGLISH_CHAT)
+            for user_str in english_users_str:
+                await channel.send(user_str)
         except asyncio.TimeoutError:
             pass
         # Small hack to delete the ephemeral /pingn message
@@ -315,36 +322,42 @@ class RandomCommands(interactions.Extension):
 
     @interactions.Task.create(interactions.TimeTrigger(hour=18, utc=False))
     async def auto_pingn(self):
-        users = await self.get_new_players(self.bot.get_guild(variables.SERVER))
-        if not users:
-            return
-        users_str = self.generate_users_str(users)
+        french_users, english_users = await self.get_new_players(self.bot.get_guild(variables.SERVER))
+        french_users_str = self.generate_users_str(french_users, PINGN_MSG_FR)
+        english_users_str = self.generate_users_str(english_users, PINGN_MSG_EN)
 
         channel = self.bot.get_channel(variables.Channels.FRENCH_CHAT)
-        for user_str in users_str:
+        for user_str in french_users_str:
+            await channel.send(user_str)
+        channel = self.bot.get_channel(variables.Channels.ENGLISH_CHAT)
+        for user_str in english_users_str:
             await channel.send(user_str)
 
-    async def get_new_players(self, guild: interactions.Guild) -> list[str]:
+    async def get_new_players(self, guild: interactions.Guild) -> tuple[list[str], list[str]]:
         now = interactions.Timestamp.utcnow()
-        newbies = []
+        french_newbies, english_newbies = [], []
         for member in guild.members:
             if now - member.joined_at < timedelta(days=1):
-                newbies.append(member)
+                if variables.Roles.ENGLISH in member.roles:
+                    english_newbies.append(member)
+                else:
+                    french_newbies.append(member)
 
-        return [member.mention for member in newbies]
+        return [member.mention for member in french_newbies], [member.mention for member in english_newbies]
 
-    def generate_users_str(self, users: list[str]) -> list[str]:
+    def generate_users_str(self, users: list[str], message: str) -> list[str]:
         """Generate multiple strings to counter the max 2000 characters per message"""
-        max_users_str_length = 2000 - len(PINGN_MSG)
+        max_users_str_length = 2000 - len(message)
         users_strs = []
         last_users_str = ""
         while users:
             if len(f"{last_users_str} {users[0]}") < max_users_str_length:
                 last_users_str += users.pop(0) + " "
             else:
-                users_strs.append(last_users_str + PINGN_MSG)
+                users_strs.append(last_users_str + message)
                 last_users_str = ""
-        users_strs.append(last_users_str + PINGN_MSG)
+        if last_users_str:
+            users_strs.append(last_users_str + message)
         return users_strs
 
     @interactions.Task.create(interactions.IntervalTrigger(seconds=50))
