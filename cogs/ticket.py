@@ -284,6 +284,8 @@ Si tous les critères du salon <#1129014494941687918> sont validés, tu peux env
 
 **Avoir des bases** d'Axiom, présenter clairement tes motivations, ton utilisation prévue sur tes projets, ton niveau/expérience, ainsi que des exemples de builds réalisés si tu en as.
 
+Si vous ne connaissez pas le mod, nous pouvons vous laisser l'utiliser à condition que vous suiviez une mini-formation de <@452795217360453643> vous présentant les bases du mod.
+
 Avoir Axiom implique de grandes responsabilités donc nous devons te faire confiance pour ne pas faire crash le serveur !""",
             components=[
                 interactions.Button(
